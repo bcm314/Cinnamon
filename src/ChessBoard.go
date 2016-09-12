@@ -128,17 +128,13 @@ func ( self ChessBoard ) decodeBoardinv(typ uint8, a int, side int) string {
 	if (typ & KING_SIDE_CASTLE_MOVE_MASK != 0&&  side == BLACK) {
 		return "e8g8";
 	}
-	if ((typ & 0xC) == 0) {
-		for {
-			fmt.Printf("error")
-		}
-	}
+	assert((typ & 0xC) != 0, "a2");
+
 	if (a >= 0 && a < 64) {
 		return BOARD[a];
 	}
-	for {
-		fmt.Printf("error")
-	}
+	assert(false, "a3");
+	return "";
 }
 
 func ( self ChessBoard ) display() {
@@ -200,14 +196,14 @@ func ( self ChessBoard )loadFen(fen string) int {
 	//let chars: Vec<char> = pos.chars().collect();
 	for ch := range pos {
 		if ch != '/' {
-			if INV_FEN[ch ] != 0xFF {
-				s[ix] = INV_FEN[ch                                ];
+			if int(INV_FEN[ch ]) != 0xFF {
+				s[ix] = uint(INV_FEN[ch]);
 				ix = ix + 1;
 			} else if ch > 47 && ch < 58 {
 				dummy := 0;
 				for dummy < int(ch) - 48 {
 					dummy++;
-					s[ix] = SQUARE_FREE;
+					s[ix] = uint(SQUARE_FREE);
 					ix = ix + 1;
 				}
 			} else {
@@ -219,72 +215,66 @@ func ( self ChessBoard )loadFen(fen string) int {
 		return 2
 	}
 	if side == "b" {
-		self.chessboard[SIDETOMOVE_IDX] = BLACK;
+		self.chessboard[SIDETOMOVE_IDX] = uint64(BLACK);
 
 	} else if side == "w" {
-		self.chessboard[SIDETOMOVE_IDX] = WHITE;
+		self.chessboard[SIDETOMOVE_IDX] = uint64(WHITE);
 	} else {
 		return 2
 	}
 	i := 0;
 	for i < 64 {
 		p := s[63 - i];
-		if p != SQUARE_FREE {
-			self.updateZobristKey(p, i);
+		if int(p) != SQUARE_FREE {
+			self.updateZobristKey(p, uint(i));
 			self.chessboard[p] |= POW2[i];
 		} else {
 			self.chessboard[p] &= NOTPOW2[i];
 		}
 	};
+	for ch := range castle {
+		//let cast: Vec < char > = castle.chars().collect();
+		//for	ch	in cast{
+		if ch == 'K' {
+			self.updateZobristKey(uint(RIGHT_CASTLE_IDX), 4);
+			//assert((4 != BITScanForward(RIGHT_KING_CASTLE_WHITE_MASK)),"b1");
+			self.chessboard[RIGHT_CASTLE_IDX] |= self.chessboard[RIGHT_CASTLE_IDX];
+		} else
+		if ch == 'k' {
+			self.updateZobristKey(uint(RIGHT_CASTLE_IDX), 6);
+			//assert((6 != BITScanForward(RIGHT_KING_CASTLE_BLACK_MASK)),"b2");
+			self.chessboard[RIGHT_CASTLE_IDX] |= uint64(RIGHT_KING_CASTLE_BLACK_MASK);
+		} else
+		if ch == 'Q' {
+			self.updateZobristKey(uint(RIGHT_CASTLE_IDX), 5);
+			//assert ((5 != BITScanForward(RIGHT_QUEEN_CASTLE_WHITE_MASK)),"b3");
+			self.chessboard[RIGHT_CASTLE_IDX] |= uint64(RIGHT_QUEEN_CASTLE_WHITE_MASK);
+		} else
+		if ch == 'q' {
+			self.updateZobristKey(uint(RIGHT_CASTLE_IDX), 7);
+			//assert((7 != BITScanForward(RIGHT_QUEEN_CASTLE_BLACK_MASK)),"b4");
+			self.chessboard[RIGHT_CASTLE_IDX] |= uint64(RIGHT_QUEEN_CASTLE_BLACK_MASK);
+		}
+	};
+	self.chessboard[ENPASSANT_IDX] = NO_ENPASSANT;
 
-	let
-	cast: Vec < char > = castle.chars().collect();
-	for
-	ch
-	in
-	cast{
-	if ch == 'K' {
-		&self.update_zobrist_key(RIGHT_CASTLE_IDX, 4);
-		assert
-		!((4 == RIGHT_KING_CASTLE_WHITE_MASK.bitscan_forward()));
-		self.chessboard[RIGHT_CASTLE_IDX] |= self.chessboard[RIGHT_CASTLE_IDX];
-	} else
-	if ch == 'k' {
-		&self.update_zobrist_key(RIGHT_CASTLE_IDX, 6);
-		assert
-		!((6 == RIGHT_KING_CASTLE_BLACK_MASK.bitscan_forward()));
-		self.chessboard[RIGHT_CASTLE_IDX] |= RIGHT_KING_CASTLE_BLACK_MASK;
-	} else
-	if ch == 'Q' {
-		&self.update_zobrist_key(RIGHT_CASTLE_IDX, 5);
-		assert
-		!((5 == RIGHT_QUEEN_CASTLE_WHITE_MASK.bitscan_forward()));
-		self.chessboard[RIGHT_CASTLE_IDX] |= RIGHT_QUEEN_CASTLE_WHITE_MASK;
-	} else
-	if ch == 'q' {
-		&self.update_zobrist_key(RIGHT_CASTLE_IDX, 7);
-		assert
-		!((7 == RIGHT_QUEEN_CASTLE_BLACK_MASK.bitscan_forward()));
-		self.chessboard[RIGHT_CASTLE_IDX] |= RIGHT_QUEEN_CASTLE_BLACK_MASK;
+	for i < 64 {
+		i++;
+		//for i in 0..64 {
+		if enpassant == BOARD[i] {
+			self.chessboard[ENPASSANT_IDX] = uint64(i);
+
+			if self.chessboard[SIDETOMOVE_IDX] != 0 {
+				self.chessboard[ENPASSANT_IDX] -= 8;
+			} else {
+				self.chessboard[ENPASSANT_IDX] += 8;
+			}
+			self.updateZobristKey(uint(ENPASSANT_IDX), uint(self.chessboard[ENPASSANT_IDX]));
+			break;
+		}
 	}
-};
-self.chessboard[ENPASSANT_IDX] = NO_ENPASSANT;
+	return int(self.chessboard[SIDETOMOVE_IDX])
 
-for i in 0..64 {
-if enpassant == BOARD[i] {
-self.chessboard[ENPASSANT_IDX] = i as u64;
-
-if self.chessboard[SIDETOMOVE_IDX] != 0 {
-self.chessboard[ENPASSANT_IDX] -= 8;
-} else {
-self.chessboard[ENPASSANT_IDX] += 8;
-}
-&self.update_zobrist_key(ENPASSANT_IDX, self.chessboard[ENPASSANT_IDX] as usize);
-break;
-}
-}
-self.chessboard[SIDETOMOVE_IDX] as i32
-return 1;
 }
 
 //int getPieceByChar(char);

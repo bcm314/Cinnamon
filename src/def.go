@@ -19,6 +19,8 @@
 
 package main
 
+import "fmt"
+
 const (
 	BLACK int = 0;
 	WHITE int = 1;
@@ -39,7 +41,14 @@ func bitCount(bits uint64) int {
 	}
 	return count;
 }
-
+func assert(a bool, b string) {
+	if a == true {
+		return
+	}
+	for {
+		fmt.Printf("error %d",b)
+	}
+}
 func BITScanForward(bb uint64) int {
 	//  @author Matt Taylor (2003)
 	lsb_64_table := []int{63, 30, 3, 32, 59, 14, 11, 33, 60, 24, 50, 9, 55, 19, 21, 34, 61, 29, 2, 53, 51, 23, 41, 18, 56, 28, 1, 43, 46, 27, 0, 35, 62, 31, 58, 4, 5, 49, 54, 6, 15, 52, 12, 40, 7, 42, 45, 16, 25, 57, 48, 13, 10, 39, 8, 44, 20, 47, 38, 22, 17, 37, 36, 26 };

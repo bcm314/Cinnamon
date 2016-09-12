@@ -18,7 +18,6 @@
 
 package main
 
-import "fmt"
 
 //Kindergarten
 type Bitboard struct {
@@ -340,11 +339,8 @@ func ( b Bitboard )  combinations(elems []uint64, len1 int, pos []uint64, depth 
 }
 
 func ( b Bitboard )   combinations2(elems []uint64, len1 int) []uint64 {
-	if (len1 <= 0 || len1 > len(elems)) {
-		for {
-			fmt.Printf("error")
-		}
-	}
+	assert(len1 > 0 && len1 < len(elems), "a1");
+
 	var positions = make([]uint64, len1)
 	return b.combinations(elems, len1, positions, 0, 0);
 
