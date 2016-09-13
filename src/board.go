@@ -20,26 +20,26 @@
 package main
 
 type _Tmove struct {
-	promotionPiece int8;
-	pieceFrom      int8;
-	capturedPiece  uint8;
-	from           uint8;
-	to             uint8;
-	side           int8;
-	typ            uint8;
-	score          int;
-	used           bool;
+	promotionPiece int8
+	pieceFrom      int8
+	capturedPiece  uint8
+	from           uint8
+	to             uint8
+	side           int8
+	typee          uint8
+	score          int
+	used           bool
 }
 
 type _TmoveP struct {
-	moveList *_Tmove;
-	size     int;
+	moveList []_Tmove
+	size     int
 }
 
-type _TpvLine struct {
-	cmove   int;
-	argmove [MAX_PLY]_Tmove;
-}
+//type _TpvLine struct {
+//	cmove   int;
+//	argmove [MAX_PLY]_Tmove;
+//}
 
 const (
 	NAME string = "Cinnamon 2.0-20160502";
@@ -104,11 +104,15 @@ const (
 	NOTPOW2_60 uint64 = 0xefffffffffffffff;
 	NOTPOW2_61 uint64 = 0xdfffffffffffffff;
 	NOTPOW2_63 uint64 = 0x7fffffffffffffff;
+
+
 )
 
 var BOARD = []string{"h1", "g1", "f1", "e1", "d1", "c1", "b1", "a1", "h2", "g2", "f2", "e2", "d2", "c2", "b2", "a2", "h3", "g3", "f3", "e3", "d3", "c3", "b3", "a3", "h4", "g4", "f4", "e4", "d4", "c4", "b4", "a4", "h5", "g5", "f5", "e5", "d5", "c5", "b5", "a5", "h6", "g6", "f6", "e6", "d6", "c6", "b6", "a6", "h7", "g7", "f7", "e7", "d7", "c7", "b7", "a7", "h8", "g8", "f8", "e8", "d8", "c8", "b8", "a8"};
 
 var FEN_PIECE = []rune{'p', 'P', 'r', 'R', 'b', 'B', 'n', 'N', 'k', 'K', 'q', 'Q', '-'};
+
+var PIECES_VALUE = []int{VALUEPAWN, VALUEPAWN, VALUEROOK, VALUEROOK, VALUEBISHOP, VALUEBISHOP, VALUEKNIGHT, VALUEKNIGHT, VALUEKING, VALUEKING, VALUEQUEEN, VALUEQUEEN, 0};
 
 var INV_FEN = []int{
 	0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff,

@@ -133,7 +133,7 @@ func ( self *ChessBoard ) decodeBoardinv(typ uint8, a int, side int) string {
 	if (a >= 0 && a < 64) {
 		return BOARD[a];
 	}
-	assert(false, "a3");
+	panic(fmt.Sprintf("a3"));
 	return "";
 }
 
@@ -208,8 +208,7 @@ func ( self*ChessBoard )loadFen(fen string) int {
 						ix = ix + 1;
 					}
 				} else {
-
-					assert(false, "r2");
+					panic(fmt.Sprintf("r2"));
 					return 2;
 				};
 			}

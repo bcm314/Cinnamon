@@ -45,9 +45,8 @@ func assert(a bool, b string) {
 	if a == true {
 		return
 	}
-	for {
-		fmt.Printf("error %v\n",b)
-	}
+	panic(fmt.Sprintf("error %v\n",b));
+
 }
 func BITScanForward(bb uint64) int {
 	//  @author Matt Taylor (2003)
