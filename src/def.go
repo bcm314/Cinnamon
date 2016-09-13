@@ -46,7 +46,7 @@ func assert(a bool, b string) {
 		return
 	}
 	for {
-		fmt.Printf("error %d",b)
+		fmt.Printf("error %v\n",b)
 	}
 }
 func BITScanForward(bb uint64) int {

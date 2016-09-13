@@ -217,7 +217,7 @@ const (
 
 )
 
-func ( b Bitboard )getRankFile(position int, allpieces uint64) uint64 {
+func ( b*Bitboard )getRankFile(position int, allpieces uint64) uint64 {
 
 	//    ........            00000000
 	//    ...q....            00010000
@@ -232,7 +232,7 @@ func ( b Bitboard )getRankFile(position int, allpieces uint64) uint64 {
 		b.BITBOARD_RANK[position][b.rankIdx(position, allpieces)];
 }
 
-func ( b Bitboard ) getDiagonalAntiDiagonal(position int, allpieces uint64) uint64 {
+func ( b*Bitboard ) getDiagonalAntiDiagonal(position int, allpieces uint64) uint64 {
 	//    ........            00010000
 	//    q.......            10100000
 	//    .B......            00000000
@@ -246,7 +246,7 @@ func ( b Bitboard ) getDiagonalAntiDiagonal(position int, allpieces uint64) uint
 		b.BITBOARD_ANTIDIAGONAL[position][b.antiDiagonalIdx(position, allpieces)];
 }
 
-func ( b Bitboard )getCombination2(elements  []uint64) []uint64 {
+func ( b*Bitboard )getCombination2(elements  []uint64) []uint64 {
 	var res  []uint64;
 	var v  []uint64;
 	var bits uint64 = 0;
@@ -267,21 +267,21 @@ func ( b Bitboard )getCombination2(elements  []uint64) []uint64 {
 	return res;
 }
 
-func ( b Bitboard )  rankIdx(position int, allpieces uint64) uint8 {
+func ( b*Bitboard )  rankIdx(position int, allpieces uint64) uint8 {
 	return uint8((allpieces >> RANK_ATx8[position]) & 0xff);
 }
-func ( b Bitboard )  fileIdx(position int, allpieces uint64) uint8 {
+func ( b*Bitboard )  fileIdx(position int, allpieces uint64) uint8 {
 	return uint8((((allpieces & FILE_[position]) * MAGIC_KEY_FILE_RANK) >> 56) & 0xff);
 }
-func ( b Bitboard )  diagonalIdx(position int, allpieces uint64) uint8 {
+func ( b*Bitboard )  diagonalIdx(position int, allpieces uint64) uint8 {
 	return uint8((((allpieces & DIAGONAL[position]) * MAGIC_KEY_DIAG_ANTIDIAG) >> 56) & 0xff);
 };
 
-func ( b Bitboard )  antiDiagonalIdx(position int, allpieces uint64) uint8 {
+func ( b*Bitboard )  antiDiagonalIdx(position int, allpieces uint64) uint8 {
 	return uint8((((allpieces & ANTIDIAGONAL[position]) * MAGIC_KEY_DIAG_ANTIDIAG) >> 56) & 0xff);
 }
 
-func ( b Bitboard ) popolateColumn() {
+func ( b*Bitboard ) popolateColumn() {
 	var combinationsColumn []uint64
 	for pos := 0; pos < 64; pos++ {
 		combinationsColumn = b.getCombination(FILE_[pos]);
@@ -293,7 +293,7 @@ func ( b Bitboard ) popolateColumn() {
 	}
 }
 
-func ( b Bitboard ) popolateDiagonal() {
+func ( b*Bitboard ) popolateDiagonal() {
 	var combinationsDiagonal []uint64
 	for pos := 0; pos < 64; pos++ {
 		combinationsDiagonal = b.getCombination(DIAGONAL[pos]);
@@ -304,7 +304,7 @@ func ( b Bitboard ) popolateDiagonal() {
 	}
 }
 
-func ( b Bitboard )  popolateAntiDiagonal() {
+func ( b*Bitboard )  popolateAntiDiagonal() {
 	var combinationsAntiDiagonal []uint64
 	for pos := 0; pos < 64; pos++ {
 		combinationsAntiDiagonal = b.getCombination(ANTIDIAGONAL[pos]);
@@ -315,7 +315,7 @@ func ( b Bitboard )  popolateAntiDiagonal() {
 	}
 }
 
-func ( b Bitboard )  combinations(elems []uint64, len1 int, pos []uint64, depth int, margin int) []uint64 {
+func ( b*Bitboard )  combinations(elems []uint64, len1 int, pos []uint64, depth int, margin int) []uint64 {
 	var res []uint64;
 	if depth >= len1 {
 		for ii := 0; ii < len(pos); ii++ {
@@ -338,14 +338,14 @@ func ( b Bitboard )  combinations(elems []uint64, len1 int, pos []uint64, depth 
 	return res;
 }
 
-func ( b Bitboard )   combinations2(elems []uint64, len1 int) []uint64 {
+func ( b*Bitboard )   combinations2(elems []uint64, len1 int) []uint64 {
 	assert(len1 > 0 && len1 < len(elems), "a1");
 
 	var positions = make([]uint64, len1)
 	return b.combinations(elems, len1, positions, 0, 0);
 
 }
-func ( b Bitboard )  performDiagShift(position int, allpieces uint64) uint64 {
+func ( b*Bitboard )  performDiagShift(position int, allpieces uint64) uint64 {
 	var q uint64 = allpieces & MASK_BIT_UNSET_LEFT_UP[position];
 	var k uint64;
 	if q != 0 {
@@ -365,7 +365,7 @@ func ( b Bitboard )  performDiagShift(position int, allpieces uint64) uint64 {
 
 }
 
-func ( b Bitboard ) performDiagCapture(position int, allpieces uint64) uint64 {
+func ( b*Bitboard ) performDiagCapture(position int, allpieces uint64) uint64 {
 	var k uint64 = 0;
 	var bound int;
 	var q uint64 = allpieces & MASK_BIT_UNSET_LEFT_UP[position];
@@ -386,7 +386,7 @@ func ( b Bitboard ) performDiagCapture(position int, allpieces uint64) uint64 {
 	return k;
 }
 
-func ( b Bitboard ) performAntiDiagCapture(position int, allpieces uint64) uint64 {
+func ( b*Bitboard ) performAntiDiagCapture(position int, allpieces uint64) uint64 {
 	var bound int;
 	var k uint64 = 0;
 	var q uint64 = allpieces & MASK_BIT_UNSET_RIGHT_UP[position];
@@ -405,7 +405,7 @@ func ( b Bitboard ) performAntiDiagCapture(position int, allpieces uint64) uint6
 	}
 	return k;
 }
-func ( b Bitboard ) performAntiDiagShift(position int, allpieces uint64) uint64 {
+func ( b*Bitboard ) performAntiDiagShift(position int, allpieces uint64) uint64 {
 	var q uint64 = allpieces & MASK_BIT_UNSET_RIGHT_UP[position];
 	var k uint64;
 	if q != 0 {
@@ -423,7 +423,7 @@ func ( b Bitboard ) performAntiDiagShift(position int, allpieces uint64) uint64 
 
 	return k;
 }
-func ( b Bitboard ) getCombination(elements uint64) []uint64 {
+func ( b*Bitboard ) getCombination(elements uint64) []uint64 {
 	var res []uint64;
 	for ok := true; ok; ok = (elements != 0) {
 		o := BITScanForward(elements);
@@ -433,7 +433,7 @@ func ( b Bitboard ) getCombination(elements uint64) []uint64 {
 	return b.getCombination2(res);
 }
 
-func ( b Bitboard ) popolateRank() {
+func ( b*Bitboard ) popolateRank() {
 	var combinationsRank []uint64;
 	for pos := 0; pos < 64; pos++ {
 		combinationsRank = b.getCombination(RANK[pos]);
@@ -444,7 +444,7 @@ func ( b Bitboard ) popolateRank() {
 	}
 }
 
-func ( b Bitboard ) performRankShift(position int, allpieces uint64) uint64 {
+func ( b*Bitboard ) performRankShift(position int, allpieces uint64) uint64 {
 	var q uint64 = allpieces & MASK_BIT_UNSET_RIGHT[position];
 	var k uint64;
 	if q != 0 {
@@ -462,7 +462,7 @@ func ( b Bitboard ) performRankShift(position int, allpieces uint64) uint64 {
 
 	return k;
 }
-func ( b Bitboard )performColumnCapture(position int, allpieces uint64) uint64 {
+func ( b*Bitboard )performColumnCapture(position int, allpieces uint64) uint64 {
 	var q uint64;
 	var k uint64 = 0;
 	var x uint64 = allpieces & FILE_[position];
@@ -476,7 +476,7 @@ func ( b Bitboard )performColumnCapture(position int, allpieces uint64) uint64 {
 	}
 	return k;
 }
-func ( b Bitboard )performRankCapture(position int, allpieces uint64) uint64 {
+func ( b*Bitboard )performRankCapture(position int, allpieces uint64) uint64 {
 	var q uint64;
 	var k uint64 = 0;
 	var x uint64 = allpieces & RANK[position];
@@ -492,7 +492,7 @@ func ( b Bitboard )performRankCapture(position int, allpieces uint64) uint64 {
 	return k;
 }
 
-func ( b Bitboard )performColumnShift(position int, allpieces uint64) uint64 {
+func ( b*Bitboard )performColumnShift(position int, allpieces uint64) uint64 {
 	var q uint64 = allpieces & MASK_BIT_UNSET_UP[position];
 	var k uint64;
 	if q != 0 {

@@ -115,7 +115,7 @@ type  ChessBoard struct {
 	structureEval _Tboard
 }
 
-func ( self ChessBoard ) decodeBoardinv(typ uint8, a int, side int) string {
+func ( self *ChessBoard ) decodeBoardinv(typ uint8, a int, side int) string {
 	if (typ & QUEEN_SIDE_CASTLE_MOVE_MASK != 0&& side == WHITE) {
 		return "e1c1";
 	}
@@ -137,48 +137,37 @@ func ( self ChessBoard ) decodeBoardinv(typ uint8, a int, side int) string {
 	return "";
 }
 
-func ( self ChessBoard ) display() {
+func ( self*ChessBoard ) display() {
 	fmt.Printf("\n     a   b   c   d   e   f   g   h");
 	for t := 0; t <= 63; t++ {
-		//var x  = ' ';
 		if (t % 8 == 0) {
 			fmt.Printf("\n   ----+---+---+---+---+---+---+----\n");
 			fmt.Printf(" %v | ", ( 8 - RANK_AT[t] ));
 		}
-		var o = FEN_PIECE[self.getPieceAt(WHITE, POW2[63 - t])];
+		var o rune = FEN_PIECE[self.getPieceAt(WHITE, POW2[63 - t])];
 
-		var k = int(' ');
-		if int(o) != int('-') {
-			k = int(o)
-			fmt.Printf("111111%v ", k);
+		var k rune;
+		if o != '-' {
+			k = o
 		} else {
-			var rr =self.getPieceAt(BLACK, POW2[63 - t]);
-			fmt.Printf("111111  %v ", rr);
-			k = int(FEN_PIECE[self.getPieceAt(BLACK, POW2[63 - t])])
-			assert(k != int('-'), "a");
-			//fmt.Printf("22222222s%v ", k);
+			k = FEN_PIECE[self.getPieceAt(BLACK, POW2[63 - t])]
 		};
 
-		if int(o) == int('-') {
-			o = ' '
-		} else {
-			o = rune(k)
-			fmt.Printf("xxxxxxxxx%v %v", o, k);
-		};
-
-		if int(o) != int(' ') {
-			fmt.Printf("%v", o);
-		} else {
+		if k == '-' {
 			if POW2[t] & WHITE_SQUARES != 0 {
 				fmt.Printf(" ");
 			} else {
 				fmt.Printf(".")
 			};
-		}
+		} else {
+			fmt.Printf("%c", k);
+		};
+
+
 		fmt.Printf(" | ");
 	};
 	fmt.Printf("\n   ----+---+---+---+---+---+---+----\n");
-	//fmt.Printf("     a   b   c   d   e   f   g   h\n\n\n{}\n\n", self.boardToFen());
+	fmt.Printf("     a   b   c   d   e   f   g   h\n\n\n");
 
 
 	fmt.Printf("zobristKey: %v", self.chessboard[ZOBRISTKEY_IDX]);
@@ -187,13 +176,13 @@ func ( self ChessBoard ) display() {
 	fmt.Printf("sideToMove: %v", self.chessboard[SIDETOMOVE_IDX]);
 }
 
-func ( self ChessBoard ) getFen() string {
+func ( self *ChessBoard ) getFen() string {
 	return self.fenString;
 }
 
 //char decodeBoard(string);
 
-func ( self ChessBoard )loadFen(fen string) int {
+func ( self*ChessBoard )loadFen(fen string) int {
 	var iss = strings.Split(fen, " ");
 	var pos = iss[0];
 	var side = iss[1];
@@ -298,19 +287,19 @@ func ( self ChessBoard )loadFen(fen string) int {
 //int getPieceByChar(char);
 
 
-func ( self ChessBoard ) getBitmap(side int) uint64 {
+func ( self *ChessBoard ) getBitmap(side int) uint64 {
 	return self.chessboard[PAWN_BLACK + side] | self.chessboard[ROOK_BLACK + side] | self.chessboard[BISHOP_BLACK + side] | self.chessboard[KNIGHT_BLACK + side] | self.chessboard[KING_BLACK + side] | self.chessboard[QUEEN_BLACK + side];
 }
 
-func ( self ChessBoard )  setSide(b uint64) {
+func ( self *ChessBoard )  setSide(b uint64) {
 	self.chessboard[SIDETOMOVE_IDX] = b;
 }
 
-func ( self ChessBoard )   getSide() int {
+func ( self *ChessBoard )   getSide() int {
 	return int(self.chessboard[SIDETOMOVE_IDX]);
 }
 
-func ( self ChessBoard )  getBitmapNoPawns(side int) uint64 {
+func ( self *ChessBoard )  getBitmapNoPawns(side int) uint64 {
 	return self.chessboard[ROOK_BLACK + side] | self.chessboard[BISHOP_BLACK + side] | self.chessboard[KNIGHT_BLACK + side] | self.chessboard[KING_BLACK + side] | self.chessboard[QUEEN_BLACK + side];
 }
 
@@ -323,8 +312,8 @@ func ( self ChessBoard )  getBitmapNoPawns(side int) uint64 {
 //}
 
 
-func ( self ChessBoard ) getPieceAt(side int, bitmapPos uint64) int {
-	fmt.Printf("\n\nchessboard -------- %v", self.chessboard);
+func ( self*ChessBoard ) getPieceAt(side int, bitmapPos uint64) int {
+
 	if self.chessboard[PAWN_BLACK + side] & bitmapPos != 0 {
 		return PAWN_BLACK + side; }
 	if self.chessboard[ROOK_BLACK + side] & bitmapPos != 0 {
@@ -345,6 +334,6 @@ func ( self ChessBoard ) getPieceAt(side int, bitmapPos uint64) int {
 	return SQUARE_FREE;
 }
 
-func ( self ChessBoard )updateZobristKey(piece uint, position uint) {
+func ( self *ChessBoard )updateZobristKey(piece uint, position uint) {
 	self.chessboard[ZOBRISTKEY_IDX] = self.chessboard[ZOBRISTKEY_IDX] ^ RANDOM_KEY[piece][position];
 }
