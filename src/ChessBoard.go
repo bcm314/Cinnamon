@@ -140,29 +140,38 @@ func ( self ChessBoard ) decodeBoardinv(typ uint8, a int, side int) string {
 func ( self ChessBoard ) display() {
 	fmt.Printf("\n     a   b   c   d   e   f   g   h");
 	for t := 0; t <= 63; t++ {
-		var x = ' ';
+		//var x  = ' ';
 		if (t % 8 == 0) {
 			fmt.Printf("\n   ----+---+---+---+---+---+---+----\n");
 			fmt.Printf(" %v | ", ( 8 - RANK_AT[t] ));
 		}
 		var o = FEN_PIECE[self.getPieceAt(WHITE, POW2[63 - t])];
 
-		var k = ' ';
-		if o != '-' {
-			k = rune(o)
+		var k = int(' ');
+		if int(o) != int('-') {
+			k = int(o)
+			fmt.Printf("111111%v ", k);
 		} else {
-			k = FEN_PIECE[self.getPieceAt(BLACK, POW2[63 - t])]
-		};
-		if k == '-' {
-			x = ' '
-		} else {
-			x = k
+			var rr =self.getPieceAt(BLACK, POW2[63 - t]);
+			fmt.Printf("111111  %v ", rr);
+			k = int(FEN_PIECE[self.getPieceAt(BLACK, POW2[63 - t])])
+			assert(k != int('-'), "a");
+			//fmt.Printf("22222222s%v ", k);
 		};
 
-		if x != ' ' {
-			fmt.Printf("%v", x); } else {
+		if int(o) == int('-') {
+			o = ' '
+		} else {
+			o = rune(k)
+			fmt.Printf("xxxxxxxxx%v %v", o, k);
+		};
+
+		if int(o) != int(' ') {
+			fmt.Printf("%v", o);
+		} else {
 			if POW2[t] & WHITE_SQUARES != 0 {
-				fmt.Printf(" "); } else {
+				fmt.Printf(" ");
+			} else {
 				fmt.Printf(".")
 			};
 		}
@@ -192,23 +201,29 @@ func ( self ChessBoard )loadFen(fen string) int {
 	var enpassant = iss[3];
 	var ix = 0;
 	s := make([]uint, 64);
-	//var s: [usize; 64] = [0; 64];
-	//let chars: Vec<char> = pos.chars().collect();
-	for ch := range pos {
+
+	for _, ch := range pos {
 		if ch != '/' {
 			if int(INV_FEN[ch ]) != 0xFF {
+
 				s[ix] = uint(INV_FEN[ch]);
 				ix = ix + 1;
-			} else if ch > 47 && ch < 58 {
-				dummy := 0;
-				for dummy < int(ch) - 48 {
-					dummy++;
-					s[ix] = uint(SQUARE_FREE);
-					ix = ix + 1;
-				}
 			} else {
-				return 2;
-			};
+
+				if ch > 47 && ch < 58 {
+
+					dummy := 0;
+					for dummy < int(ch) - 48 {
+						dummy++;
+						s[ix] = uint(SQUARE_FREE);
+						ix = ix + 1;
+					}
+				} else {
+
+					assert(false, "r2");
+					return 2;
+				};
+			}
 		}
 	}
 	if ix != 64 {
@@ -223,6 +238,7 @@ func ( self ChessBoard )loadFen(fen string) int {
 		return 2
 	}
 	i := 0;
+
 	for i < 64 {
 		p := s[63 - i];
 		if int(p) != SQUARE_FREE {
@@ -231,8 +247,9 @@ func ( self ChessBoard )loadFen(fen string) int {
 		} else {
 			self.chessboard[p] &= NOTPOW2[i];
 		}
+		i++;
 	};
-	for ch := range castle {
+	for _, ch := range castle {
 		//let cast: Vec < char > = castle.chars().collect();
 		//for	ch	in cast{
 		if ch == 'K' {
@@ -273,6 +290,7 @@ func ( self ChessBoard )loadFen(fen string) int {
 			break;
 		}
 	}
+	fmt.Printf("\n\nchessboard %v", self.chessboard);
 	return int(self.chessboard[SIDETOMOVE_IDX])
 
 }
@@ -306,6 +324,7 @@ func ( self ChessBoard )  getBitmapNoPawns(side int) uint64 {
 
 
 func ( self ChessBoard ) getPieceAt(side int, bitmapPos uint64) int {
+	fmt.Printf("\n\nchessboard -------- %v", self.chessboard);
 	if self.chessboard[PAWN_BLACK + side] & bitmapPos != 0 {
 		return PAWN_BLACK + side; }
 	if self.chessboard[ROOK_BLACK + side] & bitmapPos != 0 {
