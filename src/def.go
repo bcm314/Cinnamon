@@ -22,8 +22,8 @@ package main
 import "fmt"
 
 const (
-	BLACK int = 0;
-	WHITE int = 1;
+	BLACK uint = 0;
+	WHITE uint = 1;
 )
 
 type  _Tchessboard[16]uint64;

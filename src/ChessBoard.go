@@ -34,18 +34,18 @@ type _Tboard struct {
 }
 
 const (
-	PAWN_BLACK int = 0
-	PAWN_WHITE int = 1
-	ROOK_BLACK int = 2
-	ROOK_WHITE int = 3
-	BISHOP_BLACK int = 4
-	BISHOP_WHITE int = 5
-	KNIGHT_BLACK int = 6
-	KNIGHT_WHITE int = 7
-	KING_BLACK int = 8
-	KING_WHITE int = 9
-	QUEEN_BLACK int = 10
-	QUEEN_WHITE int = 11
+	PAWN_BLACK uint = 0
+	PAWN_WHITE uint = 1
+	ROOK_BLACK uint = 2
+	ROOK_WHITE uint = 3
+	BISHOP_BLACK uint = 4
+	BISHOP_WHITE uint = 5
+	KNIGHT_BLACK uint = 6
+	KNIGHT_WHITE uint = 7
+	KING_BLACK uint = 8
+	KING_WHITE uint = 9
+	QUEEN_BLACK uint = 10
+	QUEEN_WHITE uint = 11
 
 	RIGHT_CASTLE_IDX int = 12
 	ENPASSANT_IDX int = 13
@@ -57,7 +57,7 @@ const (
 	RIGHT_KING_CASTLE_BLACK_MASK uint8 = 0x40
 	RIGHT_QUEEN_CASTLE_BLACK_MASK uint8 = 0x80
 
-	SQUARE_FREE int = 12
+	SQUARE_FREE uint = 12
 
 	NO_ENPASSANT uint64 = 100
 	KING_SIDE_CASTLE_MOVE_MASK uint8 = 0x4
@@ -115,7 +115,7 @@ type  ChessBoard struct {
 	structureEval _Tboard
 }
 
-func ( self *ChessBoard ) decodeBoardinv(typ uint8, a int, side int) string {
+func ( self *ChessBoard ) decodeBoardinv(typ uint8, a int, side uint) string {
 	if (typ & QUEEN_SIDE_CASTLE_MOVE_MASK != 0&& side == WHITE) {
 		return "e1c1";
 	}
@@ -229,7 +229,7 @@ func ( self*ChessBoard )loadFen(fen string) int {
 
 	for i < 64 {
 		p := s[63 - i];
-		if int(p) != SQUARE_FREE {
+		if uint(p) != SQUARE_FREE {
 			self.updateZobristKey(p, uint(i));
 			self.chessboard[p] |= POW2[i];
 		} else {
@@ -286,7 +286,7 @@ func ( self*ChessBoard )loadFen(fen string) int {
 //int getPieceByChar(char);
 
 
-func ( self *ChessBoard ) getBitmap(side int) uint64 {
+func ( self *ChessBoard ) getBitmap(side uint) uint64 {
 	return self.chessboard[PAWN_BLACK + side] | self.chessboard[ROOK_BLACK + side] | self.chessboard[BISHOP_BLACK + side] | self.chessboard[KNIGHT_BLACK + side] | self.chessboard[KING_BLACK + side] | self.chessboard[QUEEN_BLACK + side];
 }
 
@@ -298,7 +298,7 @@ func ( self *ChessBoard )   getSide() int {
 	return int(self.chessboard[SIDETOMOVE_IDX]);
 }
 
-func ( self *ChessBoard )  getBitmapNoPawns(side int) uint64 {
+func ( self *ChessBoard )  getBitmapNoPawns(side uint) uint64 {
 	return self.chessboard[ROOK_BLACK + side] | self.chessboard[BISHOP_BLACK + side] | self.chessboard[KNIGHT_BLACK + side] | self.chessboard[KING_BLACK + side] | self.chessboard[QUEEN_BLACK + side];
 }
 
@@ -311,7 +311,7 @@ func ( self *ChessBoard )  getBitmapNoPawns(side int) uint64 {
 //}
 
 
-func ( self*ChessBoard ) getPieceAt(side int, bitmapPos uint64) int {
+func ( self*ChessBoard ) getPieceAt(side uint, bitmapPos uint64) uint {
 
 	if self.chessboard[PAWN_BLACK + side] & bitmapPos != 0 {
 		return PAWN_BLACK + side; }

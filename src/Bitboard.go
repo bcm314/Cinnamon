@@ -217,7 +217,7 @@ const (
 
 )
 
-func ( b*Bitboard )getRankFile(position int, allpieces uint64) uint64 {
+func ( b*Bitboard )getRankFile(position uint, allpieces uint64) uint64 {
 
 	//    ........            00000000
 	//    ...q....            00010000
@@ -232,7 +232,7 @@ func ( b*Bitboard )getRankFile(position int, allpieces uint64) uint64 {
 		b.BITBOARD_RANK[position][b.rankIdx(position, allpieces)];
 }
 
-func ( b*Bitboard ) getDiagonalAntiDiagonal(position int, allpieces uint64) uint64 {
+func ( b*Bitboard ) getDiagonalAntiDiagonal(position uint, allpieces uint64) uint64 {
 	//    ........            00010000
 	//    q.......            10100000
 	//    .B......            00000000
@@ -267,17 +267,17 @@ func ( b*Bitboard )getCombination2(elements  []uint64) []uint64 {
 	return res;
 }
 
-func ( b*Bitboard )  rankIdx(position int, allpieces uint64) uint8 {
+func ( b*Bitboard )  rankIdx(position uint, allpieces uint64) uint8 {
 	return uint8((allpieces >> RANK_ATx8[position]) & 0xff);
 }
-func ( b*Bitboard )  fileIdx(position int, allpieces uint64) uint8 {
+func ( b*Bitboard )  fileIdx(position uint, allpieces uint64) uint8 {
 	return uint8((((allpieces & FILE_[position]) * MAGIC_KEY_FILE_RANK) >> 56) & 0xff);
 }
-func ( b*Bitboard )  diagonalIdx(position int, allpieces uint64) uint8 {
+func ( b*Bitboard )  diagonalIdx(position uint, allpieces uint64) uint8 {
 	return uint8((((allpieces & DIAGONAL[position]) * MAGIC_KEY_DIAG_ANTIDIAG) >> 56) & 0xff);
 };
 
-func ( b*Bitboard )  antiDiagonalIdx(position int, allpieces uint64) uint8 {
+func ( b*Bitboard )  antiDiagonalIdx(position uint, allpieces uint64) uint8 {
 	return uint8((((allpieces & ANTIDIAGONAL[position]) * MAGIC_KEY_DIAG_ANTIDIAG) >> 56) & 0xff);
 }
 
@@ -287,7 +287,7 @@ func ( b*Bitboard ) popolateColumn() {
 		combinationsColumn = b.getCombination(FILE_[pos]);
 		var allpieces uint64;
 		for _, allpieces = range combinationsColumn {
-			idx := b.fileIdx(pos, allpieces);
+			idx := b.fileIdx(uint(pos), allpieces);
 			b.BITBOARD_FILE[pos][idx] = b.performColumnShift(pos, allpieces) | b.performColumnCapture(pos, allpieces);
 		}
 	}
@@ -298,7 +298,7 @@ func ( b*Bitboard ) popolateDiagonal() {
 	for pos := 0; pos < 64; pos++ {
 		combinationsDiagonal = b.getCombination(DIAGONAL[pos]);
 		for _, allpieces := range combinationsDiagonal {
-			idx := b.diagonalIdx(pos, allpieces);
+			idx := b.diagonalIdx(uint(pos), allpieces);
 			b.BITBOARD_DIAGONAL[pos][idx] = b.performDiagShift(pos, allpieces) | b.performDiagCapture(pos, allpieces);
 		}
 	}
@@ -309,7 +309,7 @@ func ( b*Bitboard )  popolateAntiDiagonal() {
 	for pos := 0; pos < 64; pos++ {
 		combinationsAntiDiagonal = b.getCombination(ANTIDIAGONAL[pos]);
 		for _, allpieces := range combinationsAntiDiagonal {
-			idx := b.antiDiagonalIdx(pos, allpieces);
+			idx := b.antiDiagonalIdx(uint(pos), allpieces);
 			b.BITBOARD_ANTIDIAGONAL[pos][idx] = b.performAntiDiagShift(pos, allpieces) | b.performAntiDiagCapture(pos, allpieces);
 		}
 	}
@@ -438,7 +438,7 @@ func ( b*Bitboard ) popolateRank() {
 	for pos := 0; pos < 64; pos++ {
 		combinationsRank = b.getCombination(RANK[pos]);
 		for _, allpieces := range combinationsRank {
-			var idx = b.rankIdx(pos, allpieces);
+			var idx = b.rankIdx(uint(pos), allpieces);
 			b.BITBOARD_RANK[pos][idx] = b.performRankShift(pos, allpieces) | b.performRankCapture(pos, allpieces);
 		}
 	}

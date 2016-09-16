@@ -24,9 +24,9 @@ const (
 	RANK_3 uint64 = 0xff000000
 	RANK_4 uint64 = 0xff00000000
 	RANK_6 uint64 = 0xff000000000000
-	STANDARD_MOVE_MASK uint8 = 0x3
-	ENPASSANT_MOVE_MASK uint8 = 0x1
-	PROMOTION_MOVE_MASK uint8 = 0x2
+	STANDARD_MOVE_MASK uint = 0x3
+	ENPASSANT_MOVE_MASK uint = 0x1
+	PROMOTION_MOVE_MASK uint = 0x2
 	MAX_REP_COUNT int = 1024
 	NO_PROMOTION int = -1
 
@@ -230,7 +230,7 @@ func ( self *GenMoves ) getDiagCapture(position uint, allpieces uint64, enemies 
 
 func ( self *GenMoves ) getDiagShiftAndCapture(position uint, enemies uint64, allpieces uint64) uint64 {
 	var nuovo = self.getDiagonalAntiDiagonal(position, allpieces);
-	return (nuovo & enemies) | (nuovo & !allpieces);
+	return (nuovo & enemies) | (nuovo & allpieces^0);
 }
 
 func ( self *GenMoves ) takeback(mov *_Tmove, oldkey uint64, rep bool) {
@@ -240,11 +240,11 @@ func ( self *GenMoves ) takeback(mov *_Tmove, oldkey uint64, rep bool) {
 	self.chessboard[ZOBRISTKEY_IDX] = oldkey;
 	self.chessboard[ENPASSANT_IDX] = NO_ENPASSANT;
 
-	var pieceFrom uint;
+	var pieceFrom int;
 	var posTo uint;
 	var posFrom uint;
 	var movecapture uint;
-	self.chessboard[RIGHT_CASTLE_IDX] = (mov.typee & 0xf0);
+	self.chessboard[RIGHT_CASTLE_IDX] = uint64((mov.typee & 0xf0));
 	if (mov.typee & 0x3) == STANDARD_MOVE_MASK || (mov.typee & 0x3) == ENPASSANT_MOVE_MASK {
 		posTo = mov.to;
 		posFrom = mov.from;
