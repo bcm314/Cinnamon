@@ -52,16 +52,16 @@ const (
 	SIDETOMOVE_IDX int = 14
 	ZOBRISTKEY_IDX int = 15
 
-	RIGHT_KING_CASTLE_WHITE_MASK uint8 = 0x10
-	RIGHT_QUEEN_CASTLE_WHITE_MASK uint8 = 0x20
-	RIGHT_KING_CASTLE_BLACK_MASK uint8 = 0x40
-	RIGHT_QUEEN_CASTLE_BLACK_MASK uint8 = 0x80
+	RIGHT_KING_CASTLE_WHITE_MASK uint64 = 0x10
+	RIGHT_QUEEN_CASTLE_WHITE_MASK uint64 = 0x20
+	RIGHT_KING_CASTLE_BLACK_MASK uint64 = 0x40
+	RIGHT_QUEEN_CASTLE_BLACK_MASK uint64 = 0x80
 
 	SQUARE_FREE uint = 12
 
 	NO_ENPASSANT uint64 = 100
-	KING_SIDE_CASTLE_MOVE_MASK uint8 = 0x4
-	QUEEN_SIDE_CASTLE_MOVE_MASK uint8 = 0x8
+	KING_SIDE_CASTLE_MOVE_MASK uint64 = 0x4
+	QUEEN_SIDE_CASTLE_MOVE_MASK uint64 = 0x8
 
 	A7bit uint64 = 0x80000000000000
 	B7bit uint64 = 0x40000000000000
@@ -115,7 +115,7 @@ type  ChessBoard struct {
 	structureEval _Tboard
 }
 
-func ( self *ChessBoard ) decodeBoardinv(typ uint8, a int, side uint) string {
+func ( self *ChessBoard ) decodeBoardinv(typ uint64, a int, side uint) string {
 	if (typ & QUEEN_SIDE_CASTLE_MOVE_MASK != 0&& side == WHITE) {
 		return "e1c1";
 	}

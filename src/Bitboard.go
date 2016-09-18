@@ -367,7 +367,7 @@ func ( b*Bitboard )  performDiagShift(position int, allpieces uint64) uint64 {
 
 func ( b*Bitboard ) performDiagCapture(position int, allpieces uint64) uint64 {
 	var k uint64 = 0;
-	var bound int;
+	var bound uint;
 	var q uint64 = allpieces & MASK_BIT_UNSET_LEFT_UP[position];
 	if q != 0 {
 		bound = BITScanReverse(q);
@@ -387,7 +387,7 @@ func ( b*Bitboard ) performDiagCapture(position int, allpieces uint64) uint64 {
 }
 
 func ( b*Bitboard ) performAntiDiagCapture(position int, allpieces uint64) uint64 {
-	var bound int;
+	var bound uint;
 	var k uint64 = 0;
 	var q uint64 = allpieces & MASK_BIT_UNSET_RIGHT_UP[position];
 	if q != 0 {

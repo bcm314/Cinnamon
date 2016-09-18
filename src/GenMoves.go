@@ -24,9 +24,9 @@ const (
 	RANK_3 uint64 = 0xff000000
 	RANK_4 uint64 = 0xff00000000
 	RANK_6 uint64 = 0xff000000000000
-	STANDARD_MOVE_MASK uint = 0x3
-	ENPASSANT_MOVE_MASK uint = 0x1
-	PROMOTION_MOVE_MASK uint = 0x2
+	STANDARD_MOVE_MASK uint64 = 0x3
+	ENPASSANT_MOVE_MASK uint64 = 0x1
+	PROMOTION_MOVE_MASK uint64 = 0x2
 	MAX_REP_COUNT int = 1024
 	NO_PROMOTION int = -1
 
@@ -107,102 +107,6 @@ func ( self *GenMoves ) setForceCheck(b bool) {
 	self.forceCheck = b;
 }
 
-//func ( self *GenMoves ) getMoveFromSan(fenStr *string, mov *_Tmove) int {
-
-/* self.chessboard [ENPASSANT_IDX] =  NO_ENPASSANT;
- memset(mov, 0, sizeof (_Tmove));
- const string MATCH_QUEENSIDE = "O-O-O e1c1 e8c8";
- const string MATCH_QUEENSIDE_WHITE = "O-O-O e1c1";
- const string MATCH_KINGSIDE_WHITE = "O-O e1g1";
- const string MATCH_QUEENSIDE_BLACK = "O-O-O e8c8";
- const string MATCH_KINGSIDE_BLACK = "O-O e8g8";
-
- if ((MATCH_QUEENSIDE_WHITE.find(fenStr) != string::npos | |
- MATCH_KINGSIDE_WHITE.find(fenStr) != string::npos) & &
- getPieceAt < WHITE > (POW2[E1]) == KING_WHITE) | |
- ((MATCH_QUEENSIDE_BLACK.find(fenStr) != string::npos | |
- MATCH_KINGSIDE_BLACK.find(fenStr) != string::npos) & &
- getPieceAt < BLACK > (POW2[E8]) == KING_BLACK) {
- if MATCH_QUEENSIDE.find(fenStr) != string::npos {
- mov.typee = QUEEN_SIDE_CASTLE_MOVE_MASK;
- mov.from = QUEEN_SIDE_CASTLE_MOVE_MASK;
- } else {
- mov.from = KING_SIDE_CASTLE_MOVE_MASK;
- mov.typee = KING_SIDE_CASTLE_MOVE_MASK;
- }
- if (fenStr.find("1") != string::npos) {
- mov.side = WHITE;
- } else if (fenStr.find("8") != string::npos) {
- mov.side = BLACK;
- } else {
- panic!();
- }
- mov.from = - 1;
- mov.capturedPiece = SQUARE_FREE;
- return mov.side;
- }
- int from = - 1;
- int to = -1;
- for i 0..64{
- if (!fenStr.compare(0, 2, BOARD[i])) {
- from = i;
- break;
- }
- }
- if from == - 1 {
- cout < < fenStr < < endl;
- panic!();
- }
- for i 0..64{
- if (!fenStr.compare(2, 2, BOARD[i])) {
- to = i;
- break;
- }
- }
- if (to == - 1) {
- cout < < fenStr < < endl;
- panic!();
- }
- int pieceFrom;
- if ((pieceFrom = getPieceAt <WHITE > (POW2[from])) != 12) {
- move.side = WHITE;
- } else if ((pieceFrom = getPieceAt < BLACK >(POW2[from])) != 12) {
- move.side = BLACK;
- } else {
- cout < < "fenStr: " < < fenStr < < " from: " < < from < < endl;
- panic!();
- }
- move.from = from;
- move.to = to;
- if (fenStr.length() == 4) {
- move.typee = STANDARD_MOVE_MASK;
- if (pieceFrom == PAWN_WHITE | | pieceFrom == PAWN_BLACK) {
- if (FILE_AT[from] != FILE_AT[to] & & ( move.side ^ 1 ? getPieceAt < WHITE > (POW2[to]) : getPieceAt < BLACK > (POW2[to])) == SQUARE_FREE) {
- move.typee = ENPASSANT_MOVE_MASK;
- }
- }
- } else if (fenStr.length() == 5) {
- move.typee = PROMOTION_MOVE_MASK;
- if ( move.side == WHITE) {
- move.promotionPiece = INV_FEN[toupper(fenStr.at(4))];
- } else {
- move.promotionPiece = INV_FEN[(uchar) fenStr.at(4)];
- }
- debug_assert!( move.promotionPiece != - 1);
- }
- if ( move.side == WHITE) {
- move.capturedPiece = getPieceAt < BLACK > (POW2[ move.to]);
- move.pieceFrom = getPieceAt < WHITE > (POW2[ move.from]);
- } else {
- move.capturedPiece = getPieceAt < WHITE > (POW2[ move.to]);
- move.pieceFrom = getPieceAt < BLACK > (POW2[ move.from]);
- }
- if ( move.typee == ENPASSANT_MOVE_MASK) {
- move.capturedPiece = ! move.side;
- }
- return move.side;*/
-//}
-
 func ( self *GenMoves ) init() {
 	self.numMoves = 0;
 	self.numMovesq = 0;
@@ -215,7 +119,7 @@ func ( self *GenMoves ) init() {
 	//        #endif
 }
 
-func ( self *GenMoves ) loadFen(fen *string) int {
+func ( self *GenMoves ) loadFen(fen string) int {
 	//self.repetitionMapCount = 0;
 	var side = self.loadFen(fen);
 	if side == 2 {
@@ -240,7 +144,7 @@ func ( self *GenMoves ) takeback(mov *_Tmove, oldkey uint64, rep bool) {
 	self.chessboard[ZOBRISTKEY_IDX] = oldkey;
 	self.chessboard[ENPASSANT_IDX] = NO_ENPASSANT;
 
-	var pieceFrom int;
+	var pieceFrom uint;
 	var posTo uint;
 	var posFrom uint;
 	var movecapture uint;
@@ -280,13 +184,10 @@ func ( self *GenMoves ) takeback(mov *_Tmove, oldkey uint64, rep bool) {
 	}
 }
 
-//func ( self *GenMoves ) setRepetitionMapCount(i uint) {
-//	self.repetitionMapCount = i;
-//}
 
 func ( self *GenMoves )  getDiagShiftCount(position uint, allpieces uint64) uint {
 
-	return bitCount((self.getDiagonalAntiDiagonal(position, allpieces) & !allpieces));
+	return bitCount((self.getDiagonalAntiDiagonal(position, allpieces) & ^allpieces));
 }
 
 func ( self *GenMoves )  performKingShiftCapture(side uint, enemies uint64) bool {
@@ -362,7 +263,7 @@ func ( self *GenMoves ) performRankFileCapture(piece uint, enemies uint64, side 
 func ( self *GenMoves ) performPawnCapture(enemies uint64, side uint) bool {
 	if self.chessboard[side] == 0 {
 		if self.chessboard[ENPASSANT_IDX] != NO_ENPASSANT {
-			self.updateZobristKey(13, self.chessboard[ENPASSANT_IDX]);
+			self.updateZobristKey(13, uint(self.chessboard[ENPASSANT_IDX]));
 		}
 		self.chessboard[ENPASSANT_IDX] = NO_ENPASSANT;
 		return false;
@@ -378,23 +279,25 @@ func ( self *GenMoves ) performPawnCapture(enemies uint64, side uint) bool {
 	};
 	for ; x != 0; {
 		var o = BITScanForward(x);
+		var xx =uint(int(o) + GG);
 		if (side != 0 && o > 55) || (side == 0 && o < 8) {
 			//PROMOTION
-			if self.pushmove(PROMOTION_MOVE_MASK, o + GG, o, side, (QUEEN_BLACK + side), side) {
+
+			if self.pushmove(PROMOTION_MOVE_MASK, xx, o, side, int(QUEEN_BLACK + side), side) {
 				return true; //queen
 			}
 			if self.perftMode == true {
-				if self.pushmove(PROMOTION_MOVE_MASK, o + GG, o, side, (KNIGHT_BLACK + side), side) {
+				if self.pushmove(PROMOTION_MOVE_MASK, xx, o, side, int(KNIGHT_BLACK + side), side) {
 					return true; //knight
 				}
-				if self.pushmove(PROMOTION_MOVE_MASK, o + GG, o, side, (ROOK_BLACK + side), side) {
+				if self.pushmove(PROMOTION_MOVE_MASK, xx, o, side, int(ROOK_BLACK + side), side) {
 					return true; //rock
 				}
-				if self.pushmove(PROMOTION_MOVE_MASK, o + GG, o, side, (BISHOP_BLACK + side), side) {
+				if self.pushmove(PROMOTION_MOVE_MASK,xx, o, side, int(BISHOP_BLACK + side), side) {
 					return true; //bishop
 				}
 			}
-		} else if self.pushmove(STANDARD_MOVE_MASK, o + GG, o, side, NO_PROMOTION, side) {
+		} else if self.pushmove(STANDARD_MOVE_MASK, xx, o, side, NO_PROMOTION, side) {
 			return true;
 		}
 		RESET_LSB(x);
@@ -408,23 +311,25 @@ func ( self *GenMoves ) performPawnCapture(enemies uint64, side uint) bool {
 	};
 	for ; x != 0; {
 		var o = BITScanForward(x);
+		var xx =uint(int(o) + GG);
 		if (side != 0 && o > 55) || (side == 0 && o < 8) {
 			//PROMOTION
-			if self.pushmove(PROMOTION_MOVE_MASK, o + GG, o, side, (QUEEN_BLACK + side), side) {
+
+			if self.pushmove(PROMOTION_MOVE_MASK, xx, o, side, int(QUEEN_BLACK + side), side) {
 				return true; //queen
 			}
 			if self.perftMode == true {
-				if self.pushmove(PROMOTION_MOVE_MASK, o + GG, o, side, (KNIGHT_BLACK + side), side) {
+				if self.pushmove(PROMOTION_MOVE_MASK, xx, o, side, int(KNIGHT_BLACK + side), side) {
 					return true; //knight
 				}
-				if self.pushmove(PROMOTION_MOVE_MASK, o + GG, o, side, (BISHOP_BLACK + side), side) {
+				if self.pushmove(PROMOTION_MOVE_MASK, xx, o, side, int(BISHOP_BLACK + side), side) {
 					return true; //bishop
 				}
-				if self.pushmove(PROMOTION_MOVE_MASK, o + GG, o, side, (ROOK_BLACK + side), side) {
+				if self.pushmove(PROMOTION_MOVE_MASK, xx, o, side, int(ROOK_BLACK + side), side) {
 					return true; //rock
 				}
 			}
-		} else if self.pushmove(STANDARD_MOVE_MASK, o + GG, o, side, NO_PROMOTION, side) {
+		} else if self.pushmove(STANDARD_MOVE_MASK, xx, o, side, NO_PROMOTION, side) {
 			return true;
 		}
 		RESET_LSB(x);
@@ -440,10 +345,10 @@ func ( self *GenMoves ) performPawnCapture(enemies uint64, side uint) bool {
 			} else {
 				ff = self.chessboard[ENPASSANT_IDX] - 8
 			};
-			self.pushmove(ENPASSANT_MOVE_MASK, o, ff, side, NO_PROMOTION, side);
+			self.pushmove(ENPASSANT_MOVE_MASK, o, uint(ff), side, NO_PROMOTION, side);
 			RESET_LSB(x);
 		}
-		self.updateZobristKey(13, self.chessboard[ENPASSANT_IDX]);
+		self.updateZobristKey(13, uint(self.chessboard[ENPASSANT_IDX]));
 		self.chessboard[ENPASSANT_IDX] = NO_ENPASSANT;
 	}
 	return false;
@@ -465,16 +370,16 @@ func ( self *GenMoves ) performPawnShift(side uint, xallpieces uint64) {
 	x &= xallpieces;
 	for ; x != 0; {
 		var o = BITScanForward(x);
-
+		var xx=uint(int(o) + tt);
 		if o > 55 || o < 8 {
-			self.pushmove(PROMOTION_MOVE_MASK, o + tt, o, side, (QUEEN_BLACK + side), side);
+			self.pushmove(PROMOTION_MOVE_MASK, xx, o, side, int(QUEEN_BLACK + side), side);
 			if self.perftMode == true {
-				self.pushmove(PROMOTION_MOVE_MASK, o + tt, o, side, (KNIGHT_BLACK + side), side);
-				self.pushmove(PROMOTION_MOVE_MASK, o + tt, o, side, (BISHOP_BLACK + side), side);
-				self.pushmove(PROMOTION_MOVE_MASK, o + tt, o, side, (ROOK_BLACK + side), side);
+				self.pushmove(PROMOTION_MOVE_MASK, xx, o, side, int(KNIGHT_BLACK + side), side);
+				self.pushmove(PROMOTION_MOVE_MASK, xx, o, side, int(BISHOP_BLACK + side), side);
+				self.pushmove(PROMOTION_MOVE_MASK, xx, o, side,int (ROOK_BLACK + side), side);
 			}
 		} else {
-			self.pushmove(STANDARD_MOVE_MASK, o + tt, o, side, NO_PROMOTION, side);
+			self.pushmove(STANDARD_MOVE_MASK,xx, o, side, NO_PROMOTION, side);
 		}
 		RESET_LSB(x);
 	};
@@ -490,7 +395,7 @@ func ( self *GenMoves ) performDiagShift(piece uint, side uint, allpieces uint64
 	var x2 = self.chessboard[piece];
 	for ; x2 != 0; {
 		var position = BITScanForward(x2);
-		var diag = self.getDiagonalAntiDiagonal(position, allpieces) & !allpieces;
+		var diag = self.getDiagonalAntiDiagonal(position, allpieces) & ^allpieces;
 		for ; diag != 0; {
 			self.pushmove(STANDARD_MOVE_MASK, position, BITScanForward(diag), side, NO_PROMOTION, piece);
 			RESET_LSB(diag);
@@ -504,7 +409,7 @@ func ( self *GenMoves ) performRankFileShift(piece uint, side uint, allpieces ui
 	var x2 = self.chessboard[piece];
 	for ; x2 != 0; {
 		var position = BITScanForward(x2);
-		var rankFile = self.getRankFile(position, allpieces) & !allpieces;
+		var rankFile = self.getRankFile(position, allpieces) & ^allpieces;
 		for ; rankFile != 0; {
 			self.pushmove(STANDARD_MOVE_MASK, position, BITScanForward(rankFile), side, NO_PROMOTION, piece);
 			RESET_LSB(rankFile);
@@ -515,8 +420,8 @@ func ( self *GenMoves ) performRankFileShift(piece uint, side uint, allpieces ui
 
 func ( self *GenMoves ) makemove(mov *_Tmove, rep bool, checkInCheck bool) bool {
 	var pieceFrom uint = SQUARE_FREE;
-	var posTo uint8;
-	var posFrom uint8;
+	var posTo uint;
+	var posFrom uint;
 	var movecapture = SQUARE_FREE;
 	var rightCastleOld = self.chessboard[RIGHT_CASTLE_IDX];
 	if mov.typee & 0xc == 0 {
@@ -531,7 +436,7 @@ func ( self *GenMoves ) makemove(mov *_Tmove, rep bool, checkInCheck bool) bool 
 			self.updateZobristKey(pieceFrom, posFrom);
 
 			self.chessboard[mov.promotionPiece] |= POW2[posTo];
-			self.updateZobristKey(mov.promotionPiece, posTo);
+			self.updateZobristKey(uint(mov.promotionPiece), posTo);
 		} else {
 			self.chessboard[pieceFrom] = (self.chessboard[pieceFrom] | POW2[posTo]) & NOTPOW2[posFrom];
 			self.updateZobristKey(pieceFrom, posFrom);
@@ -580,15 +485,15 @@ func ( self *GenMoves ) makemove(mov *_Tmove, rep bool, checkInCheck bool) bool 
 
 		case PAWN_WHITE :{
 			if (RANK_1 & POW2[posFrom]) != 0 && (RANK_3 & POW2[posTo]) != 0 {
-				self.chessboard[ENPASSANT_IDX] = posTo;
-				self.updateZobristKey(13, self.chessboard[ENPASSANT_IDX]);
+				self.chessboard[ENPASSANT_IDX] = uint64(posTo);
+				self.updateZobristKey(13, uint(self.chessboard[ENPASSANT_IDX]));
 			}
 		}
 
 		case PAWN_BLACK :{
 			if (RANK_6 & POW2[posFrom]) != 0 && (RANK_4 & POW2[posTo]) != 0 {
-				self.chessboard[ENPASSANT_IDX] = posTo;
-				self.updateZobristKey(13, self.chessboard[ENPASSANT_IDX]);
+				self.chessboard[ENPASSANT_IDX] = uint64(posTo);
+				self.updateZobristKey(13, uint(self.chessboard[ENPASSANT_IDX]));
 			}
 		}
 
@@ -614,7 +519,7 @@ func ( self *GenMoves ) makemove(mov *_Tmove, rep bool, checkInCheck bool) bool 
 	//	}
 	//	self.pushStackMove1(self.chessboard[ZOBRISTKEY_IDX]);
 	//}
-	if (self.forceCheck || (checkInCheck == true && self.perftMode == false)) && ((mov.side == WHITE && self.inCheck1(WHITE)) || (mov.side == BLACK && self.inCheck1(BLACK))) {
+	if (self.forceCheck || (checkInCheck == true && self.perftMode == false)) && ((mov.side == WHITE && self.inCheck1(WHITE)!=0) || (mov.side == BLACK && self.inCheck1(BLACK)!=0)) {
 		return false;
 	}
 	return true;
@@ -631,7 +536,7 @@ func ( self *GenMoves ) incListId() {
 }
 
 func ( self *GenMoves ) display() {
-	self.display();
+	//self.display();
 }
 
 func ( self *GenMoves ) decListId() {
@@ -639,55 +544,41 @@ func ( self *GenMoves ) decListId() {
 	self.gen_list[self.listId].size = 0;
 	self.listId = self.listId - 1;
 }
-//
+
 func ( self *GenMoves ) getListSize() int {
 	return self.gen_list[self.listId].size;
 }
-//
-//func ( self *GenMoves ) pushStackMove() {
-//	self.pushStackMove1(self.chessboard[ZOBRISTKEY_IDX]);
-//}
 
 func ( self *GenMoves ) resetList() {
 	self.gen_list[self.listId].size = 0;
 }
-//
-//func ( self *GenMoves ) incKillerHeuristic(from uint, to uint, value int) {
-//	if self.getRunning() == 0 {
-//		return;
-//	}
-//
-//
-//	//        debug_assert!(self.killerHeuristic[from][to] <= self.killerHeuristic[from][to] + value);
-//	//self.killerHeuristic[from][to] += value;
-//}
 
 func ( self *GenMoves ) getNextMove(list _TmoveP) *_Tmove {
-	var gen_list1 = &list.moveList;
+	//var gen_list1 = &list.moveList;
 
-	var listcount uint = list.size;
-	var bestId = -1;
+	var listcount uint = uint(list.size);
+	var bestId uint = 9999999;
 
 	var bestScore int;
 	var j uint;
-	for j := 0; j < listcount; j++ {
-		if gen_list1[j].used == false {
-			bestId = j;
-			bestScore = gen_list1[bestId].score;
+	for j := 0; j < int(listcount); j++ {
+		if list.moveList[j].used == false {
+			bestId = uint(j);
+			bestScore = list.moveList[uint(bestId)].score;
 			break;
 		}
 	}
-	if bestId == -1 {
+	if bestId == 9999999 {
 		return nil;
 	}
 	for i := j + 1; i < listcount; i++ {
-		if gen_list1[i].used == true && gen_list1[i].score > bestScore {
+		if list.moveList[i].used == true && list.moveList[i].score > bestScore {
 			bestId = i;
-			bestScore = gen_list1[bestId].score;
+			bestScore = list.moveList[bestId].score;
 		}
 	}
-	gen_list1[bestId].used = true;
-	return &gen_list1[bestId];
+	list.moveList[bestId].used = true;
+	return &list.moveList[bestId];
 }
 
 func ( self *GenMoves ) isAttacked(side uint, position uint, allpieces uint64) uint64 {
@@ -722,7 +613,7 @@ func ( self *GenMoves ) getMobilityCastle(side uint, allpieces uint64) int {
 		if POW2_3 & self.chessboard[KING_WHITE] != 0 && allpieces & 0x6 == 0 && self.chessboard[RIGHT_CASTLE_IDX] & RIGHT_KING_CASTLE_WHITE_MASK != 0 && self.chessboard[ROOK_WHITE] & POW2_0 != 0 && self.isAttacked(WHITE, 1, allpieces) == 0 && self.isAttacked(WHITE, 2, allpieces) == 0 && self.isAttacked(WHITE, 3, allpieces) == 0 {
 			count = count + 1;
 		}
-		if POW2_3 & self.chessboard[KING_WHITE] != 0 && !(allpieces & 0x70) == 0 && self.chessboard[RIGHT_CASTLE_IDX] & RIGHT_QUEEN_CASTLE_WHITE_MASK != 0 && self.chessboard[ROOK_WHITE] & POW2_7 != 0 && self.isAttacked(WHITE, 3, allpieces) == 0 && self.isAttacked(WHITE, 4, allpieces) == 0 && self.isAttacked(WHITE, 5, allpieces) == 0 {
+		if POW2_3 & self.chessboard[KING_WHITE] != 0 && ^(allpieces & 0x70) == 0 && self.chessboard[RIGHT_CASTLE_IDX] & RIGHT_QUEEN_CASTLE_WHITE_MASK != 0 && self.chessboard[ROOK_WHITE] & POW2_7 != 0 && self.isAttacked(WHITE, 3, allpieces) == 0 && self.isAttacked(WHITE, 4, allpieces) == 0 && self.isAttacked(WHITE, 5, allpieces) == 0 {
 			count = count + 1;
 		}
 	} else {
@@ -742,19 +633,15 @@ func ( self *GenMoves ) getMobilityQueen(position uint, enemies uint64, allpiece
 		bitCount(self.getDiagShiftAndCapture(position, enemies, allpieces))
 }
 
-func ( self *GenMoves ) inCheck(side uint, typee uint, from uint, to uint, pieceFrom uint, pieceTo uint, promotionPiece uint) uint64 {
-	//#ifdef DEBUG_MODE
-	//_Tchessboard a;
-	//memcpy( & a, self.chessboard, sizeof (_Tchessboard));
-	//#endif
+func ( self *GenMoves ) inCheck(side uint, typee uint64, from uint, to uint, pieceFrom uint, pieceTo uint, promotionPiece uint) uint64 {
 
 	var result uint64;
-	var g3 uint64 = typee & 0x3;
+	var g3 uint64 = uint64(typee & 0x3);
 	switch  g3{
 	case
 		STANDARD_MOVE_MASK :{
 		var from1 = self.chessboard[pieceFrom];
-		var to1 uint64 = -1;
+		var to1 uint64 = 0xffffffffffffffff;
 
 
 		if pieceTo != SQUARE_FREE {
@@ -808,9 +695,6 @@ func ( self *GenMoves ) inCheck(side uint, typee uint, from uint, to uint, piece
 
 	}
 
-	//    #ifdef DEBUG_MODE
-
-	//    #endif
 	return result;
 }
 
@@ -880,17 +764,17 @@ func ( self *GenMoves ) tryAllCastle(side uint, allpieces uint64) {
 
 	if side == WHITE {
 		if POW2_3 & self.chessboard[KING_WHITE] != 0 && allpieces & 0x6 == 0 && self.chessboard[RIGHT_CASTLE_IDX] & RIGHT_KING_CASTLE_WHITE_MASK != 0  && self.chessboard[ROOK_WHITE] & POW2_0 != 0  && 0 == self.isAttacked(WHITE, 1, allpieces) && 0 == self.isAttacked(WHITE, 2, allpieces) && 0 == self.isAttacked(WHITE, 3, allpieces) {
-			self.pushmove(KING_SIDE_CASTLE_MOVE_MASK, -1, -1, WHITE, NO_PROMOTION, -1);
+			self.pushmove(KING_SIDE_CASTLE_MOVE_MASK,0xffffffff, 0xffffffff, WHITE, NO_PROMOTION, 0xffffffff);
 		}
 		if POW2_3 & self.chessboard[KING_WHITE] != 0 && allpieces & 0x70 == 0 && self.chessboard[RIGHT_CASTLE_IDX] & RIGHT_QUEEN_CASTLE_WHITE_MASK != 0 && self.chessboard[ROOK_WHITE] & POW2_7 != 0  && 0 == self.isAttacked(WHITE, 3, allpieces) && 0 == self.isAttacked(WHITE, 4, allpieces) && 0 == self.isAttacked(WHITE, 5, allpieces) {
-			self.pushmove(QUEEN_SIDE_CASTLE_MOVE_MASK, -1, -1, WHITE, NO_PROMOTION, -1);
+			self.pushmove(QUEEN_SIDE_CASTLE_MOVE_MASK, 0xffffffff, 0xffffffff, WHITE, NO_PROMOTION, 0xffffffff);
 		}
 	} else {
 		if POW2_59 & self.chessboard[KING_BLACK] != 0 && self.chessboard[RIGHT_CASTLE_IDX] & RIGHT_KING_CASTLE_BLACK_MASK != 0 && 0 == (allpieces & 0x600000000000000) && self.chessboard[ROOK_BLACK] & POW2_56 != 0 && 0 == self.isAttacked(BLACK, 57, allpieces) && 0 == self.isAttacked(BLACK, 58, allpieces) && 0 == self.isAttacked(BLACK, 59, allpieces) {
-			self.pushmove(KING_SIDE_CASTLE_MOVE_MASK, -1, -1, BLACK, NO_PROMOTION, -1);
+			self.pushmove(KING_SIDE_CASTLE_MOVE_MASK, 0xffffffff, 0xffffffff, BLACK, NO_PROMOTION, 0xffffffff);
 		}
 		if POW2_59 & self.chessboard[KING_BLACK] != 0&& self.chessboard[RIGHT_CASTLE_IDX] & RIGHT_QUEEN_CASTLE_BLACK_MASK != 0 && 0 == (allpieces & 0x7000000000000000) && self.chessboard[ROOK_BLACK] & POW2_63 != 0 && 0 == self.isAttacked(BLACK, 59, allpieces) && 0 == self.isAttacked(BLACK, 60, allpieces) && 0 == self.isAttacked(BLACK, 61, allpieces) {
-			self.pushmove(QUEEN_SIDE_CASTLE_MOVE_MASK, -1, -1, BLACK, NO_PROMOTION, -1);
+			self.pushmove(QUEEN_SIDE_CASTLE_MOVE_MASK, 0xffffffff, 0xffffffff, BLACK, NO_PROMOTION, 0xffffffff);
 		}
 	}
 }
@@ -915,10 +799,10 @@ func ( self *GenMoves ) pushmove(typee uint64, from uint, to uint, side uint, pr
 	}
 	if (typee & 0xc) != 0 && (self.forceCheck || self.perftMode) {
 		//no castle
-		if side == WHITE && self.inCheck(WHITE, typee, from, to, pieceFrom, piece_captured, promotionPiece) != 0 {
+		if side == WHITE && self.inCheck(WHITE,  typee, from, to, pieceFrom, piece_captured, uint(promotionPiece)) != 0 {
 			return false;
 		}
-		if side == BLACK && self.inCheck(BLACK, typee, from, to, pieceFrom, piece_captured, promotionPiece) != 0 {
+		if side == BLACK && self.inCheck(BLACK, typee, from, to, pieceFrom, piece_captured,  uint(promotionPiece)) != 0 {
 			return false;
 		}
 	}
@@ -959,29 +843,12 @@ func ( self *GenMoves ) pushmove(typee uint64, from uint, to uint, side uint, pr
 }
 
 func ( self *GenMoves ) getMove(i uint) *_Tmove {
-	return self.gen_list[self.listId].moveList[i]
+	return &self.gen_list[self.listId].moveList[i];
 }
-//
-//func ( self *GenMoves ) setRunning(t int) {
-//	self.running = t;
-//}
-//
-//func ( self *GenMoves ) getRunning() int {
-//	return self.running;
-//}
 
-func ( self *GenMoves ) inCheck1(side uint) bool {
+func ( self *GenMoves ) inCheck1(side uint) uint64 {
 	return self.isAttacked(side, BITScanForward(self.chessboard[KING_BLACK + side]), self.getBitmap(BLACK) | self.getBitmap(WHITE));
 }
-
-//func ( self *GenMoves ) setKillerHeuristic(from uint, to uint, value int) {
-//	if self.getRunning() != 0 {
-//		self.killerHeuristic[from][to] = value;
-//	}
-//}
-
-///////////////////////////////////// private:
-
 
 func ( self *GenMoves ) checkJumpPawn(side uint, xx uint64, xallpieces uint64) {
 	var x = xx;
@@ -999,8 +866,8 @@ func ( self *GenMoves ) checkJumpPawn(side uint, xx uint64, xallpieces uint64) {
 		} else {
 			rr = 16;
 		}
-
-		self.pushmove(STANDARD_MOVE_MASK, ((o + rr)), o, side, NO_PROMOTION, side);
+		var xx=uint(int(o) + rr);
+		self.pushmove(STANDARD_MOVE_MASK, xx, o, side, NO_PROMOTION, side);
 		RESET_LSB(x);
 	}
 }
@@ -1008,22 +875,9 @@ func ( self *GenMoves ) checkJumpPawn(side uint, xx uint64, xallpieces uint64) {
 func ( self *GenMoves ) performRankFileCaptureAndShiftCount(position uint, enemies uint64, allpieces uint64) uint {
 
 	var rankFile uint64 = self.getRankFile(position, allpieces);
-	rankFile = (rankFile & enemies) | (rankFile & !allpieces);
+	rankFile = (rankFile & enemies) | (rankFile & ^allpieces);
 	return bitCount(rankFile)
 }
-/*
-func ( self *GenMoves ) popStackMove() {
-
-	self.repetitionMapCount = self.repetitionMapCount - 1;
-	if self.repetitionMapCount != 0 && self.repetitionMap[self.repetitionMapCount - 1] == 0 {
-		self.repetitionMapCount = self.repetitionMapCount - 1;
-	}
-}
-
-func ( self *GenMoves ) pushStackMove1(key uint64) {
-	self.repetitionMap[self.repetitionMapCount] = key;
-	self.repetitionMapCount = self.repetitionMapCount + 1;
-}*/
 
 func ( self *GenMoves ) getAttackers(side uint, exitOnFirst bool, position uint, allpieces uint64) uint64 {
 
