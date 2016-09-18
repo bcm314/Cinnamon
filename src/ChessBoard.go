@@ -177,10 +177,10 @@ func ( self*ChessBoard ) display() {
 	fmt.Printf("     a   b   c   d   e   f   g   h\n\n\n");
 
 
-	fmt.Printf("zobristKey: %v", self.chessboard[ZOBRISTKEY_IDX]);
-	fmt.Printf("enpassantPosition: %v", self.chessboard[ENPASSANT_IDX]);
-	fmt.Printf("rightCastle: %v", self.chessboard[RIGHT_CASTLE_IDX]);
-	fmt.Printf("sideToMove: %v", self.chessboard[SIDETOMOVE_IDX]);
+	fmt.Printf("\nzobristKey: %v", self.chessboard[ZOBRISTKEY_IDX]);
+	fmt.Printf("\nenpassantPosition: %v", self.chessboard[ENPASSANT_IDX]);
+	fmt.Printf("\nrightCastle: %v", self.chessboard[RIGHT_CASTLE_IDX]);
+	fmt.Printf("\nsideToMove: %v", self.chessboard[SIDETOMOVE_IDX]);
 }
 
 func ( self *ChessBoard ) getFen() string {
@@ -343,3 +343,4 @@ func ( self*ChessBoard ) getPieceAt(side uint, bitmapPos uint64) uint {
 func ( self *ChessBoard )updateZobristKey(piece uint, position uint) {
 	self.chessboard[ZOBRISTKEY_IDX] = self.chessboard[ZOBRISTKEY_IDX] ^ RANDOM_KEY[piece][position];
 }
+

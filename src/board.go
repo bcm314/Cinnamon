@@ -32,7 +32,7 @@ type _Tmove struct {
 }
 
 type _TmoveP struct {
-	moveList []_Tmove
+	moveList [MAX_MOVE]_Tmove
 	size     int
 }
 
