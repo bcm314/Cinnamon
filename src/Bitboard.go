@@ -18,6 +18,10 @@
 
 package main
 
+import (
+	"math"
+	"fmt"
+)
 
 //Kindergarten
 type Bitboard struct {
@@ -25,7 +29,7 @@ type Bitboard struct {
 	BITBOARD_ANTIDIAGONAL [64][256]uint64
 	BITBOARD_FILE         [64][256]uint64
 	BITBOARD_RANK         [64][256]uint64
-	tmpStruct             *_Ttmp
+	tmpStruct             _Ttmp
 }
 
 var MASK_BIT_SET_VERT_LOWER = []uint64{
@@ -217,6 +221,73 @@ const (
 
 )
 
+func ( self*Bitboard ) init() {
+
+	MASK_BIT_SET := [64][64]uint64{}
+
+	for i := 0; i < 64; i++ {
+		for j := 0; j < 64; j++ {
+			var a = math.Min(float64(i), float64(j));
+			var b = math.Max(float64(i), float64(j));
+			MASK_BIT_SET[i][i] = 0;
+			for e := a; e <= b; e++ {
+				var r = (RANK[i] | POW2[i]) & (RANK[j] | POW2[j]);
+				if r != 0 {
+					MASK_BIT_SET[i][j] |= POW2[uint(e)] & r;
+				} else {
+					r = (FILE_[i] | POW2[i]) & (FILE_[j] | POW2[j]);
+					if r != 0 {
+						MASK_BIT_SET[i][j] |= POW2[uint(e)] & r;
+					} else {
+						r = (DIAGONAL[i] | POW2[i]) & (DIAGONAL[j] | POW2[j]);
+						if r != 0 {
+							MASK_BIT_SET[i][j] |= POW2[uint(e)] & r;
+						} else {
+							r = (ANTIDIAGONAL[i] | POW2[i]) & (ANTIDIAGONAL[j] | POW2[j]);
+							if r != 0 {
+								MASK_BIT_SET[i][j] |= POW2[uint(e)] & r;
+							}
+						}
+					}
+				}
+			}
+			if i == j {
+				MASK_BIT_SET[i][i] &= NOTPOW2[i];
+			}
+		}
+	}
+	for i := 0; i < 64; i++ {
+		for j := 0; j < 64; j++ {
+			self.tmpStruct.MASK_BIT_SET_NOBOUND_TMP[i][j] = MASK_BIT_SET[i][j];
+			self.tmpStruct.MASK_BIT_SET_NOBOUND_TMP[i][j] &= NOTPOW2[i];
+			self.tmpStruct.MASK_BIT_SET_NOBOUND_TMP[i][j] &= NOTPOW2[j];
+			MASK_BIT_SET[i][j] &= NOTPOW2[i];
+		}
+	}
+	for i := 0; i < 64; i++ {
+		for j := 0; j < 64; j++ {
+			self.tmpStruct.MASK_BIT_SET_NOBOUND_COUNT_TMP[i][j] = int8(bitCount(self.tmpStruct.MASK_BIT_SET_NOBOUND_TMP[i][j]));
+		}
+	}
+
+	self.popolateAntiDiagonal();
+
+	self.popolateDiagonal();
+
+	self.popolateColumn();
+
+	self.popolateRank();
+
+}
+
+func NewBitboard() *Bitboard {
+	fmt.Print("NewBitboard\n")
+	p := new(Bitboard)
+	p.init();
+	fmt.Print("NewBitboard end\n")
+	return p
+}
+
 func ( b*Bitboard )getRankFile(position uint, allpieces uint64) uint64 {
 
 	//    ........            00000000
@@ -283,10 +354,13 @@ func ( b*Bitboard )  antiDiagonalIdx(position uint, allpieces uint64) uint8 {
 
 func ( b*Bitboard ) popolateColumn() {
 	var combinationsColumn []uint64
+	fmt.Println("b0")
 	for pos := 0; pos < 64; pos++ {
+
 		combinationsColumn = b.getCombination(FILE_[pos]);
 		var allpieces uint64;
 		for _, allpieces = range combinationsColumn {
+
 			idx := b.fileIdx(uint(pos), allpieces);
 			b.BITBOARD_FILE[pos][idx] = b.performColumnShift(pos, allpieces) | b.performColumnCapture(pos, allpieces);
 		}
@@ -307,12 +381,16 @@ func ( b*Bitboard ) popolateDiagonal() {
 func ( b*Bitboard )  popolateAntiDiagonal() {
 	var combinationsAntiDiagonal []uint64
 	for pos := 0; pos < 64; pos++ {
+
 		combinationsAntiDiagonal = b.getCombination(ANTIDIAGONAL[pos]);
+
 		for _, allpieces := range combinationsAntiDiagonal {
+
 			idx := b.antiDiagonalIdx(uint(pos), allpieces);
 			b.BITBOARD_ANTIDIAGONAL[pos][idx] = b.performAntiDiagShift(pos, allpieces) | b.performAntiDiagCapture(pos, allpieces);
 		}
 	}
+
 }
 
 func ( b*Bitboard )  combinations(elems []uint64, len1 int, pos []uint64, depth int, margin int) []uint64 {
@@ -339,7 +417,7 @@ func ( b*Bitboard )  combinations(elems []uint64, len1 int, pos []uint64, depth 
 }
 
 func ( b*Bitboard )   combinations2(elems []uint64, len1 int) []uint64 {
-	assert(len1 > 0 && len1 < len(elems), "a1");
+	assert(len1 > 0 && len1 <= len(elems), "a1 ");
 
 	var positions = make([]uint64, len1)
 	return b.combinations(elems, len1, positions, 0, 0);
@@ -367,7 +445,7 @@ func ( b*Bitboard )  performDiagShift(position int, allpieces uint64) uint64 {
 
 func ( b*Bitboard ) performDiagCapture(position int, allpieces uint64) uint64 {
 	var k uint64 = 0;
-	var bound int;
+	var bound uint;
 	var q uint64 = allpieces & MASK_BIT_UNSET_LEFT_UP[position];
 	if q != 0 {
 		bound = BITScanReverse(q);
@@ -387,7 +465,7 @@ func ( b*Bitboard ) performDiagCapture(position int, allpieces uint64) uint64 {
 }
 
 func ( b*Bitboard ) performAntiDiagCapture(position int, allpieces uint64) uint64 {
-	var bound int;
+	var bound uint;
 	var k uint64 = 0;
 	var q uint64 = allpieces & MASK_BIT_UNSET_RIGHT_UP[position];
 	if q != 0 {
@@ -426,9 +504,10 @@ func ( b*Bitboard ) performAntiDiagShift(position int, allpieces uint64) uint64 
 func ( b*Bitboard ) getCombination(elements uint64) []uint64 {
 	var res []uint64;
 	for ok := true; ok; ok = (elements != 0) {
+
 		o := BITScanForward(elements);
 		res = append(res, uint64(o));
-		RESET_LSB(elements);
+		elements = reset_lsb(elements);
 	}
 	return b.getCombination2(res);
 }

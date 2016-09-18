@@ -21,12 +21,12 @@ package main
 
 type _Tmove struct {
 	promotionPiece int
-	pieceFrom      int
+	pieceFrom      uint
 	capturedPiece  uint
 	from           uint
 	to             uint
-	side           int
-	typee          uint
+	side           uint
+	typee          uint64
 	score          int
 	used           bool
 }

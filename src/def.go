@@ -28,37 +28,45 @@ const (
 
 type  _Tchessboard[16]uint64;
 
-func RESET_LSB(bits uint64) uint64 {
-	bits &= bits - 1; return bits;
+func reset_lsb(bits uint64) uint64 {
+	x:=bits - 1
+	bits = bits & x
+	return bits;
 }
 
-func bitCount(bits uint64) int {
+func bitCount(bits uint64) uint {
 	count := 0;
 	for ok := true; ok; ok = (bits != 0) {
 		//while (bits) {
 		count++;
 		bits &= bits - 1;
 	}
-	return count;
+	return uint(count);
 }
 func assert(a bool, b string) {
+	//TODO commentare
 	if a == true {
 		return
 	}
-	panic(fmt.Sprintf("error %v\n",b));
+	panic(fmt.Sprintf("error %v\n", b));
 
 }
-func BITScanForward(bb uint64) int {
+
+func BITScanForward(bb uint64) uint {
+
 	//  @author Matt Taylor (2003)
-	lsb_64_table := []int{63, 30, 3, 32, 59, 14, 11, 33, 60, 24, 50, 9, 55, 19, 21, 34, 61, 29, 2, 53, 51, 23, 41, 18, 56, 28, 1, 43, 46, 27, 0, 35, 62, 31, 58, 4, 5, 49, 54, 6, 15, 52, 12, 40, 7, 42, 45, 16, 25, 57, 48, 13, 10, 39, 8, 44, 20, 47, 38, 22, 17, 37, 36, 26 };
-	bb ^= bb - 1;
-	var folded int = int(bb ^ (bb >> 32));
-	return lsb_64_table[folded * 0x78291ACF >> 26];
-}
+	lsb_64_table := []uint{63, 30, 3, 32, 59, 14, 11, 33, 60, 24, 50, 9, 55, 19, 21, 34, 61, 29, 2, 53, 51, 23, 41, 18, 56, 28, 1, 43, 46, 27, 0, 35, 62, 31, 58, 4, 5, 49, 54, 6, 15, 52, 12, 40, 7, 42, 45, 16, 25, 57, 48, 13, 10, 39, 8, 44, 20, 47, 38, 22, 17, 37, 36, 26};
+	bb ^= bb - 1
+	var folded uint64 = bb ^ (bb >> 32)
+	xx :=uint(folded * 0x78291ACF)& 0xffffffff
+	var x uint = uint(xx  >> 26)
+	v := lsb_64_table[x]
 
-func BITScanReverse(bb uint64) int {
+	return v;
+}
+func BITScanReverse(bb uint64) uint {
 	// authors Kim Walisch, Mark Dickinson
-	index64 := []int{0, 47, 1, 56, 48, 27, 2, 60, 57, 49, 41, 37, 28, 16, 3, 61, 54, 58, 35, 52, 50, 42, 21, 44, 38, 32, 29, 23, 17, 11, 4, 62, 46, 55, 26, 59, 40, 36, 15, 53, 34, 51, 20, 43, 31, 22, 10, 45, 25, 39, 14, 33, 19, 30, 9, 24, 13, 18, 8, 12, 7, 6, 5, 63, };
+	index64 := []uint{0, 47, 1, 56, 48, 27, 2, 60, 57, 49, 41, 37, 28, 16, 3, 61, 54, 58, 35, 52, 50, 42, 21, 44, 38, 32, 29, 23, 17, 11, 4, 62, 46, 55, 26, 59, 40, 36, 15, 53, 34, 51, 20, 43, 31, 22, 10, 45, 25, 39, 14, 33, 19, 30, 9, 24, 13, 18, 8, 12, 7, 6, 5, 63, };
 	const debruijn64 uint64 = 0x03f79d71b4cb0a89;
 	bb |= bb >> 1;
 	bb |= bb >> 2;
