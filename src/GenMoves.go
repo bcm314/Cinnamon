@@ -790,7 +790,8 @@ func ( self *GenMoves ) pushmove(typee uint64, from uint, to uint, side uint, pr
 		//no castle
 		piece_captured = side ^ 1;
 	}
-	if (typee & 0xc) != 0 && (self.forceCheck || self.perftMode) {
+	//if (typee & 0xc) != 0 && (self.forceCheck || self.perftMode)
+	{
 		//no castle
 		if side == WHITE && self.inCheck(WHITE, typee, from, to, pieceFrom, piece_captured, uint(promotionPiece)) != 0 {
 			return false;
@@ -925,8 +926,8 @@ func ( self *GenMoves ) perft(side uint, depthx uint) uint64 {
 	var friends = self.chessBoard.getBitmap(side)
 	var enemies = self.chessBoard.getBitmap(side ^ 1)
 	var b = self.generateCaptures(side, enemies, friends)
-
-	assert(b == false, "sdsd");
+//self.display();
+	assert(b == false, "assert captured king");
 	self.generateMoves(side, friends | enemies);
 	var listcount = self.getListSize();
 
