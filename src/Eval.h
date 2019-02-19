@@ -22,6 +22,7 @@
 #include <fstream>
 #include <string.h>
 #include <iomanip>
+#include "db/Endgame.h"
 
 using namespace _board;
 

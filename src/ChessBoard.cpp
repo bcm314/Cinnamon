@@ -275,14 +275,4 @@ int ChessBoard::loadFen(string fen) {
     return chessboard[SIDETOMOVE_IDX];
 }
 
-#ifdef DEBUG_MODE
 
-bool ChessBoard::checkNPieces(std::unordered_map<int, int> pieces) {
-    int a = 0;
-    for (int i = 0; i < 13; i++) {
-        a += bitCount(chessboard[i]) == pieces[i];
-    }
-    return a == 13;
-}
-
-#endif

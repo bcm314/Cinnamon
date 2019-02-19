@@ -106,18 +106,26 @@ public:
 
     u64 getBitmap(int side);
 
-    bool checkNPieces(std::unordered_map<int, int>);
+    static bool checkNPieces(std::unordered_map<int, int> pieces,const _Tchessboard &chessboard) {
+        int a = 0;
+        for (int i = 0; i < 13; i++) {
+            a += bitCount(chessboard[i]) == pieces[i];
+        }
+        return a == 13;
+    }
 
 #endif
 
     template<int side>
     u64 getBitmap() const {
-        return chessboard[PAWN_BLACK + side] | chessboard[ROOK_BLACK + side] | chessboard[BISHOP_BLACK + side] | chessboard[KNIGHT_BLACK + side] | chessboard[KING_BLACK + side] | chessboard[QUEEN_BLACK + side];
+        return chessboard[PAWN_BLACK + side] | chessboard[ROOK_BLACK + side] | chessboard[BISHOP_BLACK + side] |
+               chessboard[KNIGHT_BLACK + side] | chessboard[KING_BLACK + side] | chessboard[QUEEN_BLACK + side];
     }
 
     template<int side>
-    static u64 getBitmap(const _Tchessboard &chessboard)  {
-        return chessboard[PAWN_BLACK + side] | chessboard[ROOK_BLACK + side] | chessboard[BISHOP_BLACK + side] | chessboard[KNIGHT_BLACK + side] | chessboard[KING_BLACK + side] | chessboard[QUEEN_BLACK + side];
+    static u64 getBitmap(const _Tchessboard &chessboard) {
+        return chessboard[PAWN_BLACK + side] | chessboard[ROOK_BLACK + side] | chessboard[BISHOP_BLACK + side] |
+               chessboard[KNIGHT_BLACK + side] | chessboard[KING_BLACK + side] | chessboard[QUEEN_BLACK + side];
     }
 
     void setSide(bool b) {
@@ -130,22 +138,46 @@ public:
 
     template<int side>
     u64 getBitmapNoPawns() const {
-        return chessboard[ROOK_BLACK + side] | chessboard[BISHOP_BLACK + side] | chessboard[KNIGHT_BLACK + side] | chessboard[KING_BLACK + side] | chessboard[QUEEN_BLACK + side];
+        return chessboard[ROOK_BLACK + side] | chessboard[BISHOP_BLACK + side] | chessboard[KNIGHT_BLACK + side] |
+               chessboard[KING_BLACK + side] | chessboard[QUEEN_BLACK + side];
     }
 
     template<int side>
     int getPieceAt(const u64 bitmapPos) const {
-        return ((chessboard[PAWN_BLACK + side] & bitmapPos) ? PAWN_BLACK + side : ((chessboard[ROOK_BLACK + side] & bitmapPos) ? ROOK_BLACK + side : ((chessboard[BISHOP_BLACK + side] & bitmapPos) ? BISHOP_BLACK + side : ((chessboard[KNIGHT_BLACK + side] & bitmapPos) ? KNIGHT_BLACK + side : ((chessboard[QUEEN_BLACK + side] & bitmapPos) ? QUEEN_BLACK + side : ((chessboard[KING_BLACK + side] & bitmapPos) ? KING_BLACK + side : SQUARE_FREE))))));
+        return ((chessboard[PAWN_BLACK + side] & bitmapPos) ? PAWN_BLACK + side : ((chessboard[ROOK_BLACK + side] &
+                                                                                    bitmapPos) ? ROOK_BLACK + side
+                                                                                               : ((chessboard[
+                                                                                                           BISHOP_BLACK +
+                                                                                                           side] &
+                                                                                                   bitmapPos) ?
+                                                                                                  BISHOP_BLACK + side
+                                                                                                              : ((chessboard[
+                                                                                                                          KNIGHT_BLACK +
+                                                                                                                          side] &
+                                                                                                                  bitmapPos)
+                                                                                                                 ?
+                                                                                                                 KNIGHT_BLACK +
+                                                                                                                 side
+                                                                                                                 : ((chessboard[
+                                                                                                                             QUEEN_BLACK +
+                                                                                                                             side] &
+                                                                                                                     bitmapPos)
+                                                                                                                    ?
+                                                                                                                    QUEEN_BLACK +
+                                                                                                                    side
+                                                                                                                    : ((chessboard[
+                                                                                                                                KING_BLACK +
+                                                                                                                                side] &
+                                                                                                                        bitmapPos)
+                                                                                                                       ?
+                                                                                                                       KING_BLACK +
+                                                                                                                       side
+                                                                                                                       : SQUARE_FREE))))));
     }
 
     static string getCell(const int file, const int rank) {
         return BOARD[FILE_AT[file] * 8 + rank];
     }
-
-
-protected:
-
-    _Tchessboard chessboard;
 
     typedef struct {
         u64 allPieces;
@@ -158,6 +190,11 @@ protected:
         int kingSecurityDistance[2];
         uchar posKing[2];
     } _Tboard;
+
+
+protected:
+
+    _Tchessboard chessboard;
 
     static constexpr u64 A7bit = 0x80000000000000ULL;
     static constexpr u64 B7bit = 0x40000000000000ULL;
@@ -265,8 +302,6 @@ protected:
     static constexpr int E8 = 59;
 
 
-
-
     static constexpr u64 BLACK_SQUARES = 0x55AA55AA55AA55AAULL;
     static constexpr u64 WHITE_SQUARES = 0xAA55AA55AA55AA55ULL;
 
@@ -276,7 +311,9 @@ protected:
 
     template<int side>
     int getNpiecesNoPawnNoKing() const {
-        return bitCount(chessboard[ROOK_BLACK + side] | chessboard[BISHOP_BLACK + side] | chessboard[KNIGHT_BLACK + side] | chessboard[QUEEN_BLACK + side]);
+        return bitCount(
+                chessboard[ROOK_BLACK + side] | chessboard[BISHOP_BLACK + side] | chessboard[KNIGHT_BLACK + side] |
+                chessboard[QUEEN_BLACK + side]);
     }
 
 #ifdef DEBUG_MODE
