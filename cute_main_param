@@ -1,1 +1,2 @@
 export opening_epd=$test_dir/$dir/$project_name/KRKP-KQKP-KBBKN-KQKR-KRKB-KRKN.epd
+export resign=""
