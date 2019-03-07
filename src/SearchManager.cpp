@@ -291,6 +291,12 @@ void SearchManager::setNullMove(bool i) {
     }
 }
 
+void SearchManager::setChess960(bool i) {
+    for (Search *s:getPool()) {
+        s->setChess960(i);
+    }
+}
+
 bool SearchManager::makemove(_Tmove *i) {
     bool b = false;
     for (Search *s:getPool()) {

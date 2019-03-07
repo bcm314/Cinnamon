@@ -104,7 +104,7 @@ public:
     int getMaxTimeMillsec();
 
     void setNullMove(bool i);
-
+    void setChess960(bool i);
     bool makemove(_Tmove *i);
 
     void takeback(_Tmove *move, const u64 oldkey, bool rep);

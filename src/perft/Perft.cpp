@@ -130,7 +130,13 @@ void Perft::alloc() {
     }
 }
 
-void Perft::setParam(const string &fen1, int depth1, const int nCpu2, const int mbSize1, const string &dumpFile1) {
+void Perft::setParam(const string &fen1,
+                     int depth1,
+                     const int nCpu2,
+                     const int mbSize1,
+                     const string &dumpFile1,
+                     const bool is960) {
+
     memset(&perftRes, 0, sizeof(_TPerftRes));
     if (depth1 <= 0)depth1 = 1;
     mbSize = mbSize1;
@@ -140,6 +146,7 @@ void Perft::setParam(const string &fen1, int depth1, const int nCpu2, const int 
     perftRes.nCpu = nCpu2;
     count = 0;
     dumping = false;
+    chess960 = is960;
     setNthread(getNthread());//reinitialize threads
 }
 
@@ -173,6 +180,7 @@ void Perft::run() {
     cout << "#cpu:\t\t\t" << perftRes.nCpu << endl;
     cout << "cache size:\t\t" << mbSize << endl;
     cout << "dump file:\t\t" << dumpFile << endl;
+    cout << "chess960:\t\t" << chess960 << endl;
     cout << endl << Time::getLocalTime() << " start perft test..." << endl;
 
     Timer t2(minutesToDump * 60);
@@ -206,11 +214,11 @@ void Perft::run() {
     setNthread(perftRes.nCpu);
     for (i = 0; i < perftRes.nCpu - 1; i++) {
         PerftThread &perftThread = getNextThread();
-        perftThread.setParam(fen, s, s + block, &perftRes);
+        perftThread.setParam(fen, s, s + block, &perftRes, chess960);
         s += block;
     }
     PerftThread &perftThread = getNextThread();
-    perftThread.setParam(fen, s, listcount, &perftRes);
+    perftThread.setParam(fen, s, listcount, &perftRes, chess960);
     startAll();
     joinAll();
 }

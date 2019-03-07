@@ -313,6 +313,7 @@ public:
     double betaEfficiency;
 #endif
 protected:
+    bool chess960 = false;
     u64 pinned;
     bool perftMode;
     int listId;
@@ -540,7 +541,8 @@ protected:
     void unPerformCastle(const int side, const uchar type);
 
     void tryAllCastle(const int side, const u64 allpieces);
-
+    void tryAllCastle960(const int side, const u64 allpieces);
+    void tryAllCastleStandard(const int side, const u64 allpieces);
 
     template<uchar type>
     bool pushmove(const int from, const int to, const int side, const int promotionPiece, const int pieceFrom) {

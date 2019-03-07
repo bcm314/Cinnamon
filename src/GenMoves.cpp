@@ -251,6 +251,14 @@ int GenMoves::getMobilityCastle(const int side, const u64 allpieces) const {
 
 void GenMoves::tryAllCastle(const int side, const u64 allpieces) {
     ASSERT_RANGE(side, 0, 1);
+    if (chess960)tryAllCastle960(side, allpieces); else
+        tryAllCastleStandard(side, allpieces);
+}
+
+void GenMoves::tryAllCastle960(const int side, const u64 allpieces) {
+ASSERT(0);
+}
+void GenMoves::tryAllCastleStandard(const int side, const u64 allpieces) {
     if (side == WHITE) {
         if (POW2_3 & chessboard[KING_WHITE] && !(allpieces & 0x6ULL) &&
             chessboard[RIGHT_CASTLE_IDX] & RIGHT_KING_CASTLE_WHITE_MASK && chessboard[ROOK_WHITE] & POW2_0 &&
@@ -277,6 +285,7 @@ void GenMoves::tryAllCastle(const int side, const u64 allpieces) {
         }
     }
 }
+
 
 bool GenMoves::performKnightShiftCapture(const int piece, const u64 enemies, const int side) {
     ASSERT_RANGE(piece, 0, 11);

@@ -64,7 +64,12 @@ class Perft: public Thread<Perft>, public ThreadPool<PerftThread>, public Single
 
 public:
 
-    void setParam(const string &fen1, int depth1, const int nCpu2, const int mbSize1, const string &dumpFile1);
+    void setParam(const string &fen1,
+                  int depth1,
+                  const int nCpu2,
+                  const int mbSize1,
+                  const string &dumpFile1,
+                  const bool chess960);
 
     ~Perft();
 
@@ -88,6 +93,7 @@ private:
     string fen;
     string dumpFile;
     u64 mbSize;
+    bool chess960;
 
     void alloc();
 

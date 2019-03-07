@@ -40,10 +40,13 @@ private:
         string fen;
         int perftHashSize = 0;
         string dumpFile;
+        bool chess960 = false;
         int opt;
         string iniFile;
-        while ((opt = getopt(argc, argv, "d:f:h:f:c:F:")) != -1) {
-            if (opt == 'd') {    //depth
+        while ((opt = getopt(argc, argv, "d:f:h:f:c:F:9:")) != -1) {
+            if (opt == '9') {    //chess960
+                if (atoi(optarg) == 60)chess960 = true;
+            } else if (opt == 'd') {    //depth
                 perftDepth = atoi(optarg);
             } else if (opt == 'F') { //use dump
                 dumpFile = optarg;
@@ -60,7 +63,7 @@ private:
             }
 
         }
-        Uci(fen, perftDepth, nCpu, perftHashSize, dumpFile);
+        Uci(fen, perftDepth, nCpu, perftHashSize, dumpFile, chess960);
 
     }
 

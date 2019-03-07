@@ -23,13 +23,15 @@ Spinlock PerftThread::spinlockPrint;
 
 PerftThread::PerftThread() { perftMode = true; }
 
-void PerftThread::setParam(const string &fen1, const int from1, const int to1, _TPerftRes *perft1) {
+void PerftThread::setParam(const string &fen1, const int from1, const int to1, _TPerftRes *perft1, const bool is960) {
 
     loadFen(fen1);
     this->tPerftRes = perft1;
     this->from = from1;
     this->to = to1;
+    chess960 = is960;
 }
+
 
 unsigned PerftThread::perft(const string &fen, const int depth) {
     loadFen(fen);
@@ -203,3 +205,5 @@ PerftThread::~PerftThread() {
 u64 PerftThread::getPartial() {
     return partialTot;
 }
+
+

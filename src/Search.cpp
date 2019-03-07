@@ -130,6 +130,10 @@ void Search::setNullMove(bool b) {
     nullSearch = !b;
 }
 
+void Search::setChess960(bool b) {
+    chess960 = b;
+}
+
 void Search::startClock() {
     startTime = std::chrono::high_resolution_clock::now();
 }

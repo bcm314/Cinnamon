@@ -36,5 +36,6 @@ typedef struct {
     u64 sizeAtDepth[255];
     int depth;
     int nCpu;
+    bool chess960;
 } _TPerftRes;
 

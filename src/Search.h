@@ -49,7 +49,7 @@ public:
     void setPonder(bool);
 
     void setNullMove(bool);
-
+    void setChess960(bool b);
     void setMaxTimeMillsec(int);
 
     bool setParameter(String param, int value);
@@ -148,6 +148,7 @@ private:
 
     int maxTimeMillsec = 5000;
     bool nullSearch;
+
     static high_resolution_clock::time_point startTime;
 
     bool checkDraw(u64);
