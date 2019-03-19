@@ -92,11 +92,12 @@ pair<short, short>  Eval::evaluatePawn() {
         ADD(SCORE_DEBUG[MG].ENEMIES_PAWNS_ALL[side], -ENEMIES_PAWNS_ALL);
     }
 
-
 // 5. space
 
-    result_mg += PAWN_CENTER * bitCount(ped_friends & CENTER_MASK);
-    ADD(SCORE_DEBUG[MG].PAWN_CENTER[side], PAWN_CENTER * bitCount(ped_friends & CENTER_MASK));
+    result_mg += PAWN_CENTER[MG] * bitCount(ped_friends & CENTER_MASK);
+    result_eg += PAWN_CENTER[EG] * bitCount(ped_friends & CENTER_MASK);
+    ADD(SCORE_DEBUG[MG].PAWN_CENTER[side], PAWN_CENTER[MG] * bitCount(ped_friends & CENTER_MASK));
+    ADD(SCORE_DEBUG[EG].PAWN_CENTER[side], PAWN_CENTER[EG] * bitCount(ped_friends & CENTER_MASK));
 
     // 6. pinned
 //    if (phase == END) {
@@ -105,11 +106,15 @@ pair<short, short>  Eval::evaluatePawn() {
 
 
     // 7.
-    structureEval.kingSecurity[side] +=
-        FRIEND_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side]] & ped_friends);
+    structureEval.kingSecurity[MG][side] +=
+        FRIEND_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & ped_friends);
+    structureEval.kingSecurity[EG][side] +=
+        FRIEND_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & ped_friends);
 
-    structureEval.kingSecurity[side] -=
-        ENEMY_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & ped_friends);
+    structureEval.kingSecurity[MG][side] -=
+        ENEMY_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & ped_friends);
+    structureEval.kingSecurity[EG][side] -=
+        ENEMY_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & ped_friends);
 
     // 8.  pawn in 8th
     const u64 pawnsIn7 = PAWNS_7_2[side] & ped_friends;
@@ -130,7 +135,8 @@ pair<short, short>  Eval::evaluatePawn() {
         // 4. attack king
         if (structureEval.posKingBit[xside] & PAWN_FORK_MASK[side][o]) {
             structureEval.kingAttackers[xside] |= pos;
-            result_eg_mg += ATTACK_KING;
+            result_mg += ATTACK_KING[MG];
+            result_eg += ATTACK_KING[EG];
         }
 
         /// blocked
@@ -150,9 +156,10 @@ pair<short, short>  Eval::evaluatePawn() {
         }
         /// isolated
         if (!(ped_friends & PAWN_ISOLATED_MASK[o])) {
-            result_eg_mg -= PAWN_ISOLATED;
-            ADD(SCORE_DEBUG[EG].PAWN_ISOLATED[side], -PAWN_ISOLATED);
-            ADD(SCORE_DEBUG[MG].PAWN_ISOLATED[side], -PAWN_ISOLATED);
+            result_mg -= PAWN_ISOLATED[MG];
+            result_eg -= PAWN_ISOLATED[EG];
+            ADD(SCORE_DEBUG[EG].PAWN_ISOLATED[side], -PAWN_ISOLATED[EG]);
+            ADD(SCORE_DEBUG[MG].PAWN_ISOLATED[side], -PAWN_ISOLATED[MG]);
             isolated = true;
         }
         /// doubled
@@ -169,9 +176,10 @@ pair<short, short>  Eval::evaluatePawn() {
         }
         /// backward
         if (!(ped_friends & PAWN_BACKWARD_MASK[side][o])) {
-            ADD(SCORE_DEBUG[EG].BACKWARD_PAWN[side], -BACKWARD_PAWN);
-            ADD(SCORE_DEBUG[MG].BACKWARD_PAWN[side], -BACKWARD_PAWN);
-            result_eg_mg -= BACKWARD_PAWN;
+            ADD(SCORE_DEBUG[EG].BACKWARD_PAWN[side], -BACKWARD_PAWN[EG]);
+            ADD(SCORE_DEBUG[MG].BACKWARD_PAWN[side], -BACKWARD_PAWN[MG]);
+            result_eg -= BACKWARD_PAWN[EG];
+            result_mg -= BACKWARD_PAWN[MG];
         }
         /// passed
         if (!(chessboard[xside] & PAWN_PASSED_MASK[side][o])) {
@@ -223,10 +231,11 @@ pair<short, short>  Eval::evaluateBishop(const u64 enemies) {
     }
 
     // 3. *king security*
-    structureEval.kingSecurity[side] -=
-        ENEMY_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side ^ 1]] & bishop);
-    ADD(SCORE_DEBUG[EG].KING_SECURITY_BISHOP[side],
-        -ENEMY_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side ^ 1]] & bishop));
+    const auto near = bitCount(NEAR_MASK2[structureEval.posKing[side ^ 1]] & bishop);
+    structureEval.kingSecurity[MG][side] -= ENEMY_NEAR_KING[MG] * near;
+    structureEval.kingSecurity[EG][side] -= ENEMY_NEAR_KING[EG] * near;
+    ADD(SCORE_DEBUG[EG].KING_SECURITY_BISHOP[side], -ENEMY_NEAR_KING[EG] * near);
+    ADD(SCORE_DEBUG[MG].KING_SECURITY_BISHOP[side], -ENEMY_NEAR_KING[MG] * near);
 
     // 4. undevelop
     result_mg -= UNDEVELOPED_BISHOP * bitCount(BISHOP_HOME[side] & bishop);
@@ -299,15 +308,24 @@ pair<short, short>  Eval::evaluateQueen(const u64 enemies) {
     int result_mg = 0;
 
     // 2. *king security*
-    structureEval.kingSecurity[side] +=
-        FRIEND_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side]] & queen);
+    structureEval.kingSecurity[MG][side] +=
+        FRIEND_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & queen);
+    structureEval.kingSecurity[EG][side] +=
+        FRIEND_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & queen);
     ADD(SCORE_DEBUG[EG].KING_SECURITY_QUEEN[side],
-        FRIEND_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side]] & queen));
+        FRIEND_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & queen));
+    ADD(SCORE_DEBUG[MG].KING_SECURITY_QUEEN[side],
+        FRIEND_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & queen));
 
-    structureEval.kingSecurity[side] -=
-        ENEMY_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side ^ 1]] & queen);
+    structureEval.kingSecurity[EG][side] -=
+        ENEMY_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[side ^ 1]] & queen);
+    structureEval.kingSecurity[MG][side] -=
+        ENEMY_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[side ^ 1]] & queen);
+
     ADD(SCORE_DEBUG[EG].KING_SECURITY_QUEEN[side ^ 1],
-        -ENEMY_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side ^ 1]] & queen));
+        -ENEMY_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[side ^ 1]] & queen));
+    ADD(SCORE_DEBUG[MG].KING_SECURITY_QUEEN[side ^ 1],
+        -ENEMY_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[side ^ 1]] & queen));
 
     for (; queen; RESET_LSB(queen)) {
         const int o = BITScanForward(queen);
@@ -418,15 +436,24 @@ pair<short, short>  Eval::evaluateKnight(const u64 enemiesPawns, const u64 notMy
     }
 
     // 4. king security
-    structureEval.kingSecurity[side] +=
-        FRIEND_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side]] & knight);
+    structureEval.kingSecurity[EG][side] +=
+        FRIEND_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & knight);
+    structureEval.kingSecurity[MG][side] +=
+        FRIEND_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & knight);
     ADD(SCORE_DEBUG[EG].KING_SECURITY_KNIGHT[side],
-        FRIEND_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side]] & knight));
+        FRIEND_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & knight));
+    ADD(SCORE_DEBUG[MG].KING_SECURITY_KNIGHT[side],
+        FRIEND_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & knight));
 
-    structureEval.kingSecurity[side] -=
-        ENEMY_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & knight);
+    structureEval.kingSecurity[EG][side] -=
+        ENEMY_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & knight);
+    structureEval.kingSecurity[MG][side] -=
+        ENEMY_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & knight);
+
     ADD(SCORE_DEBUG[EG].KING_SECURITY_KNIGHT[xside],
-        -ENEMY_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & knight));
+        -ENEMY_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & knight));
+    ADD(SCORE_DEBUG[MG].KING_SECURITY_KNIGHT[xside],
+        -ENEMY_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & knight));
 
     for (; knight; RESET_LSB(knight)) {
         const int pos = BITScanForward(knight);
@@ -491,15 +518,23 @@ pair<short, short>  Eval::evaluateRook(const u64 king, const u64 enemies, const 
 //    }
 
     // 4. king security
-    structureEval.kingSecurity[side] +=
-        FRIEND_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side]] & rook);
+    structureEval.kingSecurity[EG][side] +=
+        FRIEND_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & rook);
+    structureEval.kingSecurity[MG][side] +=
+        FRIEND_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & rook);
     ADD(SCORE_DEBUG[EG].KING_SECURITY_ROOK[side],
-        FRIEND_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[side]] & rook));
+        FRIEND_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & rook));
+    ADD(SCORE_DEBUG[MG].KING_SECURITY_ROOK[side],
+        FRIEND_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[side]] & rook));
 
-    structureEval.kingSecurity[side] -=
-        ENEMY_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & rook);
+    structureEval.kingSecurity[EG][side] -=
+        ENEMY_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & rook);
+    structureEval.kingSecurity[MG][side] -=
+        ENEMY_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & rook);
     ADD(SCORE_DEBUG[EG].KING_SECURITY_ROOK[xside],
-        -ENEMY_NEAR_KING * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & rook));
+        -ENEMY_NEAR_KING[EG] * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & rook));
+    ADD(SCORE_DEBUG[MG].KING_SECURITY_ROOK[xside],
+        -ENEMY_NEAR_KING[MG] * bitCount(NEAR_MASK2[structureEval.posKing[xside]] & rook));
 
     // .6
     if (((F1G1bit[side] & king) && (H1H2G1bit[side] & rook)) || ((C1B1bit[side] & king) && (A1A2B1bit[side] & rook))) {
@@ -587,9 +622,10 @@ pair<short, short>  Eval::evaluateKing(int side, u64 squares) {
         ADD(SCORE_DEBUG[MG].PAWN_NEAR_KING[side], -PAWN_NEAR_KING);
         result_eg_mg -= PAWN_NEAR_KING;
     }
-    result_eg += structureEval.kingSecurity[side];
-    result_eg += result_eg_mg;
-    result_mg += result_eg_mg;
+
+    result_eg += result_eg_mg + structureEval.kingSecurity[EG][side];
+    result_mg += result_eg_mg + structureEval.kingSecurity[MG][side];
+
     return pair<short, short>(result_mg, result_eg);
 }
 
@@ -666,23 +702,25 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
     const short mobB = getMobilityCastle(BLACK, structureEval.allPieces);
     const int mobBlack_mg = MOB_CASTLE[MG][mobB];
     const int mobBlack_eg = MOB_CASTLE[EG][mobB];
-    const int attack_king_white = ATTACK_KING * bitCount(structureEval.kingAttackers[BLACK]);
-    const int attack_king_black = ATTACK_KING * bitCount(structureEval.kingAttackers[WHITE]);
+    const int attack_king_white_mg = ATTACK_KING[MG] * bitCount(structureEval.kingAttackers[BLACK]);
+    const int attack_king_white_eg = ATTACK_KING[EG] * bitCount(structureEval.kingAttackers[BLACK]);
+    const int attack_king_black_mg = ATTACK_KING[MG] * bitCount(structureEval.kingAttackers[WHITE]);
+    const int attack_king_black_eg = ATTACK_KING[EG] * bitCount(structureEval.kingAttackers[WHITE]);
 
-    const int result_mg = (mobBlack_mg + attack_king_black + lazyscore_black + tresult[MG].pawns[BLACK] +
+    const int result_mg = (mobBlack_mg + attack_king_black_mg + lazyscore_black + tresult[MG].pawns[BLACK] +
         tresult[MG].knights[BLACK] + tresult[MG].bishop[BLACK] + tresult[MG].rooks[BLACK] + tresult[MG].queens[BLACK] +
         tresult[MG].kings[BLACK]) -
-        (mobWhite_mg + attack_king_white + lazyscore_white + tresult[MG].pawns[WHITE] +
+        (mobWhite_mg + attack_king_white_mg + lazyscore_white + tresult[MG].pawns[WHITE] +
             tresult[MG].knights[WHITE] + tresult[MG].bishop[WHITE] + tresult[MG].rooks[WHITE]
             + tresult[MG].queens[WHITE] +
             tresult[MG].kings[WHITE]);
 
     const int result_eg =
-        (mobBlack_eg + attack_king_black + bonus_attack_king_blackEG + lazyscore_black + tresult[EG].pawns[BLACK] +
+        (mobBlack_eg + attack_king_black_eg + bonus_attack_king_blackEG + lazyscore_black + tresult[EG].pawns[BLACK] +
             tresult[EG].knights[BLACK] + tresult[EG].bishop[BLACK] + tresult[EG].rooks[BLACK]
             + tresult[EG].queens[BLACK] +
             tresult[EG].kings[BLACK]) -
-            (mobWhite_eg + attack_king_white + bonus_attack_king_whiteEG + lazyscore_white + tresult[EG].pawns[WHITE] +
+            (mobWhite_eg + attack_king_white_eg + bonus_attack_king_whiteEG + lazyscore_white + tresult[EG].pawns[WHITE] +
                 tresult[EG].knights[WHITE] + tresult[EG].bishop[WHITE] + tresult[EG].rooks[WHITE]
                 + tresult[EG].queens[WHITE] +
                 tresult[EG].kings[WHITE]);

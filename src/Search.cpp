@@ -939,10 +939,6 @@ bool Search::setParameter(String param, int value) {
         EXT_FUTILY_MARGIN = value;
     } else if (param == "RAZOR_MARGIN") {
         RAZOR_MARGIN = value;
-    } else if (param == "ATTACK_KING") {
-        ATTACK_KING = value;
-    } else if (param == "BACKWARD_PAWN") {
-        BACKWARD_PAWN = value;
     } else if (param == "BISHOP_ON_QUEEN") {
         BISHOP_ON_QUEEN = value;
     } else if (param == "NO_PAWNS") {
@@ -957,10 +953,6 @@ bool Search::setParameter(String param, int value) {
         DOUBLED_PAWNS = value;
     } else if (param == "END_OPENING") {
         END_OPENING = value;
-    } else if (param == "ENEMY_NEAR_KING") {
-        ENEMY_NEAR_KING = value;
-    } else if (param == "FRIEND_NEAR_KING") {
-        FRIEND_NEAR_KING = value;
     } else if (param == "HALF_OPEN_FILE_Q") {
         HALF_OPEN_FILE_Q = value;
     } else if (param == "KNIGHT_TRAPPED") {
@@ -971,12 +963,8 @@ bool Search::setParameter(String param, int value) {
         OPEN_FILE_Q = value;
     } else if (param == "PAWN_IN_7TH") {
         PAWN_IN_7TH = value;
-    } else if (param == "PAWN_CENTER") {
-        PAWN_CENTER = value;
     } else if (param == "PAWN_IN_8TH") {
         PAWN_IN_8TH = value;
-    } else if (param == "PAWN_ISOLATED") {
-        PAWN_ISOLATED = value;
     } else if (param == "PAWN_NEAR_KING") {
         PAWN_NEAR_KING = value;
     } else if (param == "PAWN_BLOCKED") {
