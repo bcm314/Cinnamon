@@ -245,7 +245,7 @@ private:
             res[EG].kings[WHITE] = x2.second;
         }
     }
-    static constexpr int MAX_VALUE_TAPERED = VALUEROOK * 2 + VALUEBISHOP * 2 + VALUEKNIGHT * 2 + VALUEQUEEN;
+
     template<int side>
     void openFile();
 
