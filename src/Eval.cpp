@@ -695,13 +695,10 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
     const int result_eg =
         (mobBlack_eg + attack_king_black_eg + bonus_attack_king_blackEG + lazyscore_black + tresult[EG].pawns[BLACK] +
             tresult[EG].knights[BLACK] + tresult[EG].bishop[BLACK] + tresult[EG].rooks[BLACK]
-            + tresult[EG].queens[BLACK] +
-            tresult[EG].kings[BLACK]) -
+            + tresult[EG].queens[BLACK] + tresult[EG].kings[BLACK]) -
             (mobWhite_eg + attack_king_white_eg + bonus_attack_king_whiteEG + lazyscore_white + tresult[EG].pawns[WHITE]
-                +
-                    tresult[EG].knights[WHITE] + tresult[EG].bishop[WHITE] + tresult[EG].rooks[WHITE]
-                + tresult[EG].queens[WHITE] +
-                tresult[EG].kings[WHITE]);
+                + tresult[EG].knights[WHITE] + tresult[EG].bishop[WHITE] + tresult[EG].rooks[WHITE]
+                + tresult[EG].queens[WHITE] + tresult[EG].kings[WHITE]);
 
     const double percMG = ((double) (lazyscore_white + lazyscore_black) / MAX_VALUE_TAPERED);
 
