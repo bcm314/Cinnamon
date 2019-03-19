@@ -703,8 +703,10 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
                 + tresult[EG].queens[WHITE] +
                 tresult[EG].kings[WHITE]);
 
-    const short percMG = ((lazyscore_white + lazyscore_black) / MAX_VALUE_TAPERED);
-    const short score = (percMG * result_mg) + ((1 - percMG) * result_eg);
+    const double percMG = ((double) (lazyscore_white + lazyscore_black) / MAX_VALUE_TAPERED);
+
+    const short score = (percMG * (double) result_mg) + ((1.0 - percMG) * (double) result_eg); //round
+
     ASSERT(percMG >= 0 && percMG <= 1);
     storeHashValue(key, score);
     const auto finalScore = side ? -(score - 5) : score + 5;

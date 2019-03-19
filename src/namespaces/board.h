@@ -60,7 +60,7 @@ namespace _board {
     static constexpr int VALUEKNIGHT = 330;
     static constexpr int VALUEQUEEN = 980;
     static constexpr int VALUEKING = _INFINITE;
-    static constexpr int
+    static constexpr double
         MAX_VALUE_TAPERED = 2 * (VALUEROOK * 2 + VALUEBISHOP * 2 + VALUEKNIGHT * 2 + VALUEQUEEN + VALUEPAWN * 8);
     static constexpr array<int, 13> PIECES_VALUE =
         {VALUEPAWN, VALUEPAWN, VALUEROOK, VALUEROOK, VALUEBISHOP, VALUEBISHOP, VALUEKNIGHT, VALUEKNIGHT, VALUEKING,
