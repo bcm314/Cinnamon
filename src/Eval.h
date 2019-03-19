@@ -97,6 +97,7 @@ protected:
 
         int ATTACK_KING_PAWN[2];
         int PAWN_CENTER[2];
+        int BISHOP_PAWN_ON_SAME_COLOR[2];
         int PAWN_7H[2];
         int PAWN_IN_8TH[2];
         int PAWN_BLOCKED[2];
@@ -136,7 +137,7 @@ protected:
         int ROOK_OPEN_FILE[2];
         int CONNECTED_ROOKS[2];
     } _TSCORE_DEBUG;
-    _TSCORE_DEBUG SCORE_DEBUG;
+    _TSCORE_DEBUG SCORE_DEBUG[2];
 #endif
 
 private:
@@ -144,16 +145,14 @@ private:
     static constexpr u64 keyMask = 0xffffffffffff0000ULL;
     static constexpr u64 valueMask = 0xffffULL;
     static constexpr short noHashValue = (short) 0xffff;
+    static constexpr int EG = 0;
+    static constexpr int MG = 1;
 
     static u64 *evalHash;
 
     inline void storeHashValue(const u64 key, const short value);
 
     inline short getHashValue(const u64 key) const;
-
-    enum _Tphase {
-        OPEN, MIDDLE, END
-    };
 
     typedef struct {
         int pawns[2];
@@ -166,61 +165,106 @@ private:
 
 #ifdef DEBUG_MODE
     int evaluationCount[2];
+    void p() {
+        cout << "|\t      \t      \t|";
+    }
+    void p(double d1, double d2) {
+        std::cout << std::fixed;
+        std::cout << std::setprecision(2);
+        std::cout << "\t";
+        std::cout << d1 / 100.0;
+        std::cout << "\t";
+        std::cout << d2 / 100.0;
+        std::cout << "\t|";
+    }
 #endif
 
-    template<_Tphase phase>
-    void getRes(_Tresult &res) {
+    void getScores(_Tresult res[2]) {
+        {
+            const auto x1 = evaluatePawn<BLACK>();
+            res[MG].pawns[BLACK] = x1.first;
+            res[EG].pawns[BLACK] = x1.second;
 
-        BENCH(pawnTime.start());
-        res.pawns[BLACK] = evaluatePawn<BLACK, phase>();
-        res.pawns[WHITE] = evaluatePawn<WHITE, phase>();
-        BENCH(pawnTime.stop());
+            const auto x2 = evaluatePawn<WHITE>();
+            res[MG].pawns[WHITE] = x2.first;
+            res[EG].pawns[WHITE] = x2.second;
+        }
 
-        BENCH(bishopTime.start());
-        res.bishop[BLACK] = evaluateBishop<BLACK, phase>(structureEval.allPiecesSide[WHITE]);
-        res.bishop[WHITE] = evaluateBishop<WHITE, phase>(structureEval.allPiecesSide[BLACK]);
-        BENCH(bishopTime.stop());
+        {
+            const auto x1 = evaluateBishop<BLACK>(structureEval.allPiecesSide[WHITE]);
+            res[MG].bishop[BLACK] = x1.first;
+            res[EG].bishop[BLACK] = x1.second;
 
-        BENCH(queenTime.start());
-        res.queens[BLACK] = evaluateQueen<BLACK, phase>(structureEval.allPiecesSide[WHITE]);
-        res.queens[WHITE] = evaluateQueen<WHITE, phase>(structureEval.allPiecesSide[BLACK]);
-        BENCH(queenTime.stop());
-        BENCH(rookTime.start());
-        res.rooks[BLACK] = evaluateRook<BLACK, phase>(chessboard[KING_BLACK], structureEval.allPiecesSide[WHITE],
-                                                      structureEval.allPiecesSide[BLACK]);
-        res.rooks[WHITE] = evaluateRook<WHITE, phase>(chessboard[KING_WHITE], structureEval.allPiecesSide[BLACK],
-                                                      structureEval.allPiecesSide[WHITE]);
-        BENCH(rookTime.stop());
-        BENCH(knightTime.start());
-        res.knights[BLACK] = evaluateKnight<BLACK, phase>(chessboard[WHITE], ~structureEval.allPiecesSide[BLACK]);
-        res.knights[WHITE] = evaluateKnight<WHITE, phase>(chessboard[BLACK], ~structureEval.allPiecesSide[WHITE]);
-        BENCH(knightTime.stop());
-        BENCH(kingTime.start());
-        res.kings[BLACK] = evaluateKing<phase>(BLACK, ~structureEval.allPiecesSide[BLACK]);
-        res.kings[WHITE] = evaluateKing<phase>(WHITE, ~structureEval.allPiecesSide[WHITE]);
-        BENCH(kingTime.stop());
+            const auto x2 = evaluateBishop<WHITE>(structureEval.allPiecesSide[BLACK]);
+            res[MG].bishop[WHITE] = x2.first;
+            res[EG].bishop[WHITE] = x2.second;
+        }
+
+        {
+            const auto x1 = evaluateQueen<BLACK>(structureEval.allPiecesSide[WHITE]);
+            res[MG].queens[BLACK] = x1.first;
+            res[EG].queens[BLACK] = x1.second;
+
+            const auto x2 = evaluateQueen<WHITE>(structureEval.allPiecesSide[BLACK]);
+            res[MG].queens[WHITE] = x2.first;
+            res[EG].queens[WHITE] = x2.second;
+        }
+
+        {
+            const auto x1 = evaluateRook<BLACK>(chessboard[KING_BLACK],
+                                                structureEval.allPiecesSide[WHITE],
+                                                structureEval.allPiecesSide[BLACK]);
+            res[MG].rooks[BLACK] = x1.first;
+            res[EG].rooks[BLACK] = x1.second;
+
+            const auto x2 = evaluateRook<WHITE>(chessboard[KING_WHITE],
+                                                structureEval.allPiecesSide[BLACK],
+                                                structureEval.allPiecesSide[WHITE]);
+            res[MG].rooks[WHITE] = x2.first;
+            res[EG].rooks[WHITE] = x2.second;
+        }
+
+        {
+            const auto x1 = evaluateKnight<BLACK>(chessboard[WHITE], ~structureEval.allPiecesSide[BLACK]);
+            res[MG].knights[BLACK] = x1.first;
+            res[EG].knights[BLACK] = x1.second;
+
+            const auto x2 = evaluateKnight<WHITE>(chessboard[BLACK], ~structureEval.allPiecesSide[WHITE]);
+            res[MG].knights[WHITE] = x2.first;
+            res[EG].knights[WHITE] = x2.second;
+
+        }
+
+        {
+            const auto x1 = evaluateKing(BLACK, ~structureEval.allPiecesSide[BLACK]);
+            res[MG].kings[BLACK] = x1.first;
+            res[EG].kings[BLACK] = x1.second;
+
+            const auto x2 = evaluateKing(WHITE, ~structureEval.allPiecesSide[WHITE]);
+            res[MG].kings[WHITE] = x2.first;
+            res[EG].kings[WHITE] = x2.second;
+        }
     }
-
+    static constexpr int MAX_VALUE_TAPERED = VALUEROOK * 2 + VALUEBISHOP * 2 + VALUEKNIGHT * 2 + VALUEQUEEN;
     template<int side>
     void openFile();
 
-    template<int side, _Tphase phase>
-    int evaluatePawn();
+    template<int side>
+    pair<short, short> evaluatePawn();
 
-    template<int side, _Tphase phase>
-    int evaluateBishop(const u64);
+    template<int side>
+    pair<short, short> evaluateBishop(const u64);
 
-    template<int side, Eval::_Tphase phase>
-    int evaluateQueen(const u64 enemies);
+    template<int side>
+    pair<short, short> evaluateQueen(const u64 enemies);
 
-    template<int side, _Tphase phase>
-    int evaluateKnight(const u64, const u64);
+    template<int side>
+    pair<short, short> evaluateKnight(const u64, const u64);
 
-    template<int side, Eval::_Tphase phase>
-    int evaluateRook(const u64, u64 enemies, u64 friends);
+    template<int side>
+    pair<short, short> evaluateRook(const u64, u64 enemies, u64 friends);
 
-    template<_Tphase phase>
-    int evaluateKing(int side, u64 squares);
+    pair<short, short> evaluateKing(int side, u64 squares);
 
     template<int side>
     int lazyEvalSide() {
@@ -275,11 +319,10 @@ namespace _eval {
          0, 0, 0, 0, 0, 0, 0, 0}
     };
     static constexpr int
-        MOB_QUEEN[3][29] = {{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                            {-10, -9, -5, 0, 3, 6, 7, 10, 11, 12, 15, 18, 28, 30, 32, 35, 40, 50, 51, 52, 53, 54, 55,
-                             56, 57, 58, 59, 60, 61},
-                            {-20, -15, -10, 0, 1, 3, 4, 9, 11, 12, 15, 18, 28, 30, 32, 33, 34, 36, 37, 39, 40, 41, 42,
-                             43, 44, 45, 56, 47, 48}};
+        MOB_QUEEN[2][29] = {
+        {-2, -2, -1, 0, 1, 2, 2, 3, 4, 5, 8, 8, 14, 15, 16, 17, 20, 25, 25, 26, 26, 26, 27, 28, 29, 30, 30, 30, 31},
+        {-20, -15, -10, 0, 1, 3, 4, 9, 11, 12, 15, 18, 28, 30, 32, 33, 34, 36, 37, 39, 40, 41, 42, 43, 44, 45, 56, 47,
+         48}};
 
     static constexpr int MOB_ROOK[3][15] = {{-1, 0, 1, 4, 5, 6, 7, 9, 12, 14, 19, 22, 23, 24, 25},
                                             {-9, -8, 1, 8, 9, 10, 15, 20, 28, 30, 40, 45, 50, 51, 52},
@@ -295,12 +338,11 @@ namespace _eval {
                                           35,
                                           40};
 
-    static constexpr int MOB_BISHOP[3][14] = {{-8, -7, 2, 8, 9, 10, 15, 20, 28, 30, 40, 45, 50, 50},
-                                              {-20, -10, -4, 0, 5, 10, 15, 20, 28, 30, 40, 45, 50, 50},
-                                              {-20, -10, -4, 0, 3, 8, 13, 18, 25, 30, 40, 45, 50, 50}};
+    static constexpr int MOB_BISHOP[2][14] = {
+        {-14, -8, -2, 0, 6, 10, 15, 20, 28, 30, 40, 45, 50, 50},
+        {-20, -10, -4, 0, 3, 8, 13, 18, 25, 30, 40, 45, 50, 50}};
 
-    static constexpr int MOB_KING[3][9] = {{1, 2, 2, 1, 0, 0, 0, 0, 0},
-                                           {-5, 0, 5, 5, 5, 0, 0, 0, 0},
+    static constexpr int MOB_KING[2][9] = {{0, 0, 5, 5, 5, 0, 0, 0, 0},
                                            {-50, -30, -10, 10, 25, 40, 50, 55, 60}};
 
     static constexpr int MOB_CASTLE[3][3] = {{-50, 30, 50},

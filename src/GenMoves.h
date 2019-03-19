@@ -345,6 +345,10 @@ protected:
         return getAttackers<side, true>(position, allpieces);
     }
 
+    template<int side>
+    u64 getAllAttackers(const int position, const u64 allpieces) const {
+        return getAttackers<side, false>(position, allpieces);
+    }
 //    template<int side>
 //    u64 getAllAttackers(const int position, const u64 allpieces) const {
 //        return getAttackers<side, false>(position, allpieces);
