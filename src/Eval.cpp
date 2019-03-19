@@ -951,7 +951,6 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
 //      cout << "|       mobility:                 " << setw(10) <<  (SCORE_DEBUG[MG].MOB_KING[WHITE]) / 100.0 << setw(10) <<  (SCORE_DEBUG[MG].MOB_KING[BLACK]) / 100.0 << "\n";
         cout << endl;
         cout << "\n|Total (white)..........   " << (double) (side ? finalScore / 100.0 : -finalScore / 100.0) << endl;
-        fflush(stdout);
     }
 #endif
 
