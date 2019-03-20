@@ -128,7 +128,7 @@ pair<short, short>  Eval::evaluatePawn() {
     for (u64 p = ped_friends; p; RESET_LSB(p)) {
         bool isolated = false;
         const int o = BITScanForward(p);
-        u64 pos = POW2[o];
+        const u64 pos = POW2[o];
 
         // 4. attack king
         if (structureEval.posKingBit[xside] & PAWN_FORK_MASK[side][o]) {
@@ -141,11 +141,9 @@ pair<short, short>  Eval::evaluatePawn() {
         result_eg_mg -= (!(PAWN_FORK_MASK[side][o] & structureEval.allPiecesSide[xside])) &&
             (structureEval.allPieces & (shiftForward<side, 8>(pos))) ? PAWN_BLOCKED : 0;
         ADD(SCORE_DEBUG[EG].PAWN_BLOCKED[side], (!(PAWN_FORK_MASK[side][o] & structureEval.allPiecesSide[xside])) &&
-            (structureEval.allPieces & (shiftForward<side, 8>(pos))) ? -PAWN_BLOCKED
-                                                                     : 0);
+            (structureEval.allPieces & (shiftForward<side, 8>(pos))) ? -PAWN_BLOCKED : 0);
         ADD(SCORE_DEBUG[MG].PAWN_BLOCKED[side], (!(PAWN_FORK_MASK[side][o] & structureEval.allPiecesSide[xside])) &&
-            (structureEval.allPieces & (shiftForward<side, 8>(pos))) ? -PAWN_BLOCKED
-                                                                     : 0);
+            (structureEval.allPieces & (shiftForward<side, 8>(pos))) ? -PAWN_BLOCKED : 0);
         /// unprotected
         if (!(ped_friends & PAWN_PROTECTED_MASK[side][o])) {
             result_eg_mg -= UNPROTECTED_PAWNS;
@@ -223,10 +221,8 @@ pair<short, short>  Eval::evaluateBishop(const u64 enemies) {
             BISHOP_PAWN_ON_SAME_COLOR * bitCount(chessboard[side] & ChessBoard::colors(BITScanForward(bishop)));
     } else {
         // 2.
-//        if (phase != OPEN && nBishop > 1) {
         result_eg += BONUS2BISHOP;
         ADD(SCORE_DEBUG[EG].BONUS2BISHOP[side], BONUS2BISHOP);
-//        }
     }
 
     // 3. *king security*
@@ -496,10 +492,8 @@ pair<short, short>  Eval::evaluateRook(const u64 king, const u64 enemies, const 
     int result_mg = 0;//20 * bitCount(structureEval.pinned[side] & x);
     constexpr int xside = side ^1;
     // 3. in 7th
-//    if (phase == MIDDLE) {
     result_mg += ROOK_7TH_RANK * bitCount(rook & RANK_1_7[side]);
     ADD(SCORE_DEBUG[MG].ROOK_7TH_RANK[side], ROOK_7TH_RANK * bitCount(rook & RANK_1_7[side]));
-//    }
 
     // 4. king security
     auto x = bitCount(NEAR_MASK2[structureEval.posKing[side]] & rook);
@@ -668,8 +662,8 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
     openFile<BLACK>();
 
 //    if (phase != OPEN) {
-    short bonus_attack_king_blackEG = BONUS_ATTACK_KING[bitCount(structureEval.kingAttackers[WHITE])];
-    short bonus_attack_king_whiteEG = BONUS_ATTACK_KING[bitCount(structureEval.kingAttackers[BLACK])];
+    const short bonus_attack_king_blackEG = BONUS_ATTACK_KING[bitCount(structureEval.kingAttackers[WHITE])];
+    const short bonus_attack_king_whiteEG = BONUS_ATTACK_KING[bitCount(structureEval.kingAttackers[BLACK])];
 //    }
     _Tresult tresult[2];
     getScores(tresult);
