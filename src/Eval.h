@@ -145,8 +145,8 @@ private:
     static constexpr u64 keyMask = 0xffffffffffff0000ULL;
     static constexpr u64 valueMask = 0xffffULL;
     static constexpr short noHashValue = (short) 0xffff;
-    static constexpr int EG = 0;
-    static constexpr int MG = 1;
+    static constexpr int EG = 1;
+    static constexpr int MG = 0;
 
     static u64 *evalHash;
 
