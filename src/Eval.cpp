@@ -633,10 +633,10 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
     }
 
 #ifdef DEBUG_MODE
-
     evaluationCount[WHITE] = evaluationCount[BLACK] = 0;
     memset(&SCORE_DEBUG, 0, sizeof(_TSCORE_DEBUG));
 #endif
+
     memset(structureEval.kingSecurity, 0, sizeof(structureEval.kingSecurity));
 
     structureEval.allPiecesNoPawns[BLACK] = getBitmapNoPawns<BLACK>();
@@ -646,8 +646,7 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
     structureEval.allPieces = structureEval.allPiecesSide[BLACK] | structureEval.allPiecesSide[WHITE];
     structureEval.posKing[BLACK] = (uchar) BITScanForward(chessboard[KING_BLACK]);
     structureEval.posKing[WHITE] = (uchar) BITScanForward(chessboard[KING_WHITE]);
-    structureEval.kingAttackers[WHITE] = getAllAttackers<WHITE>(structureEval.posKing[WHITE], structureEval.allPieces);
-    structureEval.kingAttackers[BLACK] = getAllAttackers<BLACK>(structureEval.posKing[BLACK], structureEval.allPieces);
+    structureEval.kingAttackers[WHITE] = structureEval.kingAttackers[BLACK] = 0;
 //    if (phase == END) {
 //
 //        structureEval.pinned[BLACK] = getPinned<BLACK>(structureEval.allPieces, structureEval.allPiecesSide[BLACK],
@@ -661,10 +660,9 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
     openFile<WHITE>();
     openFile<BLACK>();
 
-//    if (phase != OPEN) {
     const short bonus_attack_king_blackEG = BONUS_ATTACK_KING[bitCount(structureEval.kingAttackers[WHITE])];
     const short bonus_attack_king_whiteEG = BONUS_ATTACK_KING[bitCount(structureEval.kingAttackers[BLACK])];
-//    }
+
     _Tresult tresult[2];
     getScores(tresult);
 
