@@ -181,9 +181,10 @@ pair<short, short>  Eval::evaluatePawn() {
         }
         /// passed
         if (!(chessboard[xside] & PAWN_PASSED_MASK[side][o])) {
-            ADD(SCORE_DEBUG[EG].PAWN_PASSED[side], PAWN_PASSED[side][o]);
-            ADD(SCORE_DEBUG[MG].PAWN_PASSED[side], PAWN_PASSED[side][o]);
-            result_eg_mg += PAWN_PASSED[side][o];
+            ADD(SCORE_DEBUG[EG].PAWN_PASSED[side], PAWN_PASSED[EG][side][o]);
+            ADD(SCORE_DEBUG[MG].PAWN_PASSED[side], PAWN_PASSED[MG][side][o]);
+            result_eg += PAWN_PASSED[EG][side][o];
+            result_mg += PAWN_PASSED[MG][side][o];
         }
     }
     result_eg += result_eg_mg;
