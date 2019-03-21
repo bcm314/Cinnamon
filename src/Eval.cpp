@@ -204,9 +204,9 @@ int Eval::evaluateBishop(const u64 enemies) {
     // 1.
     if (!bishop) return 0;
     int result = 0;//20 * bitCount(structureEval.pinned[side] & x);
-    if (phase != OPEN) {
-        result = -20 * bitCount(structureEval.pinned[side] & bishop);
-    }
+//    if (phase != OPEN) {
+//        result = -20 * bitCount(structureEval.pinned[side] & bishop);
+//    }
     const int nBishop = bitCount(bishop);
 
     // 2.
@@ -294,8 +294,8 @@ int Eval::evaluateQueen(const u64 enemies) {
     INC(evaluationCount[side]);
     u64 queen = chessboard[QUEEN_BLACK + side];
     int result = 0;
-    if (phase != OPEN) {
-        result = (structureEval.pinned[side] & queen) ? -90 : 0;
+    if (phase == END) {
+        result = (structureEval.pinned[side] & queen) ? -150 : 0;
     }
     // 2. *king security*
     if (phase != OPEN) {
@@ -358,9 +358,9 @@ int Eval::evaluateKnight(const u64 enemiesPawns, const u64 notMyBits) {
 
     // 1. pinned
     int result = 0;
-    if (phase != OPEN) {
-        result = -20 * bitCount(structureEval.pinned[side] & knight);
-    }
+//    if (phase != OPEN) {
+//        result = -20 * bitCount(structureEval.pinned[side] & knight);
+//    }
     // 2. undevelop
     if (phase == OPEN) {
         result -= bitCount(knight & KNIGHT_HOME[side]) * UNDEVELOPED_KNIGHT;
@@ -467,9 +467,9 @@ int Eval::evaluateRook(const u64 king, const u64 enemies, const u64 friends) {
     const int nRooks = bitCount(rook);
     // 2.
     int result = 0;//20 * bitCount(structureEval.pinned[side] & x);
-    if (phase != OPEN) {
-        result = -70 * bitCount(structureEval.pinned[side] & rook);
-    }
+//    if (phase != OPEN) {
+//        result = -70 * bitCount(structureEval.pinned[side] & rook);
+//    }
     constexpr int xside = side ^1;
     // 3. in 7th
     if (phase == MIDDLE) {
@@ -632,8 +632,7 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
     structureEval.posKingBit[WHITE] = POW2[structureEval.posKing[WHITE]];
     structureEval.kingAttackers[WHITE] = structureEval.kingAttackers[BLACK] = 0;
 
-    if (phase != OPEN) {
-//    if (phase == END) {
+    if (phase == END) {
         structureEval.pinned[BLACK] = getPinned<BLACK>(structureEval.allPieces, structureEval.allPiecesSide[BLACK],
                                                        structureEval.posKing[BLACK]);
 //
