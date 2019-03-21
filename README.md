@@ -30,7 +30,7 @@ Features
 - Interruptible multithread Perft test  
 - 32/64 bit architectures  
 - Iterative deeping  
-- Killer heuristics  
+- History heuristics
 - Lazy evaluation  
 - Mvv/Lva  
 - Transposition Table  
