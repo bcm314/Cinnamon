@@ -87,9 +87,10 @@ pair<short, short>  Eval::evaluatePawn() {
     int result_mg = 0;
     constexpr int xside = side ^1;
     if (bitCount(chessboard[xside]) == 8) {
-        result_eg_mg -= ENEMIES_PAWNS_ALL;
-        ADD(SCORE_DEBUG[EG].ENEMIES_PAWNS_ALL[side], -ENEMIES_PAWNS_ALL);
-        ADD(SCORE_DEBUG[MG].ENEMIES_PAWNS_ALL[side], -ENEMIES_PAWNS_ALL);
+        result_mg -= ENEMIES_PAWNS_ALL[MG];
+        result_eg -= ENEMIES_PAWNS_ALL[EG];
+        ADD(SCORE_DEBUG[EG].ENEMIES_PAWNS_ALL[side], -ENEMIES_PAWNS_ALL[EG]);
+        ADD(SCORE_DEBUG[MG].ENEMIES_PAWNS_ALL[side], -ENEMIES_PAWNS_ALL[MG]);
     }
 
 // 5. space
@@ -122,7 +123,7 @@ pair<short, short>  Eval::evaluatePawn() {
     const u64 pawnsIn8 = (shiftForward<side, 8>(pawnsIn7) & (~structureEval.allPieces)) |
         (structureEval.allPiecesSide[xside] & (shiftForward<side, 7>(pawnsIn7) | shiftForward<side, 9>(pawnsIn7)));
 
-    result_eg += PAWN_IN_8TH * bitCount(pawnsIn8); //try to decrease PAWN_IN_8TH
+    result_eg += PAWN_IN_8TH * bitCount(pawnsIn8);
     ADD(SCORE_DEBUG[EG].PAWN_IN_8TH[side], PAWN_IN_8TH * (bitCount(pawnsIn8)));
 
     for (u64 p = ped_friends; p; RESET_LSB(p)) {
@@ -221,8 +222,10 @@ pair<short, short>  Eval::evaluateBishop(const u64 enemies) {
             BISHOP_PAWN_ON_SAME_COLOR * bitCount(chessboard[side] & ChessBoard::colors(BITScanForward(bishop)));
     } else {
         // 2.
-        result_eg += BONUS2BISHOP;
-        ADD(SCORE_DEBUG[EG].BONUS2BISHOP[side], BONUS2BISHOP);
+        result_mg += BONUS2BISHOP[MG];
+        result_eg += BONUS2BISHOP[EG];
+        ADD(SCORE_DEBUG[EG].BONUS2BISHOP[side], BONUS2BISHOP[EG]);
+        ADD(SCORE_DEBUG[MG].BONUS2BISHOP[side], BONUS2BISHOP[MG]);
     }
 
     // 3. *king security*
@@ -233,8 +236,10 @@ pair<short, short>  Eval::evaluateBishop(const u64 enemies) {
     ADD(SCORE_DEBUG[MG].KING_SECURITY_BISHOP[side], -ENEMY_NEAR_KING[MG] * near);
 
     // 4. undevelop
-    result_mg -= UNDEVELOPED_BISHOP * bitCount(BISHOP_HOME[side] & bishop);
-    ADD(SCORE_DEBUG[MG].UNDEVELOPED_BISHOP[side], UNDEVELOPED_BISHOP * bitCount(BISHOP_HOME[side] & bishop));
+    result_eg -= UNDEVELOPED_BISHOP[EG] * bitCount(BISHOP_HOME[side] & bishop);
+    result_mg -= UNDEVELOPED_BISHOP[MG] * bitCount(BISHOP_HOME[side] & bishop);
+    ADD(SCORE_DEBUG[EG].UNDEVELOPED_BISHOP[side], UNDEVELOPED_BISHOP[EG] * bitCount(BISHOP_HOME[side] & bishop));
+    ADD(SCORE_DEBUG[MG].UNDEVELOPED_BISHOP[side], UNDEVELOPED_BISHOP[MG] * bitCount(BISHOP_HOME[side] & bishop));
 
     for (; bishop; RESET_LSB(bishop)) {
         const int o = BITScanForward(bishop);
@@ -255,12 +260,16 @@ pair<short, short>  Eval::evaluateBishop(const u64 enemies) {
 
         // 6.
         if ((BIG_DIAGONAL & structureEval.allPieces) == POW2[o]) {
-            ADD(SCORE_DEBUG[EG].OPEN_DIAG_BISHOP[side], OPEN_FILE);
-            result_eg += OPEN_FILE;
+            ADD(SCORE_DEBUG[MG].OPEN_DIAG_BISHOP[side], OPEN_FILE[MG]);
+            ADD(SCORE_DEBUG[EG].OPEN_DIAG_BISHOP[side], OPEN_FILE[EG]);
+            result_mg += OPEN_FILE[MG];
+            result_eg += OPEN_FILE[EG];
         }
         if ((BIG_ANTIDIAGONAL & structureEval.allPieces) == POW2[o]) {
-            ADD(SCORE_DEBUG[EG].OPEN_DIAG_BISHOP[side], OPEN_FILE);
-            result_eg += OPEN_FILE;
+            ADD(SCORE_DEBUG[MG].OPEN_DIAG_BISHOP[side], OPEN_FILE[MG]);
+            ADD(SCORE_DEBUG[EG].OPEN_DIAG_BISHOP[side], OPEN_FILE[EG]);
+            result_mg += OPEN_FILE[MG];
+            result_eg += OPEN_FILE[EG];
         }
 
         // 7. outposts
@@ -270,10 +279,10 @@ pair<short, short>  Eval::evaluateBishop(const u64 enemies) {
         if (p && !(PAWN_FORK_MASK[side ^ 1][o] & chessboard[side ^ 1])) {
             //friend paws defends bishop
             if (PAWN_FORK_MASK[side ^ 1][o] & chessboard[side]) {
-                result_eg_mg += p;
+                result_eg += p;
                 if (!(chessboard[KNIGHT_BLACK + xside]) &&
                     !(chessboard[BISHOP_BLACK + xside] & ChessBoard::colors(o))) {
-                    result_eg_mg += p;
+                    result_eg += p;
                 }
             }
         }
@@ -323,8 +332,7 @@ pair<short, short>  Eval::evaluateQueen(const u64 enemies) {
         ADD(SCORE_DEBUG[EG].MOB_QUEEN[side], MOB_QUEEN[EG][bitCount(x)]);
         ADD(SCORE_DEBUG[MG].MOB_QUEEN[side], MOB_QUEEN[MG][bitCount(x)]);
 
-        if (x & structureEval.posKingBit[side ^ 1])
-            structureEval.kingAttackers[side ^ 1] |= POW2[o];
+        if (x & structureEval.posKingBit[side ^ 1]) structureEval.kingAttackers[side ^ 1] |= POW2[o];
         // 4. half open file
         if ((chessboard[side ^ 1] & FILE_[o])) {
             ADD(SCORE_DEBUG[EG].HALF_OPEN_FILE_Q[side], HALF_OPEN_FILE_Q);
@@ -341,9 +349,10 @@ pair<short, short>  Eval::evaluateQueen(const u64 enemies) {
 
         // 6. bishop on queen
         if (DIAGONAL_ANTIDIAGONAL[o] & chessboard[BISHOP_BLACK + side]) {
-            ADD(SCORE_DEBUG[EG].BISHOP_ON_QUEEN[side], BISHOP_ON_QUEEN);
-            ADD(SCORE_DEBUG[MG].BISHOP_ON_QUEEN[side], BISHOP_ON_QUEEN);
-            result_eg_mg += BISHOP_ON_QUEEN;
+            ADD(SCORE_DEBUG[EG].BISHOP_ON_QUEEN[side], BISHOP_ON_QUEEN[EG]);
+            ADD(SCORE_DEBUG[MG].BISHOP_ON_QUEEN[side], BISHOP_ON_QUEEN[MG]);
+            result_mg += BISHOP_ON_QUEEN[MG];
+            result_eg += BISHOP_ON_QUEEN[EG];
         }
     }
     result_eg += result_eg_mg;
@@ -380,45 +389,53 @@ pair<short, short>  Eval::evaluateKnight(const u64 enemiesPawns, const u64 notMy
     // 3. trapped
     if (side == WHITE) {
         if ((A7bit & knight) && (B7bit & enemiesPawns) && (C6A6bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result_eg_mg -= KNIGHT_TRAPPED;
+            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[EG]);
+            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[MG]);
+            result_eg -= KNIGHT_TRAPPED[EG];
+            result_mg -= KNIGHT_TRAPPED[MG];
         }
         if ((H7bit & knight) && (G7bit & enemiesPawns) && (F6H6bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result_eg_mg -= KNIGHT_TRAPPED;
+            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[EG]);
+            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[MG]);
+            result_eg -= KNIGHT_TRAPPED[EG];
+            result_mg -= KNIGHT_TRAPPED[MG];
         }
         if ((A8bit & knight) && (A7C7bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result_eg_mg -= KNIGHT_TRAPPED;
+            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[EG]);
+            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[MG]);
+            result_eg -= KNIGHT_TRAPPED[EG];
+            result_mg -= KNIGHT_TRAPPED[MG];
         }
         if ((H8bit & knight) && (H7G7bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result_eg_mg -= KNIGHT_TRAPPED;
+            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[EG]);
+            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[MG]);
+            result_eg -= KNIGHT_TRAPPED[EG];
+            result_mg -= KNIGHT_TRAPPED[MG];
         }
     } else {
         if ((A2bit & knight) && (B2bit & enemiesPawns) && (C3A3bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result_eg_mg -= KNIGHT_TRAPPED;
+            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[EG]);
+            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[MG]);
+            result_eg -= KNIGHT_TRAPPED[EG];
+            result_mg -= KNIGHT_TRAPPED[MG];
         }
         if ((H2bit & knight) && (G2bit & enemiesPawns) && (F3H3bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result_eg_mg -= KNIGHT_TRAPPED;
+            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[EG]);
+            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[MG]);
+            result_eg -= KNIGHT_TRAPPED[EG];
+            result_mg -= KNIGHT_TRAPPED[MG];
         }
         if ((A1bit & knight) && (A2C2bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result_eg_mg -= KNIGHT_TRAPPED;
+            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[EG]);
+            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[MG]);
+            result_eg -= KNIGHT_TRAPPED[EG];
+            result_mg -= KNIGHT_TRAPPED[MG];
         }
         if ((H1bit & knight) && (H2G2bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result_eg_mg -= KNIGHT_TRAPPED;
+            ADD(SCORE_DEBUG[EG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[EG]);
+            ADD(SCORE_DEBUG[MG].KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED[MG]);
+            result_eg -= KNIGHT_TRAPPED[EG];
+            result_mg -= KNIGHT_TRAPPED[MG];
         }
     }
 
@@ -441,10 +458,12 @@ pair<short, short>  Eval::evaluateKnight(const u64 enemiesPawns, const u64 notMy
         // 5. mobility
         ASSERT(bitCount(notMyBits & KNIGHT_MASK[pos]) < (int) (sizeof(MOB_KNIGHT) / sizeof(int)));
         const u64 mob = notMyBits & KNIGHT_MASK[pos];
-        result_eg_mg += MOB_KNIGHT[bitCount(mob)];
+        result_eg += MOB_KNIGHT[EG][bitCount(mob)];
+        result_mg += MOB_KNIGHT[MG][bitCount(mob)];
+        ADD(SCORE_DEBUG[EG].MOB_KNIGHT[side], MOB_KNIGHT[EG][bitCount(mob)]);
+        ADD(SCORE_DEBUG[MG].MOB_KNIGHT[side], MOB_KNIGHT[MG][bitCount(mob)]);
+
         if (mob & structureEval.posKingBit[xside]) structureEval.kingAttackers[xside] |= POW2[pos];
-        ADD(SCORE_DEBUG[EG].MOB_KNIGHT[side], MOB_KNIGHT[bitCount(mob)]);
-        ADD(SCORE_DEBUG[MG].MOB_KNIGHT[side], MOB_KNIGHT[bitCount(mob)]);
 
         // 6. outposts
         const auto p = KNIGHT_OUTPOST[side][pos];
@@ -453,10 +472,10 @@ pair<short, short>  Eval::evaluateKnight(const u64 enemiesPawns, const u64 notMy
         if (p && !(PAWN_FORK_MASK[xside][pos] & chessboard[xside])) {
             //friend paws defends knight
             if (PAWN_FORK_MASK[xside][pos] & chessboard[side]) {
-                result_eg_mg += p;
+                result_eg += p;
                 if (!(chessboard[KNIGHT_BLACK + xside]) &&
                     !(chessboard[BISHOP_BLACK + xside] & ChessBoard::colors(pos))) {
-                    result_eg_mg += p;
+                    result_eg += p;
                 }
             }
         }
@@ -509,9 +528,10 @@ pair<short, short>  Eval::evaluateRook(const u64 king, const u64 enemies, const 
 
     // .6
     if (((F1G1bit[side] & king) && (H1H2G1bit[side] & rook)) || ((C1B1bit[side] & king) && (A1A2B1bit[side] & rook))) {
-        ADD(SCORE_DEBUG[EG].ROOK_TRAPPED[side], -ROOK_TRAPPED);
-        ADD(SCORE_DEBUG[MG].ROOK_TRAPPED[side], -ROOK_TRAPPED);
-        result_eg_mg -= ROOK_TRAPPED;
+        ADD(SCORE_DEBUG[EG].ROOK_TRAPPED[side], -ROOK_TRAPPED[EG]);
+        ADD(SCORE_DEBUG[MG].ROOK_TRAPPED[side], -ROOK_TRAPPED[MG]);
+        result_eg -= ROOK_TRAPPED[EG];
+        result_mg -= ROOK_TRAPPED[MG];
     }
 
     // .7
@@ -519,9 +539,10 @@ pair<short, short>  Eval::evaluateRook(const u64 king, const u64 enemies, const 
         const int firstRook = BITScanForward(rook);
         const int secondRook = BITScanReverse(rook);
         if ((!(LINK_ROOKS[firstRook][secondRook] & structureEval.allPieces))) {
-            ADD(SCORE_DEBUG[EG].CONNECTED_ROOKS[side], CONNECTED_ROOKS);
-            ADD(SCORE_DEBUG[MG].CONNECTED_ROOKS[side], CONNECTED_ROOKS);
-            result_eg_mg += CONNECTED_ROOKS;
+            ADD(SCORE_DEBUG[EG].CONNECTED_ROOKS[side], CONNECTED_ROOKS[EG]);
+            ADD(SCORE_DEBUG[MG].CONNECTED_ROOKS[side], CONNECTED_ROOKS[MG]);
+            result_eg += CONNECTED_ROOKS[EG];
+            result_mg += CONNECTED_ROOKS[MG];
         }
     }
 
@@ -539,20 +560,24 @@ pair<short, short>  Eval::evaluateRook(const u64 king, const u64 enemies, const 
 
         // .8 Penalise if Rook is Blocked Horizontally
         if ((RANK_BOUND[o] & structureEval.allPieces) == RANK_BOUND[o]) {
-            ADD(SCORE_DEBUG[EG].ROOK_BLOCKED[side], -ROOK_BLOCKED);
-            result_eg -= ROOK_BLOCKED;
+            ADD(SCORE_DEBUG[EG].ROOK_BLOCKED[side], -ROOK_BLOCKED[EG]);
+            ADD(SCORE_DEBUG[EG].ROOK_BLOCKED[side], -ROOK_BLOCKED[MG]);
+            result_eg -= ROOK_BLOCKED[EG];
+            result_mg -= ROOK_BLOCKED[MG];
         }
 
         // .5
         if (!(chessboard[side] & FILE_[o])) {
-            ADD(SCORE_DEBUG[EG].ROOK_OPEN_FILE[side], OPEN_FILE);
-            ADD(SCORE_DEBUG[MG].ROOK_OPEN_FILE[side], OPEN_FILE);
-            result_eg_mg += OPEN_FILE;
+            ADD(SCORE_DEBUG[EG].ROOK_OPEN_FILE[side], OPEN_FILE[EG]);
+            ADD(SCORE_DEBUG[MG].ROOK_OPEN_FILE[side], OPEN_FILE[MG]);
+            result_eg += OPEN_FILE[EG];
+            result_mg += OPEN_FILE[MG];
         }
         if (!(chessboard[side ^ 1] & FILE_[o])) {
-            ADD(SCORE_DEBUG[EG].ROOK_OPEN_FILE[side], OPEN_FILE);
-            ADD(SCORE_DEBUG[MG].ROOK_OPEN_FILE[side], OPEN_FILE);
-            result_eg_mg += OPEN_FILE;
+            ADD(SCORE_DEBUG[EG].ROOK_OPEN_FILE[side], OPEN_FILE[EG]);
+            ADD(SCORE_DEBUG[MG].ROOK_OPEN_FILE[side], OPEN_FILE[MG]);
+            result_eg += OPEN_FILE[EG];
+            result_mg += OPEN_FILE[MG];
         }
     }
     result_eg += result_eg_mg;
@@ -566,6 +591,7 @@ pair<short, short>  Eval::evaluateKing(int side, u64 squares) {
     int result_eg = 0;
     int result_mg = 0;
     const uchar pos_king = structureEval.posKing[side];
+    ASSERT(pos_king < 64);
     ADD(SCORE_DEBUG[EG].DISTANCE_KING[side], DISTANCE_KING_ENDING[pos_king]);
     result_eg = DISTANCE_KING_ENDING[pos_king];
     ADD(SCORE_DEBUG[MG].DISTANCE_KING[side], DISTANCE_KING_OPENING[pos_king]);
@@ -586,13 +612,6 @@ pair<short, short>  Eval::evaluateKing(int side, u64 squares) {
             ADD(SCORE_DEBUG[EG].END_OPENING_KING[side], -END_OPENING);
             result_eg -= END_OPENING;
         }
-    }
-
-    ASSERT(pos_king < 64);
-    if (!(NEAR_MASK1[pos_king] & chessboard[side])) {
-        ADD(SCORE_DEBUG[EG].PAWN_NEAR_KING[side], -PAWN_NEAR_KING);
-        ADD(SCORE_DEBUG[MG].PAWN_NEAR_KING[side], -PAWN_NEAR_KING);
-        result_eg_mg -= PAWN_NEAR_KING;
     }
 
     result_eg += result_eg_mg + structureEval.kingSecurity[EG][side];
@@ -666,29 +685,27 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
     _Tresult tresult[2];
     getScores(tresult);
 
-    ASSERT(getMobilityCastle(WHITE, structureEval.allPieces) < (int) (sizeof(MOB_CASTLE[MG]) / sizeof(int)));
-    ASSERT(getMobilityCastle(BLACK, structureEval.allPieces) < (int) (sizeof(MOB_CASTLE[MG]) / sizeof(int)));
+    ASSERT(getMobilityCastle(BLACK, structureEval.allPieces) < (int) (sizeof(MOB_CASTLE) / sizeof(int)));
     const short mobW = getMobilityCastle(WHITE, structureEval.allPieces);
-    const int mobWhite_mg = MOB_CASTLE[MG][mobW];
-    const int mobWhite_eg = MOB_CASTLE[EG][mobW];
+
+    const int mobWhite_eg = MOB_CASTLE[mobW];
     const short mobB = getMobilityCastle(BLACK, structureEval.allPieces);
-    const int mobBlack_mg = MOB_CASTLE[MG][mobB];
-    const int mobBlack_eg = MOB_CASTLE[EG][mobB];
+
+    const int mobCastle_eg = MOB_CASTLE[mobB];
     const int attack_king_white_mg = ATTACK_KING[MG] * bitCount(structureEval.kingAttackers[BLACK]);
     const int attack_king_white_eg = ATTACK_KING[EG] * bitCount(structureEval.kingAttackers[BLACK]);
     const int attack_king_black_mg = ATTACK_KING[MG] * bitCount(structureEval.kingAttackers[WHITE]);
     const int attack_king_black_eg = ATTACK_KING[EG] * bitCount(structureEval.kingAttackers[WHITE]);
 
-    const int result_mg = (mobBlack_mg + attack_king_black_mg + lazyscore_black + tresult[MG].pawns[BLACK] +
+    const int result_mg = (attack_king_black_mg + lazyscore_black + tresult[MG].pawns[BLACK] +
         tresult[MG].knights[BLACK] + tresult[MG].bishop[BLACK] + tresult[MG].rooks[BLACK] + tresult[MG].queens[BLACK] +
         tresult[MG].kings[BLACK]) -
-        (mobWhite_mg + attack_king_white_mg + lazyscore_white + tresult[MG].pawns[WHITE] +
+        (attack_king_white_mg + lazyscore_white + tresult[MG].pawns[WHITE] +
             tresult[MG].knights[WHITE] + tresult[MG].bishop[WHITE] + tresult[MG].rooks[WHITE]
-            + tresult[MG].queens[WHITE] +
-            tresult[MG].kings[WHITE]);
+            + tresult[MG].queens[WHITE] + tresult[MG].kings[WHITE]);
 
     const int result_eg =
-        (mobBlack_eg + attack_king_black_eg + bonus_attack_king_blackEG + lazyscore_black + tresult[EG].pawns[BLACK] +
+        (mobCastle_eg + attack_king_black_eg + bonus_attack_king_blackEG + lazyscore_black + tresult[EG].pawns[BLACK] +
             tresult[EG].knights[BLACK] + tresult[EG].bishop[BLACK] + tresult[EG].rooks[BLACK]
             + tresult[EG].queens[BLACK] + tresult[EG].kings[BLACK]) -
             (mobWhite_eg + attack_king_white_eg + bonus_attack_king_whiteEG + lazyscore_white + tresult[EG].pawns[WHITE]
@@ -723,8 +740,8 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
 //        cout << HEADER;
         cout << "|Material:         " << setw(10) << (double) (lazyscore_white - lazyscore_black) / 100.0 << setw(15)
             << (double) (lazyscore_white) / 100.0 << setw(10) << (double) (lazyscore_black) / 100.0 << endl;
-        cout << "|Mobility:         " << setw(10) << (double) (mobWhite_mg - mobBlack_mg) / 100.0 << setw(15)
-            << (double) (mobWhite_mg) / 100.0 << setw(10) << (double) (mobBlack_mg) / 100.0 << endl;
+        cout << "|Mobility:         " << setw(10) << 0 << setw(15)
+            << (double) (mobWhite_eg) / 100.0 << setw(10) << (double) (mobCastle_eg) / 100.0 << endl;
         cout << "|Bonus attack king (EG):" << setw(5)
             << (double) (bonus_attack_king_whiteEG - bonus_attack_king_blackEG) / 100.0 << setw(15)
             << (double) (bonus_attack_king_whiteEG) / 100.0 << setw(10) << (double) (bonus_attack_king_blackEG) / 100.0

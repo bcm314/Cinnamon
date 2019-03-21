@@ -58,35 +58,34 @@ protected:
     STATIC_CONST int FUTIL_MARGIN = 154;
     STATIC_CONST int EXT_FUTILY_MARGIN = 392;
     STATIC_CONST int RAZOR_MARGIN = 1071;
-    STATIC_CONST int ATTACK_KING[2] = {3, 30};
-    STATIC_CONST int BISHOP_ON_QUEEN = 2;
-    STATIC_CONST int BACKWARD_PAWN[2] = {2, 4};
+    STATIC_CONST int ATTACK_KING[2] = {3, 35};
+    STATIC_CONST int BISHOP_ON_QUEEN[2] = {2, 8};
+    STATIC_CONST int BACKWARD_PAWN[2] = {1, 10};
     STATIC_CONST int NO_PAWNS = 15;
     STATIC_CONST int DOUBLED_ISOLATED_PAWNS = 14;
     STATIC_CONST int DOUBLED_PAWNS = 5;
-    STATIC_CONST int ENEMIES_PAWNS_ALL = 8;
+    STATIC_CONST int ENEMIES_PAWNS_ALL[2] = {8, 0};
     STATIC_CONST int PAWN_IN_7TH = 32;
     STATIC_CONST int PAWN_CENTER[2] = {15, 0};
-    STATIC_CONST int PAWN_IN_8TH = 114;
-    STATIC_CONST int PAWN_ISOLATED[2] = {5, 0};
-    STATIC_CONST int PAWN_NEAR_KING = 2;
+    STATIC_CONST int PAWN_IN_8TH = 100;
+    STATIC_CONST int PAWN_ISOLATED[2] = {6, 0};
     STATIC_CONST int PAWN_BLOCKED = 5;
-    STATIC_CONST int UNPROTECTED_PAWNS = 5;
+    STATIC_CONST int UNPROTECTED_PAWNS = 9;
     STATIC_CONST int ENEMY_NEAR_KING[2] = {1, 6};
     STATIC_CONST int FRIEND_NEAR_KING[2] = {1, 8};
     STATIC_CONST int HALF_OPEN_FILE_Q = 3;
-    STATIC_CONST int KNIGHT_TRAPPED = 5;
+    STATIC_CONST int KNIGHT_TRAPPED[2] = {2, 15};
     STATIC_CONST int END_OPENING = 6;
-    STATIC_CONST int BONUS2BISHOP = 18;
+    STATIC_CONST int BONUS2BISHOP[2] = {3, 18};
     STATIC_CONST int BISHOP_PAWN_ON_SAME_COLOR = 5;
-    STATIC_CONST int CONNECTED_ROOKS = 7;
-    STATIC_CONST int OPEN_FILE = 10;
+    STATIC_CONST int CONNECTED_ROOKS[2] = {0, 9};
+    STATIC_CONST int OPEN_FILE[2] = {4, 11};
     STATIC_CONST int OPEN_FILE_Q = 3;
     STATIC_CONST int ROOK_7TH_RANK = 10;
-    STATIC_CONST int ROOK_BLOCKED = 13;
-    STATIC_CONST int ROOK_TRAPPED = 6;
+    STATIC_CONST int ROOK_BLOCKED[2] = {1, 20};
+    STATIC_CONST int ROOK_TRAPPED[2] = {1, 16};
     STATIC_CONST int UNDEVELOPED_KNIGHT = 4;
-    STATIC_CONST int UNDEVELOPED_BISHOP = 4;
+    STATIC_CONST int UNDEVELOPED_BISHOP[2] = {4, 8};
 #ifdef DEBUG_MODE
     typedef struct {
         int BAD_BISHOP[2];
@@ -319,23 +318,24 @@ namespace _eval {
          0, 0, 0, 0, 0, 0, 0, 0}
     };
     static constexpr int
-        MOB_QUEEN[2][29] = {{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                            {-20, -15, -10, 0, 1, 3, 4, 9, 11, 12, 15, 18, 28, 30, 32, 33, 34, 36, 37, 39, 40, 41, 42,
-                             43, 44, 45, 56, 47, 48}};
+        MOB_QUEEN[2][29] = {{-1, 0, 1, 1, 2, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8},
+                            {-30, -28, -20, -10, -2, 3, 4, 9, 11, 11, 11, 12, 12, 13, 13, 14, 14, 16, 17, 19, 20, 21,
+                             22,
+                             23, 24, 25, 26, 27, 28}};
 
     static constexpr int MOB_ROOK[2][15] = {{-1, 0, 1, 4, 5, 6, 7, 9, 12, 14, 19, 22, 23, 24, 25},
                                             {-15, -10, -5, 0, 9, 11, 16, 22, 30, 32, 40, 45, 50, 51, 52}};
 
-    static constexpr int MOB_KNIGHT[9] = {-8, -4, 7, 10, 15, 20, 30, 35, 40};
+    static constexpr int MOB_KNIGHT[2][9] = {{-1, -1, 0, 1, 2, 3, 4, 5, 6}, {-18, -14, 0, 3, 10, 15, 18, 20, 30}};
 
-    static constexpr int MOB_BISHOP[2][14] = {{-8, -7, 2, 8, 9, 10, 15, 20, 28, 30, 40, 45, 50, 50},
-                                              {-20, -10, -4, 0, 3, 8, 13, 18, 25, 30, 40, 45, 50, 50}};
+    static constexpr int MOB_BISHOP[2][14] = {{-1, -1, 0, 1, 1, 4, 6, 10, 18, 20, 25, 26, 28, 30},
+                                              {-20, -19, -17, -5, 3, 10, 13, 18, 25, 30, 40, 45, 50, 50}};
 
-    static constexpr int MOB_KING[2][9] = {{1, 2, 2, 1, 0, 0, 0, 0, 0},
-                                           {-50, -30, -10, 10, 25, 40, 50, 55, 60}};
+    static constexpr int MOB_KING[2][9] = {{0, 1, 2, 3, 4, 5, 6, 7, 8},
+                                           {-10, 0, 10, 20, 20, 20, 25, 26, 27}};
 
-    static constexpr int MOB_CASTLE[2][3] = {{-50, 30, 50},
-                                             {0, 0, 0}};
+    static constexpr int MOB_CASTLE[3] = {-30, 20, 30};
+
 
     static constexpr int BONUS_ATTACK_KING[18] = {-1, 2, 8, 64, 128, 512, 512, 512, 512, 512, 512, 512, 512, 512, 512,
                                                   512, 512, 512};

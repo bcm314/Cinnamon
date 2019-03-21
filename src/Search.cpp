@@ -872,9 +872,9 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
                     recordHash(zobristKeyR, data);
                 }
                 if (depth < 31)
-                    setHistoryHeuristic(move->from, move->to, 1 << depth);
+                    setKillerHeuristic(move->from, move->to, 1 << depth);
                 else
-                    setHistoryHeuristic(move->from, move->to, 0x40000000);
+                    setKillerHeuristic(move->from, move->to, 0x40000000);
                 return score;
             }
             alpha = score;
@@ -942,14 +942,8 @@ bool Search::setParameter(String param, int value) {
         EXT_FUTILY_MARGIN = value;
     } else if (param == "RAZOR_MARGIN") {
         RAZOR_MARGIN = value;
-    } else if (param == "BISHOP_ON_QUEEN") {
-        BISHOP_ON_QUEEN = value;
     } else if (param == "NO_PAWNS") {
         NO_PAWNS = value;
-    } else if (param == "BONUS2BISHOP") {
-        BONUS2BISHOP = value;
-    } else if (param == "CONNECTED_ROOKS") {
-        CONNECTED_ROOKS = value;
     } else if (param == "DOUBLED_ISOLATED_PAWNS") {
         DOUBLED_ISOLATED_PAWNS = value;
     } else if (param == "DOUBLED_PAWNS") {
@@ -958,36 +952,22 @@ bool Search::setParameter(String param, int value) {
         END_OPENING = value;
     } else if (param == "HALF_OPEN_FILE_Q") {
         HALF_OPEN_FILE_Q = value;
-    } else if (param == "KNIGHT_TRAPPED") {
-        KNIGHT_TRAPPED = value;
-    } else if (param == "OPEN_FILE") {
-        OPEN_FILE = value;
     } else if (param == "OPEN_FILE_Q") {
         OPEN_FILE_Q = value;
     } else if (param == "PAWN_IN_7TH") {
         PAWN_IN_7TH = value;
     } else if (param == "PAWN_IN_8TH") {
         PAWN_IN_8TH = value;
-    } else if (param == "PAWN_NEAR_KING") {
-        PAWN_NEAR_KING = value;
     } else if (param == "PAWN_BLOCKED") {
         PAWN_BLOCKED = value;
     } else if (param == "ROOK_7TH_RANK") {
         ROOK_7TH_RANK = value;
-    } else if (param == "ROOK_BLOCKED") {
-        ROOK_BLOCKED = value;
-    } else if (param == "ROOK_TRAPPED") {
-        ROOK_TRAPPED = value;
     } else if (param == "UNDEVELOPED_KNIGHT") {
         UNDEVELOPED_KNIGHT = value;
-    } else if (param == "UNDEVELOPED_BISHOP") {
-        UNDEVELOPED_BISHOP = value;
     } else if (param == "VAL_WINDOW") {
         VAL_WINDOW = value;
     } else if (param == "UNPROTECTED_PAWNS") {
         UNPROTECTED_PAWNS = value;
-    } else if (param == "ENEMIES_PAWNS_ALL") {
-        ENEMIES_PAWNS_ALL = value;
     } else if (param == "NULLMOVE_DEPTH") {
         NULLMOVE_DEPTH = value;
     } else if (param == "NULLMOVES_MIN_PIECE") {
