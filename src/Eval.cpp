@@ -632,7 +632,7 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
     structureEval.posKingBit[WHITE] = POW2[structureEval.posKing[WHITE]];
     structureEval.kingAttackers[WHITE] = structureEval.kingAttackers[BLACK] = 0;
 
-    if (phase == END) {
+    if (phase != OPEN) {
 //    if (phase == END) {
         structureEval.pinned[BLACK] = getPinned<BLACK>(structureEval.allPieces, structureEval.allPiecesSide[BLACK],
                                                        structureEval.posKing[BLACK]);
