@@ -695,31 +695,11 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
                 + tresult[EG].knights[WHITE] + tresult[EG].bishop[WHITE] + tresult[EG].rooks[WHITE]
                 + tresult[EG].queens[WHITE] + tresult[EG].kings[WHITE]);
 
-//    const double percMG = ((double) (lazyscore_white + lazyscore_black) / MAX_VALUE_TAPERED);
-//    const short score = (percMG * (double) result_mg) + ((1.0 - percMG) * (double) result_eg); //round
-//    ASSERT(percMG >= 0 && percMG <= 1);
+    const double percMG = ((double) (lazyscore_white + lazyscore_black) / MAX_VALUE_TAPERED);
 
-    constexpr int PawnPhase = 0;
-    constexpr int KnightPhase = 1;
-    constexpr int BishopPhase = 1;
-    constexpr int RookPhase = 2;
-    constexpr int QueenPhase = 4;
-    constexpr int TotalPhase = PawnPhase * 16 + KnightPhase * 4 + BishopPhase * 4 + RookPhase * 4 + QueenPhase * 2;
+    const short score = (percMG * (double) result_mg) + ((1.0 - percMG) * (double) result_eg); //round
 
-    int phase = TotalPhase;
-
-    phase -= bitCount(chessboard[PAWN_BLACK]) * PawnPhase;
-    phase -= bitCount(chessboard[PAWN_WHITE]) * PawnPhase;
-    phase -= bitCount(chessboard[KNIGHT_WHITE]) * KnightPhase;
-    phase -= bitCount(chessboard[KNIGHT_BLACK]) * KnightPhase;
-    phase -= bitCount(chessboard[BISHOP_BLACK]) * BishopPhase;
-    phase -= bitCount(chessboard[BISHOP_WHITE]) * BishopPhase;
-    phase -= bitCount(chessboard[QUEEN_BLACK]) * QueenPhase;
-    phase -= bitCount(chessboard[QUEEN_WHITE]) * QueenPhase;
-
-
-    phase = (phase * 256 + (TotalPhase / 2)) / TotalPhase;
-    const int score = ((result_mg * (256 - phase)) + (result_eg * phase)) / 256;
+    ASSERT(percMG >= 0 && percMG <= 1);
 
     const auto finalScore = side ? -(score - 5) : score + 5;
 
