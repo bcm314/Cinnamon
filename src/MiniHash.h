@@ -41,12 +41,12 @@ public:
         hash = nullptr;
     }
 
-    void storeValue(const u64 key, const short value) {
-        hash[key % hashSize] = (key & keyMask) | (value &valueMask);
-        ASSERT(value == getValue(key));
+    inline void recordHash(const u64 key, const short value) {
+        hash[key % hashSize] = (key & keyMask) | (value & valueMask);
+        ASSERT(value == readHash(key));
     }
 
-    short getValue(const u64 key) const {
+    inline short readHash(const u64 key) const {
         const u64 kv = hash[key % hashSize];
         if ((kv & keyMask) == (key & keyMask))
             return (short) (kv & valueMask);

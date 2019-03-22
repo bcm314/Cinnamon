@@ -561,7 +561,7 @@ int Eval::evaluateKing(int side, u64 squares) {
 short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int alpha, const int beta,
                      const bool trace) {
     BENCH(evalTime.start());
-    const short hashValue = evalHash->getValue(key);
+    const short hashValue = evalHash->readHash(key);
     if (hashValue != MiniHash::noHashValue) {
         BENCH(evalTime.stop());
         return side ? -hashValue : hashValue;
@@ -821,7 +821,7 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
         fflush(stdout);
     }
 #endif
-    evalHash->storeValue(key, result);
+    evalHash->recordHash(key, result);
     BENCH(evalTime.stop());
     return side ? -result : result;
 }
