@@ -19,6 +19,7 @@
 #pragma once
 
 #include "GenMoves.h"
+#include "MiniHash.h"
 #include <fstream>
 #include <string.h>
 #include <iomanip>
@@ -141,15 +142,7 @@ protected:
 
 private:
     static constexpr int hashSize = 65536;
-    static constexpr u64 keyMask = 0xffffffffffff0000ULL;
-    static constexpr u64 valueMask = 0xffffULL;
-    static constexpr short noHashValue = (short) 0xffff;
-
-    static u64 *evalHash;
-
-    inline void storeHashValue(const u64 key, const short value);
-
-    inline short getHashValue(const u64 key) const;
+    static MiniHash *evalHash;
 
     enum _Tphase {
         OPEN, MIDDLE, END

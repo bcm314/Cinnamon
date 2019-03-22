@@ -19,7 +19,7 @@
 #include "Eval.h"
 
 using namespace _eval;
-u64 *Eval::evalHash;
+MiniHash *Eval::evalHash;
 
 #ifdef BENCH_MODE
 Time Eval::evalTime;
@@ -33,11 +33,11 @@ Time Eval::queenTime;
 
 Eval::Eval() {
     if (evalHash == nullptr)
-        evalHash = (u64 *) calloc(hashSize, sizeof(u64));
+        evalHash = new MiniHash(hashSize);
 }
 
 Eval::~Eval() {
-    free(evalHash);
+    delete (evalHash);
     evalHash = nullptr;
 }
 
@@ -75,19 +75,21 @@ void Eval::openFile() {
 template<int side, Eval::_Tphase phase>
 int Eval::evaluatePawn() {
     INC(evaluationCount[side]);
+    constexpr int xside = side ^1;
     const u64 ped_friends = chessboard[side];
+    const u64 ped_enemies = chessboard[xside];
+
     if (!ped_friends) {
         ADD(SCORE_DEBUG.NO_PAWNS[side], -NO_PAWNS);
-        return -NO_PAWNS;
+        return -NO_PAWNS; //enemies pawns
     }
 
     int result = 0;
-    constexpr int xside = side ^1;
-    if (bitCount(chessboard[xside]) == 8) {
-        result -= ENEMIES_PAWNS_ALL;
+
+    if (bitCount(ped_enemies) == 8) {
+        result -= ENEMIES_PAWNS_ALL;//TODO revise
         ADD(SCORE_DEBUG.ENEMIES_PAWNS_ALL[side], -ENEMIES_PAWNS_ALL);
     }
-
 
 // 5. space
     if (phase == OPEN) {
@@ -121,15 +123,6 @@ int Eval::evaluatePawn() {
         result += PAWN_IN_8TH * bitCount(pawnsIn8); //try to decrease PAWN_IN_8TH
         ADD(SCORE_DEBUG.PAWN_IN_8TH[side], PAWN_IN_8TH * (bitCount(pawnsIn8)));
 
-        // pawns in 8th not attacked TODO ripristinare
-//        for (u64 p = pawnsIn8; p; RESET_LSB(p)) {
-//            const int o = BITScanForward(p);
-//            if (!isAttacked<side>(o, structureEval.allPieces)) {
-//                result += PAWN_IN_8TH_SAVE;
-//                display();
-//                ADD(SCORE_DEBUG.PAWN_IN_8TH[side], PAWN_IN_8TH_SAVE);
-//            }
-//        }
     }
 
     for (u64 p = ped_friends; p; RESET_LSB(p)) {
@@ -565,24 +558,11 @@ int Eval::evaluateKing(int side, u64 squares) {
     return result;
 }
 
-void Eval::storeHashValue(const u64 key, const short value) {
-    evalHash[key % hashSize] = (key & keyMask) | (value & valueMask);
-    ASSERT(value == getHashValue(key));
-}
-
-short Eval::getHashValue(const u64 key) const {
-    const u64 kv = evalHash[key % hashSize];
-    if ((kv & keyMask) == (key & keyMask))
-        return (short) (kv & valueMask);
-
-    return noHashValue;
-}
-
 short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int alpha, const int beta,
                      const bool trace) {
     BENCH(evalTime.start());
-    const short hashValue = getHashValue(key);
-    if (hashValue != noHashValue) {
+    const short hashValue = evalHash->getValue(key);
+    if (hashValue != MiniHash::noHashValue) {
         BENCH(evalTime.stop());
         return side ? -hashValue : hashValue;
     }
@@ -841,7 +821,7 @@ short Eval::getScore(const u64 key, const int side, const int N_PIECE, const int
         fflush(stdout);
     }
 #endif
-    storeHashValue(key, result);
+    evalHash->storeValue(key, result);
     BENCH(evalTime.stop());
     return side ? -result : result;
 }
