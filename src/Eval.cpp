@@ -75,21 +75,19 @@ void Eval::openFile() {
 template<int side, Eval::_Tphase phase>
 int Eval::evaluatePawn() {
     INC(evaluationCount[side]);
-    constexpr int xside = side ^1;
     const u64 ped_friends = chessboard[side];
-    const u64 ped_enemies = chessboard[xside];
-
     if (!ped_friends) {
         ADD(SCORE_DEBUG.NO_PAWNS[side], -NO_PAWNS);
         return -NO_PAWNS; //enemies pawns
     }
 
     int result = 0;
-
-    if (bitCount(ped_enemies) == 8) {
+    constexpr int xside = side ^1;
+    if (bitCount(chessboard[xside]) == 8) {
         result -= ENEMIES_PAWNS_ALL;//TODO revise
         ADD(SCORE_DEBUG.ENEMIES_PAWNS_ALL[side], -ENEMIES_PAWNS_ALL);
     }
+
 
 // 5. space
     if (phase == OPEN) {

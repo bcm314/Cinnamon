@@ -141,7 +141,7 @@ protected:
 #endif
 
 private:
-    static constexpr int hashSize = 65536;
+    static constexpr int hashSize = 65536;//TODO aumentare?
     static MiniHash *evalHash;
 
     enum _Tphase {
