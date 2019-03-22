@@ -276,10 +276,8 @@ int Search::quiescence(int alpha, int beta, const char promotionPiece, int N_PIE
             if (score >= beta) {
                 decListId();
 
-                if (getRunning()) {
-                    _ThashData data(score, depth, move->from, move->to, 0, Hash::hashfBETA);
-                    recordHash(zobristKeyR, data);
-                }
+                _ThashData data(score, depth, move->from, move->to, 0, Hash::hashfBETA);
+                recordHash(zobristKeyR, data);
                 return beta;
             }
             best = move;
@@ -287,10 +285,8 @@ int Search::quiescence(int alpha, int beta, const char promotionPiece, int N_PIE
             hashf = Hash::hashfEXACT;
         }
     }
-    if (getRunning()) {
-        _ThashData data(score, depth, best->from, best->to, 0, hashf);
-        recordHash(zobristKeyR, data);
-    }
+    _ThashData data(score, depth, best->from, best->to, 0, hashf);
+    recordHash(zobristKeyR, data);
     decListId();
 
     return score;
@@ -867,10 +863,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
                 ASSERT(move->score == score);
                 INC(nCutAB);
                 ADD(betaEfficiency, betaEfficiencyCount / (double) listcount * 100.0);
-                if (getRunning()) {
-                    _ThashData data(score, depth - extension, move->from, move->to, 0, Hash::hashfBETA);
-                    recordHash(zobristKeyR, data);
-                }
+                _ThashData data(score, depth - extension, move->from, move->to, 0, Hash::hashfBETA);
+                recordHash(zobristKeyR, data);
                 if (depth < 31)
                     setHistoryHeuristic(move->from, move->to, 1 << depth);
                 else
@@ -884,10 +878,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
             updatePv(pline, &line, move);
         }
     }
-    if (getRunning()) {
-        _ThashData data(score, depth - extension, best->from, best->to, 0, hashf);
-        recordHash(zobristKeyR, data);
-    }
+    _ThashData data(score, depth - extension, best->from, best->to, 0, hashf);
+    recordHash(zobristKeyR, data);
     decListId();
     return score;
 }
