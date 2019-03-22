@@ -75,19 +75,10 @@ void Eval::openFile() {
 template<int side, Eval::_Tphase phase>
 int Eval::evaluatePawn() {
     INC(evaluationCount[side]);
-    const u64 ped_friends = chessboard[side];
-    if (!ped_friends) {
-        ADD(SCORE_DEBUG.NO_PAWNS[side], -NO_PAWNS);
-        return -NO_PAWNS;
-    }
-
     int result = 0;
     constexpr int xside = side ^1;
-    if (bitCount(chessboard[xside]) == 8) {
-        result -= ENEMIES_PAWNS_ALL;
-        ADD(SCORE_DEBUG.ENEMIES_PAWNS_ALL[side], -ENEMIES_PAWNS_ALL);
-    }
 
+    const u64 ped_friends = chessboard[side];
 
 // 5. space
     if (phase == OPEN) {
@@ -98,7 +89,6 @@ int Eval::evaluatePawn() {
 //    if (phase == END) {
 //        result -= 20 * bitCount(structureEval.pinned[side] & ped_friends);
 //    }
-
 
     // 7.
     if (phase != OPEN) {
@@ -360,43 +350,6 @@ int Eval::evaluateKnight(const u64 enemiesPawns, const u64 notMyBits) {
         result -= bitCount(knight & KNIGHT_HOME[side]) * UNDEVELOPED_KNIGHT;
         ADD(SCORE_DEBUG.UNDEVELOPED_KNIGHT[side],
             bitCount(knight & KNIGHT_HOME[side]) * UNDEVELOPED_KNIGHT);
-    }
-
-    // 3. trapped
-    if (side == WHITE) {
-        if ((A7bit & knight) && (B7bit & enemiesPawns) && (C6A6bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG.KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result -= KNIGHT_TRAPPED;
-        }
-        if ((H7bit & knight) && (G7bit & enemiesPawns) && (F6H6bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG.KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result -= KNIGHT_TRAPPED;
-        }
-        if ((A8bit & knight) && (A7C7bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG.KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result -= KNIGHT_TRAPPED;
-        }
-        if ((H8bit & knight) && (H7G7bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG.KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result -= KNIGHT_TRAPPED;
-        }
-    } else {
-        if ((A2bit & knight) && (B2bit & enemiesPawns) && (C3A3bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG.KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result -= KNIGHT_TRAPPED;
-        }
-        if ((H2bit & knight) && (G2bit & enemiesPawns) && (F3H3bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG.KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result -= KNIGHT_TRAPPED;
-        }
-        if ((A1bit & knight) && (A2C2bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG.KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result -= KNIGHT_TRAPPED;
-        }
-        if ((H1bit & knight) && (H2G2bit & enemiesPawns)) {
-            ADD(SCORE_DEBUG.KNIGHT_TRAPPED[side], -KNIGHT_TRAPPED);
-            result -= KNIGHT_TRAPPED;
-        }
     }
 
     // 4. king security
