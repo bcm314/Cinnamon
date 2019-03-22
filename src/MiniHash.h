@@ -29,7 +29,7 @@ private:
     static constexpr u64 valueMask = 0xffffULL;
 
 public:
-    static constexpr short noHashValue = (short) 0xffff;
+    static constexpr short noHashValue = 0x7fff;
 
     MiniHash(const unsigned size) {
         hashSize = size;
@@ -48,9 +48,7 @@ public:
 
     inline short readHash(const u64 key) const {
         const u64 kv = hash[key % hashSize];
-        if ((kv & keyMask) == (key & keyMask))
-            return (short) (kv & valueMask);
-
+        if ((kv & keyMask) == (key & keyMask)) return kv;
         return noHashValue;
     }
 
