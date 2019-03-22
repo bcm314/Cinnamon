@@ -19,7 +19,7 @@
 #include "Eval.h"
 
 using namespace _eval;
-MiniHash *Eval::evalHash;
+MiniHash *Eval::evalHash = nullptr;
 
 #ifdef BENCH_MODE
 Time Eval::evalTime;
