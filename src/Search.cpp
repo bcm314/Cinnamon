@@ -940,8 +940,6 @@ bool Search::setParameter(String param, int value) {
         BACKWARD_PAWN = value;
     } else if (param == "BISHOP_ON_QUEEN") {
         BISHOP_ON_QUEEN = value;
-    } else if (param == "NO_PAWNS") {
-        NO_PAWNS = value;
     } else if (param == "BONUS2BISHOP") {
         BONUS2BISHOP = value;
     } else if (param == "CONNECTED_ROOKS") {
@@ -958,8 +956,6 @@ bool Search::setParameter(String param, int value) {
         FRIEND_NEAR_KING = value;
     } else if (param == "HALF_OPEN_FILE_Q") {
         HALF_OPEN_FILE_Q = value;
-    } else if (param == "KNIGHT_TRAPPED") {
-        KNIGHT_TRAPPED = value;
     } else if (param == "OPEN_FILE") {
         OPEN_FILE = value;
     } else if (param == "OPEN_FILE_Q") {
@@ -990,8 +986,6 @@ bool Search::setParameter(String param, int value) {
         VAL_WINDOW = value;
     } else if (param == "UNPROTECTED_PAWNS") {
         UNPROTECTED_PAWNS = value;
-    } else if (param == "ENEMIES_PAWNS_ALL") {
-        ENEMIES_PAWNS_ALL = value;
     } else if (param == "NULLMOVE_DEPTH") {
         NULLMOVE_DEPTH = value;
     } else if (param == "NULLMOVES_MIN_PIECE") {
