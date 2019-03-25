@@ -83,38 +83,37 @@ string SYZYGY::getBestmove(const _Tchessboard &c, const bool turn, unsigned *res
     return decodePos(bestmove);
 }
 
-//unsigned SYZYGY::getWDL(const _Tchessboard &c, const bool turn, unsigned *results) {
-//
-//    unsigned int a = tb_probe_root_impl((ChessBoard::getBitmap<WHITE>(c)),
-//                                        (ChessBoard::getBitmap<BLACK>(c)),
-//                                        (c[KING_BLACK] | c[KING_WHITE]),
-//                                        (c[QUEEN_BLACK] | c[QUEEN_WHITE]),
-//                                        (c[ROOK_BLACK] | c[ROOK_WHITE]),
-//                                        (c[BISHOP_BLACK] | c[BISHOP_WHITE]),
-//                                        (c[KNIGHT_BLACK] | c[KNIGHT_WHITE]),
-//                                        (c[PAWN_BLACK] | c[PAWN_WHITE]),
-//                                        0,
-//                                        0,
-//                                        turn, results);
-//    return a;
-//}
-
 unsigned SYZYGY::getWDL(const _Tchessboard &c, const bool turn) {
 
-    unsigned int a = tb_probe_wdl(decode(ChessBoard::getBitmap<WHITE>(c)),
-                                  decode(ChessBoard::getBitmap<BLACK>(c)),
-                                  decode(c[KING_BLACK] | c[KING_WHITE]),
-                                  decode(c[QUEEN_BLACK] | c[QUEEN_WHITE]),
-                                  decode(c[ROOK_BLACK] | c[ROOK_WHITE]),
-                                  decode(c[BISHOP_BLACK] | c[BISHOP_WHITE]),
-                                  decode(c[KNIGHT_BLACK] | c[KNIGHT_WHITE]),
-                                  decode(c[PAWN_BLACK] | c[PAWN_WHITE]),
-                                  0,
-                                  0, 0,
-                                  turn);
-
+    unsigned int a = tb_probe_wdl((ChessBoard::getBitmap<WHITE>(c)),
+                                        (ChessBoard::getBitmap<BLACK>(c)),
+                                        (c[KING_BLACK] | c[KING_WHITE]),
+                                        (c[QUEEN_BLACK] | c[QUEEN_WHITE]),
+                                        (c[ROOK_BLACK] | c[ROOK_WHITE]),
+                                        (c[BISHOP_BLACK] | c[BISHOP_WHITE]),
+                                        (c[KNIGHT_BLACK] | c[KNIGHT_WHITE]),
+                                        (c[PAWN_BLACK] | c[PAWN_WHITE]),
+                                        0,
+                                        0,0,
+                                        turn);
     return a;
 }
+
+//unsigned SYZYGY::getWDL(const _Tchessboard &c, const bool turn) {
+//
+//    return tb_probe_wdl(decode(ChessBoard::getBitmap<WHITE>(c)),
+//                        decode(ChessBoard::getBitmap<BLACK>(c)),
+//                        decode(c[KING_BLACK] | c[KING_WHITE]),
+//                        decode(c[QUEEN_BLACK] | c[QUEEN_WHITE]),
+//                        decode(c[ROOK_BLACK] | c[ROOK_WHITE]),
+//                        decode(c[BISHOP_BLACK] | c[BISHOP_WHITE]),
+//                        decode(c[KNIGHT_BLACK] | c[KNIGHT_WHITE]),
+//                        decode(c[PAWN_BLACK] | c[PAWN_WHITE]),
+//                        0,
+//                        0, 0,
+//                        turn);
+//
+//}
 
 string SYZYGY::pickMove(const unsigned *results, const unsigned wdl) {
     for (unsigned i = 0; results[i] != TB_RESULT_FAILED; i++) {
@@ -138,7 +137,7 @@ string SYZYGY::pickMove(const unsigned *results, const unsigned wdl) {
 
 u64 SYZYGY::decode(u64 c) {
 
-    static constexpr array<int, 64> _decode = {
+    static constexpr array<int, 64> _decodeTODO = {
         7, 6, 5, 4, 3, 2, 1, 0,
         15, 14, 13, 12, 11, 10, 9, 8,
         23, 22, 21, 20, 19, 18, 17, 16,
@@ -147,6 +146,18 @@ u64 SYZYGY::decode(u64 c) {
         47, 46, 45, 44, 43, 42, 41, 40,
         55, 54, 53, 52, 51, 50, 49, 48,
         63, 62, 61, 60, 59, 58, 57, 56};
+
+    static constexpr unsigned _decode[64] = {
+        8, 9, 10, 11, 12, 13, 14, 0,
+        9, 10, 11, 12, 13, 14, 0, 1,
+        10, 11, 12, 13, 14, 0, 1, 2,
+        11, 12, 13, 14, 0, 1, 2, 3,
+        12, 13, 14, 0, 1, 2, 3, 4,
+        13, 14, 0, 1, 2, 3, 4, 5,
+        14, 0, 1, 2, 3, 4, 5, 6,
+        0, 1, 2, 3, 4, 5, 6, 7
+    };
+
 
     u64 res = 0;
     for (; c; RESET_LSB(c)) {

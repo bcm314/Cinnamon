@@ -115,9 +115,9 @@ void Search::printDtmSyzygy() {
 
             if (res == TB_DRAW)cout << " draw dtm" << endl;
             else if (res == TB_LOSS || res == TB_BLESSED_LOSS)
-                cout << " win dtm" << endl;
+                cout << " win" << endl;
             else
-                cout << " loss dtm" << endl;
+                cout << " loss" << endl;
 
         } else cout << " none" << endl;
         takeback(move, oldKey, false);
