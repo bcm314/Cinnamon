@@ -113,11 +113,11 @@ void Search::printDtmSyzygy() {
         unsigned res = syzygy->getWDL(chessboard, side ^ 1);
         if (res != TB_RESULT_FAILED) {
 
-            if (res == TB_DRAW)cout << " draw dtm: " << endl;
+            if (res == TB_DRAW)cout << " draw dtm" << endl;
             else if (res == TB_LOSS || res == TB_BLESSED_LOSS)
-                cout << " win dtm: " << endl;
+                cout << " win dtm" << endl;
             else
-                cout << " loss dtm: " << endl;
+                cout << " loss dtm" << endl;
 
         } else cout << " none" << endl;
         takeback(move, oldKey, false);
@@ -501,20 +501,22 @@ string Search::probeRootTB() {
                 takeback(move, oldKey, false);
                 continue;
             }
-//                cout << endl << decodeBoardinv(move->type, move->from, getSide())
-//                    << decodeBoardinv(move->type, move->to, getSide()) << " ";
+//            cout << endl << decodeBoardinv(move->type, move->from, getSide())
+//                << decodeBoardinv(move->type, move->to, getSide()) << " ";
 
             auto dtm = syzygy->getWDL(chessboard, side ^ 1);
 
             if (dtm != TB_RESULT_FAILED && (dtm == TB_LOSS || dtm == TB_BLESSED_LOSS)) {
 //            if (dtm != TB_RESULT_FAILED && (dtm == TB_WIN || dtm == TB_CURSED_WIN)) {
                 bestMove = move;
+                //cout << "win" << endl;
                 takeback(move, oldKey, false);
                 break;
             }
 
             if (dtm != TB_RESULT_FAILED && dtm == TB_DRAW) {
                 drawMove = move;
+                //if (bestMove == nullptr) cout << "draw" << endl;
             }
 
             takeback(move, oldKey, false);
