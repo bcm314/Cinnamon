@@ -508,21 +508,18 @@ string Search::probeRootTB() {
 
             if (dtm != TB_RESULT_FAILED) {
                 if (dtm == TB_LOSS || dtm == TB_BLESSED_LOSS) {
-//            if (dtm != TB_RESULT_FAILED && (dtm == TB_WIN || dtm == TB_CURSED_WIN)) {
                     bestMove = move;
                     //cout << "win" << endl;
                     takeback(move, oldKey, false);
                     break;
-                } else
-
-                if (dtm == TB_DRAW) {
+                } else if (dtm == TB_DRAW) {
                     drawMove = move;
                     //if (bestMove == nullptr) cout << "draw" << endl;
                 }
             }
             takeback(move, oldKey, false);
         }
-        
+
         if (bestMove == nullptr) bestMove = drawMove;
         if (bestMove != nullptr) {
             best = string(decodeBoardinv(bestMove->type, bestMove->from, getSide())) +
@@ -1011,6 +1008,3 @@ bool Search::setParameter(String param, int value) {
     return false;
 #endif
 }
-
-
-

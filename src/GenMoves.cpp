@@ -630,7 +630,7 @@ bool GenMoves::generatePuzzle(const string type) {
     PIECES['B'] = BISHOP_BLACK;
     PIECES['N'] = KNIGHT_BLACK;
 
-    const int TOT = 5000;
+    const int TOT = 1000;
     vector<int> pieces;
 
     for (unsigned k = 0; k < TOT; k++) {
