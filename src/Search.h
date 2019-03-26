@@ -90,12 +90,8 @@ public:
 
 //    int getSYZYGYdtm(const int side);
 
-    STATIC_CONST int NULLMOVE_DEPTH = 3;
-    STATIC_CONST int NULLMOVES_MIN_PIECE = 3;
-    STATIC_CONST int NULLMOVES_R1 = 2;
-    STATIC_CONST int NULLMOVES_R2 = 3;
-    STATIC_CONST int NULLMOVES_R3 = 2;
-    STATIC_CONST int NULLMOVES_R4 = 2;
+    STATIC_CONST int NULL_DIVISOR = 6;
+    STATIC_CONST int NULL_DEPTH = 3;
     STATIC_CONST int VAL_WINDOW = 50;
 
     void setRunningThread(bool t) {
@@ -155,7 +151,7 @@ private:
     bool checkDraw(u64);
 
     template<int side, bool checkMoves>
-    int search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn);
+    int search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn, int n_root_moves);
     int probeTB(const int side, const int N_PIECE, const int depth) const;
 
     template<bool checkMoves>

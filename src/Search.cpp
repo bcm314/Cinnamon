@@ -404,10 +404,24 @@ void Search::setMainParam(const int depth) {
 template<bool searchMoves>
 int Search::search(const int depth, const int alpha, const int beta) {
     ASSERT_RANGE(depth, 0, MAX_PLY);
-    return getSide() ? search<WHITE, searchMoves>(depth, alpha, beta, &pvLine,
-                                                  bitCount(getBitmap<WHITE>() | getBitmap<BLACK>()), &mainMateIn)
+    incListId();
+    const int side = getSide();
+    const u64 friends = (side == WHITE) ? getBitmap<WHITE>() : getBitmap<BLACK>();
+    const u64 enemies = (side == WHITE) ? getBitmap<BLACK>() : getBitmap<WHITE>();
+    generateCaptures(side, enemies, friends);
+    generateMoves(side, friends | enemies);
+    int n_root_movesTODOcrafty = getListSize();
+    decListId();
+    return getSide() ? search<WHITE, searchMoves>(depth,
+                                                  alpha,
+                                                  beta,
+                                                  &pvLine,
+                                                  bitCount(getBitmap<WHITE>() | getBitmap<BLACK>()),
+                                                  &mainMateIn,
+                                                  n_root_movesTODOcrafty)
                      : search<BLACK, searchMoves>(depth, alpha, beta, &pvLine,
-                                                  bitCount(getBitmap<WHITE>() | getBitmap<BLACK>()), &mainMateIn);
+                                                  bitCount(getBitmap<WHITE>() | getBitmap<BLACK>()), &mainMateIn,
+                                                  n_root_movesTODOcrafty);
 }
 
 string Search::probeRootTB() {
@@ -679,7 +693,7 @@ int Search::probeGtb(const int side, const int N_PIECE, const int depth) const {
 }
 
 template<int side, bool checkMoves>
-int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn) {
+int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn, int n_root_moves) {
     ASSERT_RANGE(depth, 0, MAX_PLY);
     INC(cumulativeMovesCount);
 
@@ -738,24 +752,35 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
         setRunning(checkTime());
     }
     ++numMoves;
-    ///********* null move ***********
-    int n_pieces_side;
     _TpvLine line;
     line.cmove = 0;
 
-    if (!is_incheck_side && !nullSearch && depth >= NULLMOVE_DEPTH &&
-        (n_pieces_side = getNpiecesNoPawnNoKing<side>()) >= NULLMOVES_MIN_PIECE) {
-        nullSearch = true;
-        int nullScore = -search<side ^ 1, checkMoves>(
-            depth - (NULLMOVES_R1 + (depth > (NULLMOVES_R2 + (n_pieces_side < NULLMOVES_R3 ? NULLMOVES_R4 : 0)))) -
-                1, -beta, -beta + 1, &line, N_PIECE, mateIn);
-        nullSearch = false;
-        if (nullScore >= beta) {
-            INC(nNullMoveCut);
-            return nullScore;
+    // ********* null move ***********
+    if (!nullSearch && /*!pv_node &&*/  !is_incheck_side) {
+        int n_depth = (n_root_moves > 17 || depth > 3) ? 1 : 3;
+        if (n_depth == 3) {
+            const u64 pieces = getPiecesNoKing<side>();
+            if (pieces != chessboard[PAWN_BLACK + side] || bitCount(pieces) > 9)
+                n_depth = 1;
+        }
+        if (depth > n_depth) {
+            nullSearch = true;
+            const int R = NULL_DEPTH + depth / NULL_DIVISOR;
+            const int nullScore =
+                (depth - R - 1 > 0) ?
+                -search<side ^ 1, checkMoves>(depth - R - 1, -beta, -beta + 1, &line, N_PIECE, mateIn, n_root_moves)
+                                    :
+                -quiescence<side ^ 1>(-beta, -beta + 1, -1, N_PIECE, 0);
+            nullSearch = false;
+            if (nullScore >= beta) {
+                INC(nNullMoveCut);
+                return nullScore;
+            }
         }
     }
+
     ///******* null move end ********
+
     /**************Futility Pruning****************/
     /**************Futility Pruning razor at pre-pre-frontier*****/
     bool futilPrune = false;
@@ -783,8 +808,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     incListId();
     ASSERT_RANGE(KING_BLACK + side, 0, 11);
     ASSERT_RANGE(KING_BLACK + (side ^ 1), 0, 11);
-    u64 friends = getBitmap<side>();
-    u64 enemies = getBitmap<side ^ 1>();
+    const u64 friends = getBitmap<side>();
+    const u64 enemies = getBitmap<side ^ 1>();
     if (generateCaptures<side>(enemies, friends)) {
         decListId();
         score = _INFINITE - (mainDepth - depth + 1);
@@ -834,7 +859,7 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
         if (countMove > 4 && !is_incheck_side && depth >= 3 && move->capturedPiece == SQUARE_FREE &&
             move->promotionPiece == NO_PROMOTION) {
             currentPly++;
-            val = -search<side ^ 1, checkMoves>(depth - 2, -(alpha + 1), -alpha, &line, N_PIECE, mateIn);
+            val = -search<side ^ 1, checkMoves>(depth - 2, -(alpha + 1), -alpha, &line, N_PIECE, mateIn, n_root_moves);
             ASSERT(val != INT_MAX);
             currentPly--;
         }
@@ -844,13 +869,15 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
             const int upb = (doMws ? (lwb + 1) : beta);
             currentPly++;
             val = -search<side ^ 1, checkMoves>(depth - 1, -upb, -lwb, &line,
-                                                move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1, mateIn);
+                                                move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
+                                                mateIn, n_root_moves);
             ASSERT(val != INT_MAX);
             currentPly--;
             if (doMws && (lwb < val) && (val < beta)) {
                 currentPly++;
-                val = -search<side ^ 1, checkMoves>(depth - 1, -beta, -val + 1, &line,
-                                                    move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1, mateIn);
+                val = -search<side ^ 1, checkMoves>(depth - 1, -beta, -val + 1,
+                                                    &line, move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
+                                                    mateIn, n_root_moves);
                 currentPly--;
             }
         }
@@ -986,18 +1013,6 @@ bool Search::setParameter(String param, int value) {
         VAL_WINDOW = value;
     } else if (param == "UNPROTECTED_PAWNS") {
         UNPROTECTED_PAWNS = value;
-    } else if (param == "NULLMOVE_DEPTH") {
-        NULLMOVE_DEPTH = value;
-    } else if (param == "NULLMOVES_MIN_PIECE") {
-        NULLMOVES_MIN_PIECE = value;
-    } else if (param == "NULLMOVES_R1") {
-        NULLMOVES_R1 = value;
-    } else if (param == "NULLMOVES_R2") {
-        NULLMOVES_R2 = value;
-    } else if (param == "NULLMOVES_R3") {
-        NULLMOVES_R3 = value;
-    } else if (param == "NULLMOVES_R4") {
-        NULLMOVES_R4 = value;
     } else {
         res = false;
     }
