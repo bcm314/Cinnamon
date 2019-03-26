@@ -34,10 +34,12 @@ class SearchManager: public Singleton<SearchManager>, public ThreadPool<Search> 
 public:
 
     bool getRes(_Tmove &resultMove, string &ponderMove, string &pvv, int *mateIn);
-
+    static GTB *gtb;
     ~SearchManager();
 #ifndef JS_MODE
-    GTB &getGtb() const;
+    static GTB *getGtb() {
+        return gtb;
+    }
 
     GTB &createGtb();
 
@@ -126,8 +128,6 @@ public:
 #ifndef JS_MODE
     void printDtmGtb();
     void printDtmSyzygy();
-
-    void setGtb(GTB &tablebase);
 
 //    void setSYZYGY(SYZYGY &tablebase);
 #endif

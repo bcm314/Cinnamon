@@ -13,7 +13,7 @@ or any UCI-compatible GUI. Cinnamon is also a javascript library to play with
   
 Version  
 ----------  
-2.1  
+2.2
   
 Features  
 ----------  
@@ -30,7 +30,7 @@ Features
 - Interruptible multithread Perft test  
 - 32/64 bit architectures  
 - Iterative deeping  
-- history heuristics
+- History heuristics
 - Lazy evaluation
 - Mvv/Lva  
 - Transposition Table  

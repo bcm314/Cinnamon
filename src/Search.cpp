@@ -22,7 +22,7 @@
 #include "db/bitbase/kpk.h"
 #include "namespaces/board.h"
 
-GTB *Search::gtb;
+
 SYZYGY *Search::syzygy = nullptr;
 bool Search::runningThread;
 high_resolution_clock::time_point Search::startTime;
@@ -80,7 +80,6 @@ Search::Search() : ponder(false), nullSearch(false) {
 #ifdef DEBUG_MODE
     lazyEvalCuts = cumulativeMovesCount = totGen = 0;
 #endif
-    gtb = nullptr;
 
 }
 
@@ -134,7 +133,7 @@ void Search::printDtmGtb() {
     u64 enemies = side == BLACK ? getBitmap<WHITE>() : getBitmap<BLACK>();
     display();
     cout << "current: ";
-    getGtb().getDtm(side, true, chessboard, 100);
+    SearchManager::getGtb()->getDtm(side, true, chessboard, 100);
     fflush(stdout);
     incListId();
     generateCaptures(side, enemies, friends);
@@ -152,7 +151,7 @@ void Search::printDtmGtb() {
         cout << endl << decodeBoardinv(move->type, move->from, getSide())
             << decodeBoardinv(move->type, move->to, getSide()) << " ";
 
-        auto res = -getGtb().getDtm(side ^ 1, true, chessboard, 100);
+        auto res = -SearchManager::getGtb()->getDtm(side ^ 1, true, chessboard, 100);
 
         if (res != -INT_MAX) {
             cout << " res: " << res;
@@ -194,7 +193,6 @@ int Search::checkTime() {
 
 Search::~Search() {
     join();
-    deleteGtb();
 }
 
 template<int side>
@@ -379,21 +377,8 @@ bool Search::checkDraw(u64 key) {
     return false;
 }
 
-bool Search::getGtbAvailable() {
-    return gtb;
-}
-
 bool Search::getSYZYGYAvailable() const {
     return syzygy;
-}
-
-GTB &Search::getGtb() const {
-    ASSERT(gtb);
-    return *gtb;
-}
-
-void Search::deleteGtb() {
-    gtb = nullptr;
 }
 
 void Search::setMainParam(const int depth) {
@@ -429,7 +414,7 @@ string Search::probeRootTB() {
     const int side = getSide();
     string best = "";
 #ifndef JS_MODE
-    if (gtb && gtb->isInstalledPieces(tot)) {
+    if (SearchManager::getGtb() && SearchManager::getGtb()->isInstalledPieces(tot)) {
         u64 friends = side == WHITE ? getBitmap<WHITE>() : getBitmap<BLACK>();
         u64 enemies = side == BLACK ? getBitmap<WHITE>() : getBitmap<BLACK>();
         //display();
@@ -451,7 +436,7 @@ string Search::probeRootTB() {
             }
 //                cout << endl << decodeBoardinv(move->type, move->from, getSide())
 //                    << decodeBoardinv(move->type, move->to, getSide()) << " ";
-            auto dtm = getGtb().getDtm(side ^ 1, false, chessboard, 100);
+            auto dtm = SearchManager::getGtb()->getDtm(side ^ 1, false, chessboard, 100);
 
             if (dtm != INT_MAX) {
 //                    cout << " res: " << res;
@@ -668,8 +653,8 @@ bool Search::checkSearchMoves(_Tmove *move) {
 }
 
 int Search::probeGtb(const int side, const int N_PIECE, const int depth) const {//TODO eliminare
-    if (gtb && depth != mainDepth && gtb->isInstalledPieces(N_PIECE)) {
-        int v = gtb->getDtm(side, false, chessboard, 100);
+    if (SearchManager::getGtb() && depth != mainDepth && SearchManager::getGtb()->isInstalledPieces(N_PIECE)) {
+        int v = SearchManager::getGtb()->getDtm(side, false, chessboard, 100);
 
         if (abs(v) != INT_MAX) {
             // display();
@@ -933,10 +918,6 @@ u64 Search::getZobristKey() {
 
 int Search::getMateIn() {
     return mainMateIn;
-}
-
-void Search::setGtb(GTB &tablebase) {
-    gtb = &tablebase;
 }
 
 void Search::setSYZYGY(SYZYGY &tablebase) {

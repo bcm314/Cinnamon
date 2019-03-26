@@ -60,8 +60,6 @@ public:
 
     int getRunning();
 
-    void deleteGtb();
-
     _TpvLine &getPvLine() {
         return pvLine;
     }
@@ -78,11 +76,8 @@ public:
     void printDtmGtb();
     void printDtmSyzygy();
 #endif
-    GTB &getGtb() const;
 
     void setMainPly(int);
-
-    bool getGtbAvailable();
 
     bool getSYZYGYAvailable() const;
 
@@ -101,8 +96,6 @@ public:
     bool getRunningThread() const {
         return runningThread;
     }
-
-    void setGtb(GTB &tablebase);
 
     void setValWindow(int valWin) {
         Search::valWindow = valWin;
@@ -135,8 +128,8 @@ private:
     int valWindow = INT_MAX;
     static bool runningThread;
     _TpvLine pvLine;
-    static GTB *gtb;
-    static SYZYGY *syzygy;
+
+    static SYZYGY *syzygy; //TODO in SearchManager come gtb
     bool ponder;
 
     template<bool searchMoves>

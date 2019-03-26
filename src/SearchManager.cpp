@@ -20,7 +20,7 @@
 #include "namespaces/board.h"
 
 using namespace _logger;
-
+GTB *SearchManager::gtb;
 SearchManager::SearchManager() {
     SET(checkSmp1, 0);
 
@@ -337,22 +337,8 @@ void SearchManager::setSide(bool i) {
 }
 #ifndef JS_MODE
 
-GTB &SearchManager::getGtb() const {
-    return getThread(0).getGtb();
-}
-
 void SearchManager::printDtmGtb() {
     getThread(0).printDtmGtb();
-}
-
-void SearchManager::setGtb(GTB &tablebase) {
-    for (Search *s:getPool()) {
-        s->setGtb(tablebase);
-    }
-}
-
-bool SearchManager::getGtbAvailable() const {
-    return getThread(0).getGtbAvailable();
 }
 
 //string SearchManager::getSYZYGYbestmove(const int side) const {
@@ -368,15 +354,12 @@ void SearchManager::printDtmSyzygy() {
 }
 
 void SearchManager::deleteGtb() {
-    for (Search *s:getPool()) {
-        s->deleteGtb();
-    }
+    gtb = nullptr;
 }
 
 GTB &SearchManager::createGtb() {
-    GTB &gtb = GTB::getInstance();
-    setGtb(gtb);
-    return gtb;
+    gtb = &GTB::getInstance();
+    return *gtb;
 }
 
 //void SearchManager::setSYZYGY(SYZYGY &tablebase) {
