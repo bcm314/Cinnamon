@@ -35,6 +35,7 @@ public:
 
     bool getRes(_Tmove &resultMove, string &ponderMove, string &pvv, int *mateIn);
     static GTB *gtb;
+    static SYZYGY *syzygy;
     ~SearchManager();
 #ifndef JS_MODE
     static GTB *getGtb() {
@@ -44,11 +45,8 @@ public:
     GTB &createGtb();
 
     SYZYGY *createSYZYGY(string path) {
-        SYZYGY *syzygy = &SYZYGY::getInstance();
+        syzygy = &SYZYGY::getInstance();
         if (syzygy->setPath(path)) {
-            for (Search *s:getPool()) {
-                s->setSYZYGY(*syzygy);
-            }
             return syzygy;
         } else {
             cout << "error: unable to initialize lib; no lib files found" << endl;
@@ -214,6 +212,7 @@ public:
 
 #endif
 
+    static SYZYGY* getSyzygy();
 private:
 
     SearchManager();

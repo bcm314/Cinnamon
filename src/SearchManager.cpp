@@ -21,6 +21,7 @@
 
 using namespace _logger;
 GTB *SearchManager::gtb;
+SYZYGY *SearchManager::syzygy;
 SearchManager::SearchManager() {
     SET(checkSmp1, 0);
 
@@ -415,4 +416,9 @@ bool SearchManager::setParameter(String param, int value) {
     }
     return b;
 }
+SYZYGY* SearchManager::getSyzygy() {
+    return syzygy;
+}
+
+
 

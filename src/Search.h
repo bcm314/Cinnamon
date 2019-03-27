@@ -79,12 +79,6 @@ public:
 
     void setMainPly(int);
 
-    bool getSYZYGYAvailable() const;
-
-//    string getSYZYGYbestmove(const int side);
-
-//    int getSYZYGYdtm(const int side);
-
     STATIC_CONST int NULL_DIVISOR = 6;
     STATIC_CONST int NULL_DEPTH = 3;
     STATIC_CONST int VAL_WINDOW = 50;
@@ -119,7 +113,6 @@ public:
 
 #endif
 
-    void setSYZYGY(SYZYGY &syzygy);
     void unsetSearchMoves();
     void setSearchMoves(vector<int> &v);
 private:
@@ -129,7 +122,6 @@ private:
     static bool runningThread;
     _TpvLine pvLine;
 
-    static SYZYGY *syzygy; //TODO in SearchManager come gtb
     bool ponder;
 
     template<bool searchMoves>

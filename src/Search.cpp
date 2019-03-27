@@ -22,8 +22,6 @@
 #include "db/bitbase/kpk.h"
 #include "namespaces/board.h"
 
-
-SYZYGY *Search::syzygy = nullptr;
 bool Search::runningThread;
 high_resolution_clock::time_point Search::startTime;
 using namespace _bitbase;
@@ -109,7 +107,7 @@ void Search::printDtmSyzygy() {
         cout << decodeBoardinv(move->type, move->from, getSide())
             << decodeBoardinv(move->type, move->to, getSide()) << " ";
 
-        unsigned res = syzygy->getWDL(chessboard, side ^ 1);
+        unsigned res = SearchManager::getSyzygy()->getWDL(chessboard, side ^ 1);
         if (res != TB_RESULT_FAILED) {
 
             if (res == TB_DRAW)cout << " draw dtm: " << endl;
@@ -377,10 +375,6 @@ bool Search::checkDraw(u64 key) {
     return false;
 }
 
-bool Search::getSYZYGYAvailable() const {
-    return syzygy;
-}
-
 void Search::setMainParam(const int depth) {
     memset(&pvLine, 0, sizeof(_TpvLine));
     mainDepth = depth;
@@ -480,7 +474,7 @@ string Search::probeRootTB() {
 
     }
 
-    if (syzygy && syzygy->getInstalledPieces() >= tot) {
+    if (SearchManager::getSyzygy() && SearchManager::getSyzygy()->getInstalledPieces() >= tot) {
         u64 friends = side == WHITE ? getBitmap<WHITE>() : getBitmap<BLACK>();
         u64 enemies = side == BLACK ? getBitmap<WHITE>() : getBitmap<BLACK>();
         //display();
@@ -503,7 +497,7 @@ string Search::probeRootTB() {
 //                cout << endl << decodeBoardinv(move->type, move->from, getSide())
 //                    << decodeBoardinv(move->type, move->to, getSide()) << " ";
 
-            auto dtm = syzygy->getWDL(chessboard, side ^ 1);
+            auto dtm = SearchManager::getSyzygy()->getWDL(chessboard, side ^ 1);
 
             if (dtm != TB_RESULT_FAILED && (dtm == TB_LOSS || dtm == TB_BLESSED_LOSS)) {
 //            if (dtm != TB_RESULT_FAILED && (dtm == TB_WIN || dtm == TB_CURSED_WIN)) {
@@ -920,9 +914,6 @@ int Search::getMateIn() {
     return mainMateIn;
 }
 
-void Search::setSYZYGY(SYZYGY &tablebase) {
-    syzygy = &tablebase;
-}
 
 void Search::unsetSearchMoves() {
     searchMovesVector.clear();
