@@ -207,8 +207,6 @@ int Search::quiescence(int alpha, int beta, const char promotionPiece, int N_PIE
     ///************* hash ****************
     char hashf = Hash::hashfALPHA;
 
-    _TcheckHash checkHashStruct;
-
     pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, true, alpha, beta, depth, zobristKeyR);
     if (hashGreaterItem.first != INT_MAX) {
         return hashGreaterItem.first;
@@ -247,12 +245,11 @@ int Search::quiescence(int alpha, int beta, const char promotionPiece, int N_PIE
     _Tmove *move;
     _Tmove *best = &gen_list[listId].moveList[0];
     const u64 oldKey = chessboard[ZOBRISTKEY_IDX];
-    if (checkHashStruct.phasheType[Hash::HASH_GREATER].dataS.flags &
-        0x3 /*&& checkHashStruct.phasheType[Hash::HASH_GREATER].dataS.from != checkHashStruct.phasheType[Hash::HASH_GREATER].dataS.to*/) {// hashfEXACT or hashfBETA
-        sortFromHash(listId, checkHashStruct.phasheType[Hash::HASH_GREATER]);
-    } else if (checkHashStruct.phasheType[Hash::HASH_ALWAYS].dataS.flags &
-        0x3 /*&& checkHashStruct.phasheType[Hash::HASH_ALWAYS].dataS.from != checkHashStruct.phasheType[Hash::HASH_ALWAYS].dataS.to*/) {// hashfEXACT or hashfBETA
-        sortFromHash(listId, checkHashStruct.phasheType[Hash::HASH_ALWAYS]);
+    if (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags & 0x3) {
+        sortFromHash(listId, hashGreaterItem.second.phasheType[Hash::HASH_GREATER]);
+    }
+    else if (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags & 0x3) {
+        sortFromHash(listId, hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS]);
     }
     while ((move = getNextMove(&gen_list[listId]))) {
         if (!makemove(move, false, true)) {
@@ -809,11 +806,9 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     }
     ASSERT(gen_list[listId].size > 0);
     _Tmove *best = &gen_list[listId].moveList[0];
-    if (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags &
-        0x3 /*&& checkHashStruct.phasheType[Hash::HASH_GREATER].dataS.from != checkHashStruct.phasheType[Hash::HASH_GREATER].dataS.to*/) {// hashfEXACT or hashfBETA
+    if (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags & 0x3) {
         sortFromHash(listId, hashGreaterItem.second.phasheType[Hash::HASH_GREATER]);
-    } else if (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags &
-        0x3 /* && checkHashStruct.phasheType[Hash::HASH_ALWAYS].dataS.from != checkHashStruct.phasheType[Hash::HASH_ALWAYS].dataS.to*/) {// hashfEXACT or hashfBETA
+    } else if (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags & 0x3) {
         sortFromHash(listId, hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS]);
     }
     INC(totGen);
