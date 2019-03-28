@@ -24,7 +24,7 @@ GTB *SearchManager::gtb;
 SYZYGY *SearchManager::syzygy;
 SearchManager::SearchManager() {
     SET(checkSmp1, 0);
-
+    threadPool = new ThreadPool<Search>();
     setNthread(1);
 
     IniFile iniFile("cinnamon.ini");
@@ -47,16 +47,15 @@ SearchManager::SearchManager() {
             };
         }
     }
-
 }
 
 string SearchManager::probeRootTB() {
-    return getThread(0).probeRootTB();
+    return threadPool->getThread(0).probeRootTB();
 }
 
 void SearchManager::search(const int mply) {
 
-    if (getNthread() > 1 && mply > 3) {
+    if (threadPool->getNthread() > 1 && mply > 3) {
         lazySMP(mply);
     } else {
         singleSearch(mply);
@@ -67,14 +66,14 @@ void SearchManager::singleSearch(const int mply) {
     debug("start singleSearch -------------------------------");
     lineWin.cmove = -1;
     setMainPly(mply);
-    ASSERT(!getBitCount());
-    getThread(0).setMainParam(mply);
-    getThread(0).run();
-    valWindow = getThread(0).getValWindow();
-    if (getThread(0).getRunning()) {
-        memcpy(&lineWin, &getThread(0).getPvLine(), sizeof(_TpvLine));
-        for (int ii = 1; ii < getNthread(); ii++) {
-            getThread(ii).setValWindow(valWindow);
+    ASSERT(!threadPool->getBitCount());
+    threadPool->getThread(0).setMainParam(mply);
+    threadPool->getThread(0).run();
+    valWindow = threadPool->getThread(0).getValWindow();
+    if (threadPool->getThread(0).getRunning()) {
+        memcpy(&lineWin, &threadPool->getThread(0).getPvLine(), sizeof(_TpvLine));
+        for (int ii = 1; ii < threadPool->getNthread(); ii++) {
+            threadPool->getThread(ii).setValWindow(valWindow);
         }
     }
     debug("end singleSearch -------------------------------");
@@ -84,33 +83,33 @@ void SearchManager::lazySMP(const int mply) {
     ASSERT (mply > 1);
     lineWin.cmove = -1;
     setMainPly(mply);
-    ASSERT(!getBitCount());
+    ASSERT(!threadPool->getBitCount());
 
     debug("start lazySMP --------------------------");
 
-    for (int ii = 0; ii < getNthread(); ii++) {
-        Search &idThread1 = getNextThread();
+    for (int ii = 0; ii < threadPool->getNthread(); ii++) {
+        Search &idThread1 = threadPool->getNextThread();
         idThread1.setRunning(1);
         startThread(idThread1, mply + (ii % 2));
     }
-    joinAll();
+    threadPool->joinAll();
     debug("end lazySMP ---------------------------");
 
-    ASSERT(!getBitCount());
+    ASSERT(!threadPool->getBitCount());
     if (lineWin.cmove <= 0) {
         singleSearch(mply);
     }
 }
 
 void SearchManager::receiveObserverSearch(const int threadID) {
-    ASSERT(getNthread() > 1);
+    ASSERT(threadPool->getNthread() > 1);
     spinlockSearch.lock();
     INC(checkSmp1);
 
     if (getRunning(threadID) && lineWin.cmove == -1) {
         stopAllThread();
-        memcpy(&lineWin, &getThread(threadID).getPvLine(), sizeof(_TpvLine));
-        mateIn = getThread(threadID).getMateIn();
+        memcpy(&lineWin, &threadPool->getThread(threadID).getPvLine(), sizeof(_TpvLine));
+        mateIn = threadPool->getThread(threadID).getMateIn();
         ASSERT(mateIn == INT_MAX);
 
         debug("win", threadID);
@@ -133,9 +132,14 @@ bool SearchManager::getRes(_Tmove &resultMove, string &ponderMove, string &pvv, 
     ASSERT(lineWin.cmove);
     for (int t = 0; t < lineWin.cmove; t++) {
         pvvTmp.clear();
-        pvvTmp += Search::decodeBoardinv(lineWin.argmove[t].type, lineWin.argmove[t].from, getThread(0).getSide());
+        pvvTmp +=
+            Search::decodeBoardinv(lineWin.argmove[t].type,
+                                   lineWin.argmove[t].from,
+                                   threadPool->getThread(0).getSide());
         if (pvvTmp.length() != 4) {
-            pvvTmp += Search::decodeBoardinv(lineWin.argmove[t].type, lineWin.argmove[t].to, getThread(0).getSide());
+            pvvTmp += Search::decodeBoardinv(lineWin.argmove[t].type,
+                                             lineWin.argmove[t].to,
+                                             threadPool->getThread(0).getSide());
         }
         pvv.append(pvvTmp);
         if (t == 1) {
@@ -152,11 +156,11 @@ SearchManager::~SearchManager() {
 }
 
 int SearchManager::loadFen(string fen) {
-    int res = getThread(0).loadFen(fen);
+    int res = threadPool->getThread(0).loadFen(fen);
 
     ASSERT_RANGE(res, 0, 1);
-    for (uchar i = 1; i < getPool().size(); i++) {
-        getThread(i).setChessboard(getThread(0).getChessboard());
+    for (uchar i = 1; i < threadPool->getPool().size(); i++) {
+        threadPool->getThread(i).setChessboard(threadPool->getThread(0).getChessboard());
     }
     return res;
 }
@@ -171,97 +175,98 @@ void SearchManager::startThread(Search &thread, const int depth) {
 }
 
 void SearchManager::setMainPly(int r) {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->setMainPly(r);
     }
 }
 
 int SearchManager::getPieceAt(int side, u64 i) {
-    return side == WHITE ? getThread(0).getPieceAt<WHITE>(i) : getThread(0).getPieceAt<BLACK>(i);
+    return side == WHITE ? threadPool->getThread(0).getPieceAt<WHITE>(i)
+                         : threadPool->getThread(0).getPieceAt<BLACK>(i);
 }
 
 u64 SearchManager::getTotMoves() {
     u64 i = 0;
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         i += s->getTotMoves();
     }
     return i;
 }
 
 void SearchManager::incHistoryHeuristic(int from, int to, int value) {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->incHistoryHeuristic(from, to, value);
     }
 }
 
 int SearchManager::getHashSize() {
-    return getThread(0).getHashSize();
+    return hash.getHashSize();
 }
 
 void SearchManager::startClock() {
-    getThread(0).startClock();// static variable
+    threadPool->getThread(0).startClock();// static variable
 }
 
 string SearchManager::boardToFen() {
-    return getThread(0).boardToFen();
+    return threadPool->getThread(0).boardToFen();
 }
 
 void SearchManager::clearHistoryHeuristic() {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->clearHistoryHeuristic();
     }
 }
 
 void SearchManager::clearAge() {
-    getThread(0).clearAge();
+    hash.clearAge();
 }
 
 int SearchManager::getForceCheck() {
-    return getThread(0).getForceCheck();
+    return threadPool->getThread(0).getForceCheck();
 }
 
 u64 SearchManager::getZobristKey(int id) {
-    return getThread(id).getZobristKey();
+    return threadPool->getThread(id).getZobristKey();
 }
 
 void SearchManager::setForceCheck(bool a) {
-    getThread(0).setForceCheck(a);
+    threadPool->getThread(0).setForceCheck(a);
 }
 
 void SearchManager::setRunningThread(bool r) {
-    getThread(0).setRunningThread(r);
+    threadPool->getThread(0).setRunningThread(r);
 }
 
 void SearchManager::setRunning(int i) {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->setRunning(i);
     }
 }
 
 int SearchManager::getRunning(int i) {
-    return getThread(i).getRunning();
+    return threadPool->getThread(i).getRunning();
 }
 
 void SearchManager::display() {
-    getThread(0).display();
+    threadPool->getThread(0).display();
 }
 
 string SearchManager::getFen() {
-    return getThread(0).getFen();
+    return threadPool->getThread(0).getFen();
 }
 
 void SearchManager::setHashSize(int s) {
-    getThread(0).setHashSize(s);
+    hash.setHashSize(s);
 }
 
 void SearchManager::setMaxTimeMillsec(int i) {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->setMaxTimeMillsec(i);
     }
 }
 
 void SearchManager::unsetSearchMoves() {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->unsetSearchMoves();
     }
 }
@@ -274,72 +279,72 @@ void SearchManager::setSearchMoves(vector<string> &searchMov) {
         const int x = move.to | (int) (move.from << 8);
         searchMoves.push_back(x);
     }
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->setSearchMoves(searchMoves);
     }
 }
 
 void SearchManager::setPonder(bool i) {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->setPonder(i);
     }
 }
 
 int SearchManager::getSide() {
 #ifdef DEBUG_MODE
-    int t = getThread(0).getSide();
-    for (Search *s:getPool()) {
+    int t = threadPool->getThread(0).getSide();
+    for (Search *s:threadPool->getPool()) {
         ASSERT(s->getSide() == t);
     }
 #endif
-    return getThread(0).getSide();
+    return threadPool->getThread(0).getSide();
 }
 
 int SearchManager::getScore(int side, const bool trace) {
     int N_PIECE = 0;
 #ifdef DEBUG_MODE
-    N_PIECE = bitCount(getThread(0).getBitmap<WHITE>() | getThread(0).getBitmap<BLACK>());
+    N_PIECE = bitCount(threadPool->getThread(0).getBitmap<WHITE>() | threadPool->getThread(0).getBitmap<BLACK>());
 #endif
-    return getThread(0).getScore(0xffffffffffffffffULL, side, N_PIECE, -_INFINITE, _INFINITE, trace);
+    return threadPool->getThread(0).getScore(0xffffffffffffffffULL, side, N_PIECE, -_INFINITE, _INFINITE, trace);
 }
 
 void SearchManager::clearHash() {
-    getThread(0).clearHash();
+    hash.clearHash();
 }
 
 int SearchManager::getMaxTimeMillsec() {
-    return getThread(0).getMaxTimeMillsec();
+    return threadPool->getThread(0).getMaxTimeMillsec();
 }
 
 void SearchManager::setNullMove(bool i) {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->setNullMove(i);
     }
 }
 
 bool SearchManager::makemove(_Tmove *i) {
     bool b = false;
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         b = s->makemove(i);
     }
     return b;
 }
 
 void SearchManager::takeback(_Tmove *move, const u64 oldkey, bool rep) {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->takeback(move, oldkey, rep);
     }
 }
 
 void SearchManager::setSide(bool i) {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->setSide(i);
     }
 }
 #ifndef JS_MODE
 
 void SearchManager::printDtmGtb() {
-    getThread(0).printDtmGtb();
+    threadPool->getThread(0).printDtmGtb();
 }
 
 //string SearchManager::getSYZYGYbestmove(const int side) const {
@@ -351,7 +356,7 @@ void SearchManager::printDtmGtb() {
 //}
 
 void SearchManager::printDtmSyzygy() {
-    getThread(0).printDtmSyzygy();
+    threadPool->getThread(0).printDtmSyzygy();
 }
 
 void SearchManager::deleteGtb() {
@@ -373,50 +378,53 @@ GTB &SearchManager::createGtb() {
 
 int SearchManager::getMoveFromSan(String string, _Tmove *ptr) {
 #ifdef DEBUG_MODE
-    int t = getThread(0).getMoveFromSan(string, ptr);
-    for (Search *s:getPool()) {
+    int t = threadPool->getThread(0).getMoveFromSan(string, ptr);
+    for (Search *s:threadPool->getPool()) {
         ASSERT(s->getMoveFromSan(string, ptr) == t);
     }
 #endif
-    return getThread(0).getMoveFromSan(string, ptr);
+    return threadPool->getThread(0).getMoveFromSan(string, ptr);
 }
 
 void SearchManager::pushStackMove() {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->pushStackMove();
     }
 }
 
 void SearchManager::init() {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->init();
     }
 }
 
 void SearchManager::setRepetitionMapCount(int i) {
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         s->setRepetitionMapCount(i);
     }
 }
 
 
 bool SearchManager::setNthread(int nthread) {
-    if (!ThreadPool::setNthread(nthread))return false;
+    if (!threadPool->setNthread(nthread))return false;
+    for (Search *s:threadPool->getPool()) {
+        s->setHash(&hash);
+    }
     return true;
 }
 
 void SearchManager::stopAllThread() {
-    getThread(0).setRunningThread(false);//is static
+    threadPool->getThread(0).setRunningThread(false);//is static
 }
 
 bool SearchManager::setParameter(String param, int value) {
     bool b = false;
-    for (Search *s:getPool()) {
+    for (Search *s:threadPool->getPool()) {
         b = s->setParameter(param, value);
     }
     return b;
 }
-SYZYGY* SearchManager::getSyzygy() {
+SYZYGY *SearchManager::getSyzygy() {
     return syzygy;
 }
 

@@ -30,14 +30,13 @@
 using namespace _board;
 using namespace _logger;
 
-class Hash {
+class Hash{
 
 public:
-    Hash();
 
     static constexpr int HASH_GREATER = 0;
     static constexpr int HASH_ALWAYS = 1;
-
+    Hash();
     typedef union _ThashData {
         u64 dataU;
 
@@ -130,8 +129,8 @@ public:
     }
 
 private:
-    static volatile bool generated;
-    static int HASH_SIZE;
+
+    int HASH_SIZE;
 #ifdef JS_MODE
     static constexpr int HASH_SIZE_DEFAULT = 1;
 #else
@@ -139,9 +138,6 @@ private:
 #endif
 
     void dispose();
-
-    static _Thash *hashArray[2];
-    static mutex mutexConstructor;
-
+    _Thash *hashArray[2];
 };
 

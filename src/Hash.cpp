@@ -19,17 +19,7 @@
 #include <mutex>
 #include "Hash.h"
 
-int Hash::HASH_SIZE = 0;
-Hash::_Thash *Hash::hashArray[2];
-mutex Hash::mutexConstructor;
-volatile bool Hash::generated = false;
-
 Hash::Hash() {
-    std::lock_guard<std::mutex> lock(mutexConstructor);
-    if (generated) {
-        return;
-    }
-
     HASH_SIZE = 0;
     hashArray[HASH_GREATER] = hashArray[HASH_ALWAYS] = nullptr;
 #ifdef DEBUG_MODE
@@ -37,7 +27,7 @@ Hash::Hash() {
     nRecordHashA = nRecordHashB = nRecordHashE = collisions = 0;
 #endif
     setHashSize(HASH_SIZE_DEFAULT);
-    generated = true;
+
 }
 
 void Hash::clearAge() {
@@ -77,15 +67,14 @@ void Hash::setHashSize(int mb) {
 }
 
 void Hash::dispose() {
-    if (hashArray[HASH_GREATER]) {
+    if (hashArray[HASH_GREATER] != nullptr) {
         free(hashArray[HASH_GREATER]);
     }
-    if (hashArray[HASH_ALWAYS]) {
+    if (hashArray[HASH_ALWAYS] != nullptr) {
         free(hashArray[HASH_ALWAYS]);
     }
     hashArray[HASH_GREATER] = hashArray[HASH_ALWAYS] = nullptr;
     HASH_SIZE = 0;
-    generated = false;
 }
 
 Hash::~Hash() {

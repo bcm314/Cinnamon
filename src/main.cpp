@@ -42,7 +42,7 @@
 
 using namespace _board;
 
-void printHeader() {  
+void printHeader() {
     cout << NAME << " UCI chess engine by Giuseppe Cannella\n";
 
 #ifdef HAS_64BIT

@@ -145,14 +145,14 @@ void IterativeDeeping::run() {
             sc = 0x7fffffff;
         }
 #ifdef DEBUG_MODE
-        int totStoreHash = searchManager.getPool()[0]->nRecordHashA + searchManager.getPool()[0]->nRecordHashB +
-            searchManager.getPool()[0]->nRecordHashE + 1;
-        int percStoreHashA = searchManager.getPool()[0]->nRecordHashA * 100 / totStoreHash;
-        int percStoreHashB = searchManager.getPool()[0]->nRecordHashB * 100 / totStoreHash;
-        int percStoreHashE = searchManager.getPool()[0]->nRecordHashE * 100 / totStoreHash;
-        int totCutHash = searchManager.getPool()[0]->n_cut_hashA + searchManager.getPool()[0]->n_cut_hashB + 1;
-        int percCutHashA = searchManager.getPool()[0]->n_cut_hashA * 100 / totCutHash;
-        int percCutHashB = searchManager.getPool()[0]->n_cut_hashB * 100 / totCutHash;
+        int totStoreHash = searchManager.getHash()->nRecordHashA + searchManager.getHash()->nRecordHashB +
+            searchManager.getHash()->nRecordHashE + 1;
+        int percStoreHashA = searchManager.getHash()->nRecordHashA * 100 / totStoreHash;
+        int percStoreHashB = searchManager.getHash()->nRecordHashB * 100 / totStoreHash;
+        int percStoreHashE = searchManager.getHash()->nRecordHashE * 100 / totStoreHash;
+        int totCutHash = searchManager.getHash()->n_cut_hashA + searchManager.getHash()->n_cut_hashB + 1;
+        int percCutHashA = searchManager.getHash()->n_cut_hashA * 100 / totCutHash;
+        int percCutHashB = searchManager.getHash()->n_cut_hashB * 100 / totCutHash;
         cout << "\ninfo string ply: " << mply << endl;
         cout << "info string tot moves: " << totMoves << endl;
         unsigned cumulativeMovesCount = searchManager.getCumulativeMovesCount();
@@ -172,8 +172,8 @@ void IterativeDeeping::run() {
         int nCutFp = searchManager.getNCutFp();
         int nCutRazor = searchManager.getNCutRazor();
 
-        int collisions = searchManager.getPool()[0]->collisions;
-        int nNullMoveCut = searchManager.getPool()[0]->cutFailed;
+        int collisions = searchManager.getHash()->collisions;
+        int nNullMoveCut = searchManager.getHash()->cutFailed;
         unsigned totGen = searchManager.getTotGen();
         if (nCutAB) {
             cout << "info string beta efficiency: " << (int) (betaEfficiency / totGen * 10) << "%" << endl;

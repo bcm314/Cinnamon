@@ -28,7 +28,7 @@
 #include <future>
 #include "namespaces/def.h"
 
-class SearchManager: public Singleton<SearchManager>, public ThreadPool<Search> {
+class SearchManager: public Singleton<SearchManager> {
     friend class Singleton<SearchManager>;
 
 public:
@@ -36,6 +36,7 @@ public:
     bool getRes(_Tmove &resultMove, string &ponderMove, string &pvv, int *mateIn);
     static GTB *gtb;
     static SYZYGY *syzygy;
+
     ~SearchManager();
 #ifndef JS_MODE
     static GTB *getGtb() {
@@ -156,7 +157,7 @@ public:
 
     unsigned getCumulativeMovesCount() {
         unsigned i = 0;
-        for (Search *s:getPool()) {
+        for (Search *s:threadPool->getPool()) {
             i += s->cumulativeMovesCount;
         }
         return i;
@@ -164,7 +165,7 @@ public:
 
     unsigned getNCutAB() {
         unsigned i = 0;
-        for (Search *s:getPool()) {
+        for (Search *s:threadPool->getPool()) {
             i += s->nCutAB;
         }
         return i;
@@ -172,7 +173,7 @@ public:
 
     double getBetaEfficiency() {
         double i = 0;
-        for (Search *s:getPool()) {
+        for (Search *s:threadPool->getPool()) {
             i += s->betaEfficiency;
         }
         return i;
@@ -180,7 +181,7 @@ public:
 
     unsigned getLazyEvalCuts() {
         unsigned i = 0;
-        for (Search *s:getPool()) {
+        for (Search *s:threadPool->getPool()) {
             i += s->lazyEvalCuts;
         }
         return i;
@@ -188,7 +189,7 @@ public:
 
     unsigned getNCutFp() {
         unsigned i = 0;
-        for (Search *s:getPool()) {
+        for (Search *s:threadPool->getPool()) {
             i += s->nCutFp;
         }
         return i;
@@ -196,7 +197,7 @@ public:
 
     unsigned getNCutRazor() {
         unsigned i = 0;
-        for (Search *s:getPool()) {
+        for (Search *s:threadPool->getPool()) {
             i += s->nCutRazor;
         }
         return i;
@@ -204,19 +205,23 @@ public:
 
     unsigned getTotGen() {
         unsigned i = 0;
-        for (Search *s:getPool()) {
+        for (Search *s:threadPool->getPool()) {
             i += s->totGen;
         }
         return i;
     }
 
 #endif
+    const Hash *getHash() const {
+        return &hash;
+    }
 
-    static SYZYGY* getSyzygy();
+    static SYZYGY *getSyzygy();
 private:
 
+    Hash hash;
     SearchManager();
-
+    ThreadPool<Search> *threadPool = nullptr;
     void lazySMP(const int mply);
 
     void singleSearch(int mply);

@@ -28,12 +28,12 @@
 #include "db/GTB.h"
 #include "db/syzygy/SYZYGY.h"
 
-class Search: public Eval, public Thread<Search>, public Hash {
+class Search: public Eval, public Thread<Search> {
 
 public:
 
     typedef struct {
-        _ThashData phasheType[2];
+        Hash::_ThashData phasheType[2];
     } _TcheckHash;
 
     Search();
@@ -115,7 +115,13 @@ public:
 
     void unsetSearchMoves();
     void setSearchMoves(vector<int> &v);
+    void setHash(Hash *h) {
+        hash = h;
+    }
+    
 private:
+
+    Hash *hash;
 
     vector<int> searchMovesVector;
     int valWindow = INT_MAX;
@@ -158,13 +164,12 @@ private:
     int mainMateIn;
     int mainDepth;
     inline int checkHash(const int type, const bool quies, const int alpha, const int beta, const int depth,
-                         const u64 zobristKeyR,
-                         _TcheckHash &checkHashStruct) {
-
-        _ThashData *phashe = &checkHashStruct.phasheType[type];
-        if ((phashe->dataU = readHash(type, zobristKeyR))) {
+                         const u64 zobristKeyR, _TcheckHash &checkHashStruct) {
+        ASSERT(hash);
+        Hash::_ThashData *phashe = &checkHashStruct.phasheType[type];
+        if ((phashe->dataU = hash->readHash(type, zobristKeyR))) {
             if (phashe->dataS.depth >= depth) {
-                INC(probeHash);
+                INC(hash->probeHash);
                 if (!currentPly) {
                     if (phashe->dataS.flags == Hash::hashfBETA) {
                         incHistoryHeuristic(phashe->dataS.from, phashe->dataS.to, 1);
@@ -173,20 +178,20 @@ private:
                     switch (phashe->dataS.flags) {
                         case Hash::hashfEXACT:
                             if (phashe->dataS.score >= beta) {
-                                INC(n_cut_hashB);
+                                INC(hash->n_cut_hashB);
                                 return beta;
                             }
                             break;
                         case Hash::hashfBETA:
                             if (!quies)incHistoryHeuristic(phashe->dataS.from, phashe->dataS.to, 1);
                             if (phashe->dataS.score >= beta) {
-                                INC(n_cut_hashB);
+                                INC(hash->n_cut_hashB);
                                 return beta;
                             }
                             break;
                         case Hash::hashfALPHA:
                             if (phashe->dataS.score <= alpha) {
-                                INC(n_cut_hashA);
+                                INC(hash->n_cut_hashA);
                                 return alpha;
                             }
                             break;
@@ -197,7 +202,7 @@ private:
                 }
             }
         }
-        INC(cutFailed);
+        INC(hash->cutFailed);
         return INT_MAX;
 
     }
