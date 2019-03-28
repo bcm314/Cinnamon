@@ -42,22 +42,7 @@
 
 using namespace _board;
 
-void printHeader() {
-    cout <<
-        "                 /\"\\       \n"
-            "                /o o\\      \n"
-            "           _\\/  \\   / \\/_  \n"
-            "            \\\\._/  /_.//   \n"
-            "            `--,  ,----'   \n"
-            "              /   /        \n"
-            "    ,        /    \\        \n"
-            "   /|       (      )       \n"
-            "  / |     ,__\\    /__,     \n"
-            "  \\ \\   _//---,  ,--\\\\_    \n"
-            "   \\ \\   /\\  /  /   /\\     \n"
-            "    \\ \\.___,/  /           \n"
-            "     \\.______,/           ";
-
+void printHeader() {  
     cout << NAME << " UCI chess engine by Giuseppe Cannella\n";
 
 #ifdef HAS_64BIT
