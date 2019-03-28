@@ -34,9 +34,6 @@ namespace _board {
     static constexpr bool USE_HASH_YES = true;
     static constexpr bool USE_HASH_NO = false;
 
-    static constexpr bool SMP_YES = true;
-    static constexpr bool SMP_NO = false;
-
     static constexpr int _INFINITE = 32000;
 
     static constexpr int PAWN_BLACK = 0;
