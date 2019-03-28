@@ -209,13 +209,15 @@ int Search::quiescence(int alpha, int beta, const char promotionPiece, int N_PIE
 
     _TcheckHash checkHashStruct;
 
-    int r;
-    if ((r = checkHash(Hash::HASH_GREATER, true, alpha, beta, depth, zobristKeyR, checkHashStruct)) != INT_MAX) {
-        return r;
-    }
-    if ((r = checkHash(Hash::HASH_ALWAYS, true, alpha, beta, depth, zobristKeyR, checkHashStruct)) != INT_MAX) {
-        return r;
-    }
+    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, true, alpha, beta, depth, zobristKeyR);
+    if (hashGreaterItem.first != INT_MAX) {
+        return hashGreaterItem.first;
+    };
+
+    pair<int, _TcheckHash> hashAlwaysItem = checkHash(Hash::HASH_ALWAYS, true, alpha, beta, depth, zobristKeyR);
+    if (hashAlwaysItem.first != INT_MAX) {
+        return hashAlwaysItem.first;
+    };
 
 ///********** end hash ***************
 /**************Delta Pruning ****************/
@@ -717,13 +719,14 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     //************* hash ****************
     u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
 
-    _TcheckHash checkHashStruct;
-    int r;
-    if ((r = checkHash(Hash::HASH_GREATER, false, alpha, beta, depth, zobristKeyR, checkHashStruct)) != INT_MAX) {
-        return r;
+    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, false, alpha, beta, depth, zobristKeyR);
+    if (hashGreaterItem.first != INT_MAX) {
+        return hashGreaterItem.first;
     };
-    if ((r = checkHash(Hash::HASH_ALWAYS, false, alpha, beta, depth, zobristKeyR, checkHashStruct)) != INT_MAX) {
-        return r;
+
+    pair<int, _TcheckHash> hashAlwaysItem = checkHash(Hash::HASH_ALWAYS, false, alpha, beta, depth, zobristKeyR);
+    if (hashAlwaysItem.first != INT_MAX) {
+        return hashAlwaysItem.first;
     };
     ///********** end hash ***************
 
@@ -806,12 +809,12 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     }
     ASSERT(gen_list[listId].size > 0);
     _Tmove *best = &gen_list[listId].moveList[0];
-    if (checkHashStruct.phasheType[Hash::HASH_GREATER].dataS.flags &
+    if (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags &
         0x3 /*&& checkHashStruct.phasheType[Hash::HASH_GREATER].dataS.from != checkHashStruct.phasheType[Hash::HASH_GREATER].dataS.to*/) {// hashfEXACT or hashfBETA
-        sortFromHash(listId, checkHashStruct.phasheType[Hash::HASH_GREATER]);
-    } else if (checkHashStruct.phasheType[Hash::HASH_ALWAYS].dataS.flags &
+        sortFromHash(listId, hashGreaterItem.second.phasheType[Hash::HASH_GREATER]);
+    } else if (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags &
         0x3 /* && checkHashStruct.phasheType[Hash::HASH_ALWAYS].dataS.from != checkHashStruct.phasheType[Hash::HASH_ALWAYS].dataS.to*/) {// hashfEXACT or hashfBETA
-        sortFromHash(listId, checkHashStruct.phasheType[Hash::HASH_ALWAYS]);
+        sortFromHash(listId, hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS]);
     }
     INC(totGen);
     _Tmove *move;

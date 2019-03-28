@@ -118,7 +118,7 @@ public:
     void setHash(Hash *h) {
         hash = h;
     }
-    
+
 private:
 
     Hash *hash;
@@ -163,9 +163,14 @@ private:
 
     int mainMateIn;
     int mainDepth;
-    inline int checkHash(const int type, const bool quies, const int alpha, const int beta, const int depth,
-                         const u64 zobristKeyR, _TcheckHash &checkHashStruct) {
+    inline pair<int, _TcheckHash> checkHash(const int type,
+                                            const bool quies,
+                                            const int alpha,
+                                            const int beta,
+                                            const int depth,
+                                            const u64 zobristKeyR) {
         ASSERT(hash);
+        _TcheckHash checkHashStruct;
         Hash::_ThashData *phashe = &checkHashStruct.phasheType[type];
         if ((phashe->dataU = hash->readHash(type, zobristKeyR))) {
             if (phashe->dataS.depth >= depth) {
@@ -179,20 +184,20 @@ private:
                         case Hash::hashfEXACT:
                             if (phashe->dataS.score >= beta) {
                                 INC(hash->n_cut_hashB);
-                                return beta;
+                                return pair<int, _TcheckHash>(beta, checkHashStruct);
                             }
                             break;
                         case Hash::hashfBETA:
                             if (!quies)incHistoryHeuristic(phashe->dataS.from, phashe->dataS.to, 1);
                             if (phashe->dataS.score >= beta) {
                                 INC(hash->n_cut_hashB);
-                                return beta;
+                                return pair<int, _TcheckHash>(beta, checkHashStruct);
                             }
                             break;
                         case Hash::hashfALPHA:
                             if (phashe->dataS.score <= alpha) {
                                 INC(hash->n_cut_hashA);
-                                return alpha;
+                                return pair<int, _TcheckHash>(alpha, checkHashStruct);
                             }
                             break;
                         default:
@@ -203,7 +208,7 @@ private:
             }
         }
         INC(hash->cutFailed);
-        return INT_MAX;
+        return pair<int, _TcheckHash>(INT_MAX, checkHashStruct);
 
     }
 };
