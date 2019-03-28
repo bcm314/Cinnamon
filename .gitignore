@@ -1,5 +1,4 @@
 *.dll
-*.exe
 *.o
 *.so
 cmake-build-debug 
