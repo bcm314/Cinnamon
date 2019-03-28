@@ -152,7 +152,6 @@ void Uci::listner(IterativeDeeping *it) {
         } else if (token == "ucinewgame") {
             while (it->getRunning());
             searchManager.loadFen();
-            searchManager.clearHash();
             knowCommand = true;
         } else if (token == "setvalue") {
             getToken(uip, token);
