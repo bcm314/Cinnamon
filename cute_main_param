@@ -1,4 +1,0 @@
-export concurrency=1
-export second_param=option.Threads=4
-export first="/home/geko/cinnamon21 proto=uci "
-export tc="40/2:0+0.00"
