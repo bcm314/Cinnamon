@@ -22,7 +22,7 @@
 #include "db/bitbase/kpk.h"
 #include "namespaces/board.h"
 
-bool Search::runningThread;
+bool volatile Search::runningThread;
 high_resolution_clock::time_point Search::startTime;
 using namespace _bitbase;
 void Search::run() {
@@ -376,7 +376,7 @@ bool Search::checkDraw(u64 key) {
 }
 
 void Search::setMainParam(const int depth) {
-    memset(&pvLine, 0, sizeof(_TpvLine));
+    memset(&pvLine, 0, sizeof(_TpvLine)); //TODO primo byte=0
     mainDepth = depth;
 }
 
@@ -680,7 +680,7 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     if (!getRunning()) {
         return 0;
     }
-
+//if(depth == 0 && pline->cmove==0)depth++;
 //    const int v = probeTB(side, N_PIECE, depth);
 //    if (v != INT_MAX) {
 //        return v;

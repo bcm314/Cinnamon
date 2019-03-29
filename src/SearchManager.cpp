@@ -90,15 +90,12 @@ void SearchManager::lazySMP(const int mply) {
     for (int ii = 0; ii < threadPool->getNthread(); ii++) {
         Search &idThread1 = threadPool->getNextThread();
         idThread1.setRunning(1);
-        startThread(idThread1, mply + (ii % 2));
+        startThread(idThread1, mply + ((ii & 1) ^ 1));
     }
     threadPool->joinAll();
     debug("end lazySMP ---------------------------");
 
     ASSERT(!threadPool->getBitCount());
-    if (lineWin.cmove <= 0) {
-        singleSearch(mply);
-    }
 }
 
 void SearchManager::receiveObserverSearch(const int threadID) {

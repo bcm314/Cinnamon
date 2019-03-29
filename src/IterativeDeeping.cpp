@@ -72,8 +72,6 @@ void IterativeDeeping::run() {
     int timeTaken = 0;
     searchManager.setRunning(2);
     searchManager.setRunningThread(true);
-    int mply = 0;
-
 
     //openbook
     if (openBook) {
@@ -101,7 +99,7 @@ void IterativeDeeping::run() {
     int sc = 0;
     unsigned totMoves;
 
-    mply = 0;
+    int mply = 0;
 
     searchManager.startClock();
     searchManager.clearHistoryHeuristic();
