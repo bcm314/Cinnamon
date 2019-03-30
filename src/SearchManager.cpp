@@ -70,11 +70,10 @@ void SearchManager::singleSearch(const int mply) {
     threadPool->getThread(0).setMainParam(mply);
     threadPool->getThread(0).run();
     valWindow = threadPool->getThread(0).getValWindow();
+
     if (threadPool->getThread(0).getRunning()) {
         memcpy(&lineWin, &threadPool->getThread(0).getPvLine(), sizeof(_TpvLine));
-        for (int ii = 1; ii < threadPool->getNthread(); ii++) {
-            threadPool->getThread(ii).setValWindow(valWindow);
-        }
+
     }
     debug("end singleSearch -------------------------------");
 }
@@ -89,6 +88,7 @@ void SearchManager::lazySMP(const int mply) {
 
     for (int ii = 0; ii < threadPool->getNthread(); ii++) {
         Search &idThread1 = threadPool->getNextThread();
+        idThread1.setValWindow(valWindow);
         idThread1.setRunning(1);
         startThread(idThread1, mply + ((ii & 1) ^ 1));
     }
@@ -107,6 +107,7 @@ void SearchManager::receiveObserverSearch(const int threadID) {
         stopAllThread();
         memcpy(&lineWin, &threadPool->getThread(threadID).getPvLine(), sizeof(_TpvLine));
         mateIn = threadPool->getThread(threadID).getMateIn();
+        valWindow = threadPool->getThread(threadID).getValWindow();
         ASSERT(mateIn == INT_MAX);
 
         debug("win", threadID);
