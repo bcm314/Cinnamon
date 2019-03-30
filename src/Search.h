@@ -71,7 +71,7 @@ public:
 
     void run();
 
-    void endRun();
+    void endRun(){};
 #ifndef JS_MODE
     void printDtmGtb();
     void printDtmSyzygy();

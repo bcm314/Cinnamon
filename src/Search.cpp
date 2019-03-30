@@ -34,9 +34,9 @@ void Search::run() {
     }
 }
 
-void Search::endRun() {
-    SearchManager::getInstance().receiveObserverSearch(getId());
-}
+//void Search::endRun() {
+//    SearchManager::getInstance().receiveObserverSearch(getId());
+//}
 
 template<bool searchMoves>
 void Search::aspirationWindow(const int depth, const int valWin) {
@@ -46,7 +46,7 @@ void Search::aspirationWindow(const int depth, const int valWin) {
     if (depth == 1) {
         valWindow = search<searchMoves>(depth, -_INFINITE - 1, _INFINITE + 1);
     } else {
-        ASSERT(INT_MAX != valWindow);
+//        ASSERT(INT_MAX != valWindow);
         int tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW, valWindow + VAL_WINDOW);
 
         if (tmp <= valWindow - VAL_WINDOW || tmp >= valWindow + VAL_WINDOW) {

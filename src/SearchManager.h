@@ -84,7 +84,6 @@ public:
 
     void setRunningThread(bool r);
 
-    void search(int mply);
     string probeRootTB();
     void setRunning(int i);
 
@@ -138,7 +137,7 @@ public:
 
     void deleteGtb();
 
-    void receiveObserverSearch(int threadID);
+//    void receiveObserverSearch(int threadID);
 
     bool setNthread(int);
 
@@ -215,16 +214,15 @@ public:
     const Hash *getHash() const {
         return &hash;
     }
-
+    void search(int mply);
     static SYZYGY *getSyzygy();
 private:
 
     Hash hash;
     SearchManager();
     ThreadPool<Search> *threadPool = nullptr;
-    void lazySMP(const int mply);
 
-    void singleSearch(int mply);
+
 
     int mateIn;
     int valWindow = INT_MAX;

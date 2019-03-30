@@ -54,69 +54,74 @@ string SearchManager::probeRootTB() {
 }
 
 void SearchManager::search(const int mply) {
-
-    if (threadPool->getNthread() > 1 && mply > 3) {
-        lazySMP(mply);
-    } else {
-        singleSearch(mply);
-    }
-}
-
-void SearchManager::singleSearch(const int mply) {
     debug("start singleSearch -------------------------------");
     lineWin.cmove = -1;
     setMainPly(mply);
     ASSERT(!threadPool->getBitCount());
-    threadPool->getThread(0).setMainParam(mply);
-    threadPool->getThread(0).run();
-    valWindow = threadPool->getThread(0).getValWindow();
+    debug("start lazySMP --------------------------");
+    if (mply > 3)
+        for (int ii = 1; ii < threadPool->getNthread(); ii++) {
+            Search &helperThread = threadPool->getNextThread();
+            if (helperThread.getId() == 0)continue;
+            helperThread.setValWindow(valWindow);
+            helperThread.setRunning(1);
+            startThread(helperThread, mply + ((ii & 1) ^ 1));
+        }
 
-    if (threadPool->getThread(0).getRunning()) {
-        memcpy(&lineWin, &threadPool->getThread(0).getPvLine(), sizeof(_TpvLine));
+    debug("end lazySMP ---------------------------");
+    Search& mainThread =threadPool->getThread(0);
+    mainThread.setMainParam(mply);
+    mainThread.run();
 
+    valWindow = mainThread.getValWindow();
+
+    if (mainThread.getRunning()) {
+        memcpy(&lineWin, &mainThread.getPvLine(), sizeof(_TpvLine));
     }
+    stopAllThread();
+    threadPool->joinAll();
     debug("end singleSearch -------------------------------");
 }
 
-void SearchManager::lazySMP(const int mply) {
-    ASSERT (mply > 1);
-    lineWin.cmove = -1;
-    setMainPly(mply);
-    ASSERT(!threadPool->getBitCount());
+//void SearchManager::lazySMP(const int mply) {
+//    ASSERT (mply > 1);
+//    lineWin.cmove = -1;
+//    setMainPly(mply);
+//    ASSERT(!threadPool->getBitCount());
+//
+//    debug("start lazySMP --------------------------");
+//
+//    for (int ii = 0; ii < threadPool->getNthread(); ii++) {
+//        Search &idThread1 = threadPool->getNextThread();
+//        idThread1.setValWindow(valWindow);
+//        idThread1.setRunning(1);
+//        startThread(idThread1, mply + ((ii & 1) ^ 1));
+//    }
+//    threadPool->joinAll();
+//    debug("end lazySMP ---------------------------");
+//
+//    ASSERT(!threadPool->getBitCount());
+//}
 
-    debug("start lazySMP --------------------------");
-
-    for (int ii = 0; ii < threadPool->getNthread(); ii++) {
-        Search &idThread1 = threadPool->getNextThread();
-        idThread1.setValWindow(valWindow);
-        idThread1.setRunning(1);
-        startThread(idThread1, mply + ((ii & 1) ^ 1));
-    }
-    threadPool->joinAll();
-    debug("end lazySMP ---------------------------");
-
-    ASSERT(!threadPool->getBitCount());
-}
-
-void SearchManager::receiveObserverSearch(const int threadID) {
-    ASSERT(threadPool->getNthread() > 1);
-    spinlockSearch.lock();
-    INC(checkSmp1);
-
-    if (getRunning(threadID) && lineWin.cmove == -1) {
-        stopAllThread();
-        memcpy(&lineWin, &threadPool->getThread(threadID).getPvLine(), sizeof(_TpvLine));
-        mateIn = threadPool->getThread(threadID).getMateIn();
-        valWindow = threadPool->getThread(threadID).getValWindow();
-        ASSERT(mateIn == INT_MAX);
-
-        debug("win", threadID);
-        ASSERT(lineWin.cmove);
-    }
-    ADD(checkSmp1, -1);
-    ASSERT(!checkSmp1);
-    spinlockSearch.unlock();
-}
+//void SearchManager::receiveObserverSearch(const int threadID) {
+//    ASSERT(threadPool->getNthread() > 1);
+//    spinlockSearch.lock();
+//    INC(checkSmp1);
+//
+//    if (getRunning(threadID) && lineWin.cmove == -1) {
+//        stopAllThread();
+//        memcpy(&lineWin, &threadPool->getThread(threadID).getPvLine(), sizeof(_TpvLine));
+//        mateIn = threadPool->getThread(threadID).getMateIn();
+//        valWindow = threadPool->getThread(threadID).getValWindow();
+//        ASSERT(mateIn == INT_MAX);
+//
+//        debug("win", threadID);
+//        ASSERT(lineWin.cmove);
+//    }
+//    ADD(checkSmp1, -1);
+//    ASSERT(!checkSmp1);
+//    spinlockSearch.unlock();
+//}
 
 bool SearchManager::getRes(_Tmove &resultMove, string &ponderMove, string &pvv, int *mateIn1) {
     if (lineWin.cmove < 1) {
