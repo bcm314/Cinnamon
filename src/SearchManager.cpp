@@ -54,22 +54,26 @@ string SearchManager::probeRootTB() {
 }
 
 void SearchManager::search(const int mply) {
+    constexpr int SkipStep[64] =
+        {0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1,
+         1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3};
+
     debug("start singleSearch -------------------------------");
     lineWin.cmove = -1;
     setMainPly(mply);
     ASSERT(!threadPool->getBitCount());
     debug("start lazySMP --------------------------");
-    if (mply > 6)
-        for (int ii = 1; ii < threadPool->getNthread(); ii++) {
-            Search &helperThread = threadPool->getNextThread();
-            if (helperThread.getId() == 0)continue;
-            helperThread.setValWindow(valWindow);
-            helperThread.setRunning(1);
-            startThread(helperThread, mply + ((ii & 1) ^ 1));
-        }
+   
+    for (int ii = 1; ii < threadPool->getNthread(); ii++) {
+        Search &helperThread = threadPool->getNextThread();
+        if (helperThread.getId() == 0)continue;
+        helperThread.setValWindow(valWindow);
+        helperThread.setRunning(1);
+        startThread(helperThread, mply + SkipStep[ii]);
+    }
 
     debug("end lazySMP ---------------------------");
-    Search& mainThread =threadPool->getThread(0);
+    Search &mainThread = threadPool->getThread(0);
     mainThread.setMainParam(mply);
     mainThread.run();
 
