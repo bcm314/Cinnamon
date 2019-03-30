@@ -91,9 +91,9 @@ public:
         return runningThread;
     }
 
-    void setValWindow(int valWin) {
-        Search::valWindow = valWin;
-    }
+//    void setValWindow(int valWin) {
+//        Search::valWindow = valWin;
+//    }
 
     int getValWindow() const {
         return valWindow;

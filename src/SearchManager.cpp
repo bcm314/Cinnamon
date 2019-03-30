@@ -23,7 +23,7 @@ using namespace _logger;
 GTB *SearchManager::gtb;
 SYZYGY *SearchManager::syzygy;
 SearchManager::SearchManager() {
-    SET(checkSmp1, 0);
+    //SET(checkSmp1, 0);
     threadPool = new ThreadPool<Search>();
     setNthread(1);
 
@@ -54,6 +54,7 @@ string SearchManager::probeRootTB() {
 }
 
 void SearchManager::search(const int mply) {
+
     constexpr int SkipStep[64] =
         {0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1,
          1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3};
@@ -61,13 +62,13 @@ void SearchManager::search(const int mply) {
     debug("start singleSearch -------------------------------");
     lineWin.cmove = -1;
     setMainPly(mply);
-    ASSERT(!threadPool->getBitCount());
+    ASSERT(bitCount(threadPool->getBitCount())<2);
     debug("start lazySMP --------------------------");
    
     for (int ii = 1; ii < threadPool->getNthread(); ii++) {
         Search &helperThread = threadPool->getNextThread();
         if (helperThread.getId() == 0)continue;
-        helperThread.setValWindow(valWindow);
+
         helperThread.setRunning(1);
         startThread(helperThread, mply + SkipStep[ii]);
     }
@@ -77,7 +78,7 @@ void SearchManager::search(const int mply) {
     mainThread.setMainParam(mply);
     mainThread.run();
 
-    valWindow = mainThread.getValWindow();
+    mainThread.getValWindow();
 
     if (mainThread.getRunning()) {
         memcpy(&lineWin, &mainThread.getPvLine(), sizeof(_TpvLine));

@@ -222,13 +222,9 @@ private:
     SearchManager();
     ThreadPool<Search> *threadPool = nullptr;
 
-
-
     int mateIn;
-    int valWindow = INT_MAX;
-    _TpvLine lineWin;
 
-    Spinlock spinlockSearch;
+    _TpvLine lineWin;
 
     void setMainPly(const int r);
 
@@ -236,11 +232,11 @@ private:
 
     void stopAllThread();
 
-#ifdef DEBUG_MODE
-
-    atomic_int checkSmp1;
-
-#endif
+//#ifdef DEBUG_MODE
+//
+//    atomic_int checkSmp1;
+//
+//#endif
 
 };
 
