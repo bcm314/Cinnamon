@@ -14,7 +14,13 @@ or any UCI-compatible GUI. Cinnamon is also a javascript library to play with
 Version  
 ----------  
 2.2
-  
+
+News
+----------
+- Bugs fixed in Uci protocol
+- Improved eval function
+- Improved null moves
+
 Features  
 ----------  
             
