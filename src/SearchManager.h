@@ -137,8 +137,6 @@ public:
 
     void deleteGtb();
 
-//    void receiveObserverSearch(int threadID);
-
     bool setNthread(int);
 
 #if defined(FULL_TEST)
@@ -222,25 +220,15 @@ private:
     SearchManager();
     ThreadPool<Search> *threadPool = nullptr;
 
-
-
     int mateIn;
-    int valWindow = INT_MAX;
-    _TpvLine lineWin;
 
-    Spinlock spinlockSearch;
+    _TpvLine lineWin;
 
     void setMainPly(const int r);
 
     void startThread(Search &thread, const int depth);
 
     void stopAllThread();
-
-#ifdef DEBUG_MODE
-
-    atomic_int checkSmp1;
-
-#endif
 
 };
 
