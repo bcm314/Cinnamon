@@ -59,7 +59,7 @@ void SearchManager::search(const int mply) {
     setMainPly(mply);
     ASSERT(!threadPool->getBitCount());
     debug("start lazySMP --------------------------");
-    if (mply > 3)
+    if (mply > 6)
         for (int ii = 1; ii < threadPool->getNthread(); ii++) {
             Search &helperThread = threadPool->getNextThread();
             if (helperThread.getId() == 0)continue;
