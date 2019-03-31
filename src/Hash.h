@@ -72,7 +72,7 @@ public:
     };
 
 #ifdef DEBUG_MODE
-    unsigned nRecordHashA, nRecordHashB, nRecordHashE, collisions;
+    unsigned nRecordHashA, nRecordHashB, nRecordHashE, collisions, readCollisions;
 
     int n_cut_hashA, n_cut_hashB, cutFailed, probeHash;
 #endif
@@ -87,19 +87,26 @@ public:
 
     void clearAge();
 
-    u64 readHash(const int type, const u64 zobristKeyR) const {
+    u64 readHash(const int type, const u64 zobristKeyR)
+#ifndef DEBUG_MODE
+    const;
+#endif
+    {
         const _Thash *hash = &(hashArray[type][zobristKeyR % HASH_SIZE]);
         const u64 data = hash->u.dataU;
         const u64 k = hash->key;
         if (zobristKeyR == (k ^ data)) {
             return data;
         }
+#ifdef DEBUG_MODE
+        if (data)
+            readCollisions++;
+#endif
         return 0;
     }
 
     void recordHash(const u64 zobristKey, _ThashData &tmp) {
         ASSERT(zobristKey);
-
         const int kMod = zobristKey % HASH_SIZE;
         _Thash *rootHashG = &(hashArray[HASH_GREATER][kMod]);
 
@@ -118,8 +125,12 @@ public:
 
         _Thash *rootHashA = &(hashArray[HASH_ALWAYS][kMod]);
 
-        if (rootHashA->u.dataS.depth >= tmp.dataS.depth && rootHashA->u.dataS.entryAge) {
+#ifdef DEBUG_MODE
+        if (rootHashA->u.dataU) {
             INC(collisions);
+        }
+#endif
+        if (rootHashA->u.dataS.depth >= tmp.dataS.depth && rootHashA->u.dataS.entryAge) {
             return;
         }
         tmp.dataS.entryAge = 1;

@@ -71,7 +71,7 @@ public:
 
     void run();
 
-    void endRun();
+    void endRun(){};
 #ifndef JS_MODE
     void printDtmGtb();
     void printDtmSyzygy();
@@ -91,9 +91,9 @@ public:
         return runningThread;
     }
 
-    void setValWindow(int valWin) {
-        Search::valWindow = valWin;
-    }
+//    void setValWindow(int valWin) {
+//        Search::valWindow = valWin;
+//    }
 
     int getValWindow() const {
         return valWindow;

@@ -171,6 +171,7 @@ void IterativeDeeping::run() {
         int nCutRazor = searchManager.getNCutRazor();
 
         int collisions = searchManager.getHash()->collisions;
+        unsigned readCollisions = searchManager.getHash()->readCollisions;
         int nNullMoveCut = searchManager.getHash()->cutFailed;
         unsigned totGen = searchManager.getTotGen();
         if (nCutAB) {
@@ -187,7 +188,8 @@ void IterativeDeeping::run() {
         cout << "info string razor cut: " << nCutRazor << endl;
         cout << "info string null move cut: " << nNullMoveCut << endl;
 
-        cout << "info string hash collisions : " << collisions * 100 / totStoreHash << "%" << endl;
+        cout << "info string hash write collisions : " << collisions * 100 / totStoreHash << "%" << endl;
+        cout << "info string hash read collisions : " << readCollisions * 100 / totStoreHash << "%" << endl;
 #endif
         ///is a valid move?
         bool trace = true;
