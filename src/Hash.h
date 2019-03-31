@@ -89,7 +89,7 @@ public:
 
     u64 readHash(const int type, const u64 zobristKeyR)
 #ifndef DEBUG_MODE
-    const;
+    const
 #endif
     {
         const _Thash *hash = &(hashArray[type][zobristKeyR % HASH_SIZE]);
