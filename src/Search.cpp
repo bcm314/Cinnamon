@@ -690,14 +690,14 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 
     //************* hash ****************
     u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
-
-    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, alpha, beta, depth, zobristKeyR);
-    if (pline->cmove && hashGreaterItem.first != INT_MAX) {
+    char flag;
+    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, alpha, beta, depth, zobristKeyR, &flag);
+    if (hashGreaterItem.first != INT_MAX && (flag != Hash::hashfEXACT || pline->cmove)) {
         return hashGreaterItem.first;
     };
 
-    pair<int, _TcheckHash> hashAlwaysItem = checkHash(Hash::HASH_ALWAYS, alpha, beta, depth, zobristKeyR);
-    if (pline->cmove && hashAlwaysItem.first != INT_MAX) {
+    pair<int, _TcheckHash> hashAlwaysItem = checkHash(Hash::HASH_ALWAYS, alpha, beta, depth, zobristKeyR, &flag);
+    if (hashAlwaysItem.first != INT_MAX && (flag != Hash::hashfEXACT || pline->cmove)) {
         return hashAlwaysItem.first;
     };
     ///********** end hash ***************
@@ -845,8 +845,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
                 INC(nCutAB);
                 ADD(betaEfficiency, betaEfficiencyCount / (double) listcount * 100.0);
 
-                    Hash::_ThashData data(score, depth - extension, move->from, move->to, 0, Hash::hashfBETA);
-                    hash->recordHash(zobristKeyR, data);
+                Hash::_ThashData data(score, depth - extension, move->from, move->to, 0, Hash::hashfBETA);
+                hash->recordHash(zobristKeyR, data);
 
                 if (depth < 31)
                     setHistoryHeuristic(move->from, move->to, 1 << depth);
@@ -862,8 +862,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
         }
     }
 
-        Hash::_ThashData data(score, depth - extension, best->from, best->to, 0, hashf);
-        hash->recordHash(zobristKeyR, data);
+    Hash::_ThashData data(score, depth - extension, best->from, best->to, 0, hashf);
+    hash->recordHash(zobristKeyR, data);
 
     decListId();
     return score;

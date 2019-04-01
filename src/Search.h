@@ -167,7 +167,7 @@ private:
                                             const int alpha,
                                             const int beta,
                                             const int depth,
-                                            const u64 zobristKeyR) {
+                                            const u64 zobristKeyR, char* flag ) {
         ASSERT(hash);
         _TcheckHash checkHashStruct;
         Hash::_ThashData phashe = checkHashStruct.phasheType[type];
@@ -184,18 +184,21 @@ private:
                         case Hash::hashfEXACT:
 
                             INC(hash->n_cut_hashB);
+                            *flag = Hash::hashfEXACT;
                             return pair<int, _TcheckHash>(phashe.dataS.score, checkHashStruct);
 
                         case Hash::hashfBETA:
                             incHistoryHeuristic(phashe.dataS.from, phashe.dataS.to, 1);
                             if (phashe.dataS.score >= beta) {
                                 INC(hash->n_cut_hashB);
+                                *flag = Hash::hashfBETA;
                                 return pair<int, _TcheckHash>(beta, checkHashStruct);
                             }
                             break;
                         case Hash::hashfALPHA:
                             if (phashe.dataS.score <= alpha) {
                                 INC(hash->n_cut_hashA);
+                                *flag = Hash::hashfALPHA;
                                 return pair<int, _TcheckHash>(alpha, checkHashStruct);
                             }
                             break;
