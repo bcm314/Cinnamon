@@ -142,7 +142,7 @@ private:
     bool checkDraw(u64);
 
     template<int side, bool checkMoves>
-    int search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn, int n_root_moves, bool pv);
+    int search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn, int n_root_moves);
     int probeTB(const int side, const int N_PIECE, const int depth) const;
 
     template<bool checkMoves>
