@@ -71,7 +71,7 @@ public:
 
     void run();
 
-    void endRun(){};
+    void endRun() { };
 #ifndef JS_MODE
     void printDtmGtb();
     void printDtmSyzygy();
@@ -142,7 +142,7 @@ private:
     bool checkDraw(u64);
 
     template<int side, bool checkMoves>
-    int search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn, int n_root_moves);
+    int search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn, int n_root_moves, bool pv);
     int probeTB(const int side, const int N_PIECE, const int depth) const;
 
     template<bool checkMoves>
@@ -164,38 +164,37 @@ private:
     int mainMateIn;
     int mainDepth;
     inline pair<int, _TcheckHash> checkHash(const int type,
-                                            const bool quies,
                                             const int alpha,
                                             const int beta,
                                             const int depth,
                                             const u64 zobristKeyR) {
         ASSERT(hash);
         _TcheckHash checkHashStruct;
-        Hash::_ThashData *phashe = &checkHashStruct.phasheType[type];
-        if ((phashe->dataU = hash->readHash(type, zobristKeyR))) {
-            if (phashe->dataS.depth >= depth) {
+        Hash::_ThashData phashe = checkHashStruct.phasheType[type];
+        if ((phashe.dataU = hash->readHash(type, zobristKeyR))) {
+            if (phashe.dataS.depth >= depth) {
                 INC(hash->probeHash);
                 if (!currentPly) {
-                    if (phashe->dataS.flags == Hash::hashfBETA) {
-                        incHistoryHeuristic(phashe->dataS.from, phashe->dataS.to, 1);
+                    if (phashe.dataS.flags == Hash::hashfBETA) {
+                        incHistoryHeuristic(phashe.dataS.from, phashe.dataS.to, 1);
                     }
-                } else {
-                    switch (phashe->dataS.flags) {
+                }
+                {
+                    switch (phashe.dataS.flags) {
                         case Hash::hashfEXACT:
-                            if (phashe->dataS.score >= beta) {
-                                INC(hash->n_cut_hashB);
-                                return pair<int, _TcheckHash>(beta, checkHashStruct);
-                            }
-                            break;
+
+                            INC(hash->n_cut_hashB);
+                            return pair<int, _TcheckHash>(phashe.dataS.score, checkHashStruct);
+
                         case Hash::hashfBETA:
-                            if (!quies)incHistoryHeuristic(phashe->dataS.from, phashe->dataS.to, 1);
-                            if (phashe->dataS.score >= beta) {
+                            incHistoryHeuristic(phashe.dataS.from, phashe.dataS.to, 1);
+                            if (phashe.dataS.score >= beta) {
                                 INC(hash->n_cut_hashB);
                                 return pair<int, _TcheckHash>(beta, checkHashStruct);
                             }
                             break;
                         case Hash::hashfALPHA:
-                            if (phashe->dataS.score <= alpha) {
+                            if (phashe.dataS.score <= alpha) {
                                 INC(hash->n_cut_hashA);
                                 return pair<int, _TcheckHash>(alpha, checkHashStruct);
                             }

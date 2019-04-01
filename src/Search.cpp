@@ -204,20 +204,7 @@ int Search::quiescence(int alpha, int beta, const char promotionPiece, int N_PIE
     if (score >= beta) {
         return beta;
     }
-    ///************* hash ****************
-    char hashf = Hash::hashfALPHA;
-
-    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, true, alpha, beta, depth, zobristKeyR);
-    if (hashGreaterItem.first != INT_MAX) {
-        return hashGreaterItem.first;
-    };
-
-    pair<int, _TcheckHash> hashAlwaysItem = checkHash(Hash::HASH_ALWAYS, true, alpha, beta, depth, zobristKeyR);
-    if (hashAlwaysItem.first != INT_MAX) {
-        return hashAlwaysItem.first;
-    };
-
-///********** end hash ***************
+  
 /**************Delta Pruning ****************/
     char fprune = 0;
     int fscore;
@@ -243,14 +230,9 @@ int Search::quiescence(int alpha, int beta, const char promotionPiece, int N_PIE
         return score;
     }
     _Tmove *move;
-    _Tmove *best = &gen_list[listId].moveList[0];
+   
     const u64 oldKey = chessboard[ZOBRISTKEY_IDX];
-    if (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags & 0x3) {
-        sortFromHash(listId, hashGreaterItem.second.phasheType[Hash::HASH_GREATER]);
-    }
-    else if (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags & 0x3) {
-        sortFromHash(listId, hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS]);
-    }
+   
     while ((move = getNextMove(&gen_list[listId]))) {
         if (!makemove(move, false, true)) {
             takeback(move, oldKey, false);
@@ -270,20 +252,12 @@ int Search::quiescence(int alpha, int beta, const char promotionPiece, int N_PIE
         if (score > alpha) {
             if (score >= beta) {
                 decListId();
-
-                Hash::_ThashData data(score, depth, move->from, move->to, 0, Hash::hashfBETA);
-                hash->recordHash(zobristKeyR, data);
                 return beta;
             }
-            best = move;
             alpha = score;
-            hashf = Hash::hashfEXACT;
         }
     }
-    Hash::_ThashData data(score, depth, best->from, best->to, 0, hashf);
-    hash->recordHash(zobristKeyR, data);
     decListId();
-
     return score;
 }
 
@@ -397,10 +371,10 @@ int Search::search(const int depth, const int alpha, const int beta) {
                                                   &pvLine,
                                                   bitCount(getBitmap<WHITE>() | getBitmap<BLACK>()),
                                                   &mainMateIn,
-                                                  n_root_movesTODOcrafty)
+                                                  n_root_movesTODOcrafty, false)
                      : search<BLACK, searchMoves>(depth, alpha, beta, &pvLine,
                                                   bitCount(getBitmap<WHITE>() | getBitmap<BLACK>()), &mainMateIn,
-                                                  n_root_movesTODOcrafty);
+                                                  n_root_movesTODOcrafty, false);
 }
 
 string Search::probeRootTB() {
@@ -672,7 +646,14 @@ int Search::probeGtb(const int side, const int N_PIECE, const int depth) const {
 }
 
 template<int side, bool checkMoves>
-int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn, int n_root_moves) {
+int Search::search(int depth,
+                   int alpha,
+                   int beta,
+                   _TpvLine *pline,
+                   int N_PIECE,
+                   int *mateIn,
+                   int n_root_moves,
+                   bool pv) {
     ASSERT_RANGE(depth, 0, MAX_PLY);
     INC(cumulativeMovesCount);
 
@@ -717,14 +698,14 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     //************* hash ****************
     u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
 
-    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, false, alpha, beta, depth, zobristKeyR);
+    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, alpha, beta, depth, zobristKeyR);
     if (hashGreaterItem.first != INT_MAX) {
-        return hashGreaterItem.first;
+        if (pv)return hashGreaterItem.first;
     };
 
-    pair<int, _TcheckHash> hashAlwaysItem = checkHash(Hash::HASH_ALWAYS, false, alpha, beta, depth, zobristKeyR);
+    pair<int, _TcheckHash> hashAlwaysItem = checkHash(Hash::HASH_ALWAYS, alpha, beta, depth, zobristKeyR);
     if (hashAlwaysItem.first != INT_MAX) {
-        return hashAlwaysItem.first;
+        if (pv)return hashAlwaysItem.first;
     };
     ///********** end hash ***************
 
@@ -748,7 +729,7 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
             const int R = NULL_DEPTH + depth / NULL_DIVISOR;
             const int nullScore =
                 (depth - R - 1 > 0) ?
-                -search<side ^ 1, checkMoves>(depth - R - 1, -beta, -beta + 1, &line, N_PIECE, mateIn, n_root_moves)
+                -search<side ^ 1, checkMoves>(depth - R - 1, -beta, -beta + 1, &line, N_PIECE, mateIn, n_root_moves, pv)
                                     :
                 -quiescence<side ^ 1>(-beta, -beta + 1, -1, N_PIECE, 0);
             nullSearch = false;
@@ -807,9 +788,9 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     }
     ASSERT(gen_list[listId].size > 0);
     _Tmove *best = &gen_list[listId].moveList[0];
-    if (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags & 0x3) {
+    if ((hashGreaterItem.first = !INT_MAX) && (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags & 0x3)) {
         sortFromHash(listId, hashGreaterItem.second.phasheType[Hash::HASH_GREATER]);
-    } else if (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags & 0x3) {
+    } else if ((hashAlwaysItem.first = !INT_MAX) && (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags & 0x3)) {
         sortFromHash(listId, hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS]);
     }
     INC(totGen);
@@ -837,7 +818,14 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
         if (countMove > 4 && !is_incheck_side && depth >= 3 && move->capturedPiece == SQUARE_FREE &&
             move->promotionPiece == NO_PROMOTION) {
             currentPly++;
-            val = -search<side ^ 1, checkMoves>(depth - 2, -(alpha + 1), -alpha, &line, N_PIECE, mateIn, n_root_moves);
+            val = -search<side ^ 1, checkMoves>(depth - 2,
+                                                -(alpha + 1),
+                                                -alpha,
+                                                &line,
+                                                N_PIECE,
+                                                mateIn,
+                                                n_root_moves,
+                                                pv);
             ASSERT(val != INT_MAX);
             currentPly--;
         }
@@ -848,14 +836,14 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
             currentPly++;
             val = -search<side ^ 1, checkMoves>(depth - 1, -upb, -lwb, &line,
                                                 move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
-                                                mateIn, n_root_moves);
+                                                mateIn, n_root_moves, pv);
             ASSERT(val != INT_MAX);
             currentPly--;
             if (doMws && (lwb < val) && (val < beta)) {
                 currentPly++;
                 val = -search<side ^ 1, checkMoves>(depth - 1, -beta, -val + 1,
                                                     &line, move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
-                                                    mateIn, n_root_moves);
+                                                    mateIn, n_root_moves, pv);
                 currentPly--;
             }
         }
@@ -868,8 +856,10 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
                 ASSERT(move->score == score);
                 INC(nCutAB);
                 ADD(betaEfficiency, betaEfficiencyCount / (double) listcount * 100.0);
+                if (!nullSearch) {
                 Hash::_ThashData data(score, depth - extension, move->from, move->to, 0, Hash::hashfBETA);
                 hash->recordHash(zobristKeyR, data);
+                }
                 if (depth < 31)
                     setHistoryHeuristic(move->from, move->to, 1 << depth);
                 else
@@ -880,11 +870,14 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
             hashf = Hash::hashfEXACT;
             best = move;
             move->score = score;    //used in it
+            pv = true;
             updatePv(pline, &line, move);
         }
     }
+    if (!nullSearch) {
     Hash::_ThashData data(score, depth - extension, best->from, best->to, 0, hashf);
     hash->recordHash(zobristKeyR, data);
+    }
     decListId();
     return score;
 }
