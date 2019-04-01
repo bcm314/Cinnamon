@@ -844,10 +844,10 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
                 ASSERT(move->score == score);
                 INC(nCutAB);
                 ADD(betaEfficiency, betaEfficiencyCount / (double) listcount * 100.0);
-                if (!nullSearch) {
+
                     Hash::_ThashData data(score, depth - extension, move->from, move->to, 0, Hash::hashfBETA);
                     hash->recordHash(zobristKeyR, data);
-                }
+
                 if (depth < 31)
                     setHistoryHeuristic(move->from, move->to, 1 << depth);
                 else
@@ -861,10 +861,10 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
             updatePv(pline, &line, move);
         }
     }
-    if (!nullSearch) {
+
         Hash::_ThashData data(score, depth - extension, best->from, best->to, 0, hashf);
         hash->recordHash(zobristKeyR, data);
-    }
+
     decListId();
     return score;
 }
