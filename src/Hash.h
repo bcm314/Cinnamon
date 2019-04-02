@@ -105,7 +105,7 @@ public:
         return 0;
     }
 
-    void recordHash(const u64 zobristKey, _ThashData &tmp) {
+    void recordHash(const u64 zobristKey, _ThashData &tmp) {return;
         ASSERT(zobristKey);
         const int kMod = zobristKey % HASH_SIZE;
         _Thash *rootHashG = &(hashArray[HASH_GREATER][kMod]);
