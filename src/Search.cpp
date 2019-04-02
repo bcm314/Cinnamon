@@ -720,8 +720,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
                     alpha = hashGreaterItem.first;
                 break;
         }
-        if (alpha >= beta)
-            return alpha;
+//        if (alpha >= beta)
+//            return alpha;
     }
 
 //    flag = Hash::hashfEXACT;
