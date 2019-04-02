@@ -91,7 +91,7 @@ public:
 #ifndef DEBUG_MODE
     const
 #endif
-    {return 0;
+    {
         const _Thash *hash = &(hashArray[type][zobristKeyR % HASH_SIZE]);
         const u64 data = hash->u.dataU;
         const u64 k = hash->key;
@@ -106,7 +106,7 @@ public:
     }
 
     void recordHash(const u64 zobristKey, _ThashData &tmp) {
-        return;
+
         ASSERT(zobristKey);
         const int kMod = zobristKey % HASH_SIZE;
         _Thash *rootHashG = &(hashArray[HASH_GREATER][kMod]);
