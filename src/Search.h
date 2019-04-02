@@ -163,51 +163,38 @@ private:
 
     int mainMateIn;
     int mainDepth;
-    inline pair<int, _TcheckHash> checkHash(const int type,
+    inline pair<int, _TcheckHash> checkHash(const int type, //TODO return phashe.dataU
 //                                            const int alpha,
 //                                            const int beta,
                                             const int depth,
                                             const u64 zobristKeyR, char *flag) {
         ASSERT(hash);
         _TcheckHash checkHashStruct;
+//        if (currentPly) {
         Hash::_ThashData phashe = checkHashStruct.phasheType[type];
         if ((phashe.dataU = hash->readHash(type, zobristKeyR))) {
             if (phashe.dataS.depth >= depth) {
                 INC(hash->probeHash);
-//                if (!currentPly) {
-//                    if (phashe.dataS.flags == Hash::hashfBETA) {
-//                        incHistoryHeuristic(phashe.dataS.from, phashe.dataS.to, 1);
-//                    }
-//                }
-//                {
                 switch (phashe.dataS.flags) {
                     case Hash::hashfEXACT:
-
                         INC(hash->n_cut_hashB);
                         *flag = Hash::hashfEXACT;
-                        return pair<int, _TcheckHash>(phashe.dataS.score, checkHashStruct);
-
+                        break;
                     case Hash::hashfBETA:
-                        // incHistoryHeuristic(phashe.dataS.from, phashe.dataS.to, 1);
-//                        if (phashe.dataS.score >= beta) {
                         INC(hash->n_cut_hashB);
                         *flag = Hash::hashfBETA;
-                        return pair<int, _TcheckHash>(phashe.dataS.score, checkHashStruct);
-//                        }
                         break;
                     case Hash::hashfALPHA:
-//                        if (phashe.dataS.score <= alpha) {
                         INC(hash->n_cut_hashA);
                         *flag = Hash::hashfALPHA;
-                        return pair<int, _TcheckHash>(phashe.dataS.score, checkHashStruct);
-//                        }
                         break;
                     default:
-                        fatal("error checkHash");
+                        fatal("error unknow flag");
                         break;
                 }
-//                }
+                return pair<int, _TcheckHash>(phashe.dataS.score, checkHashStruct);
             }
+//            }
         }
         INC(hash->cutFailed);
         return pair<int, _TcheckHash>(INT_MAX, checkHashStruct);

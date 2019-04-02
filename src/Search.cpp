@@ -691,9 +691,9 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 
     //************* hash ****************
     u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
-    char flag;
+    char flag = '-';
     pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, depth, zobristKeyR, &flag);
-    if (hashGreaterItem.first != INT_MAX) {
+    if (pline->cmove && hashGreaterItem.first != INT_MAX) {
         switch (flag) {
             case Hash::hashfEXACT:
                 if (pline->cmove)
