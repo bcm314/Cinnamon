@@ -35,7 +35,7 @@ class Hash{
 public:
 
     static constexpr int HASH_GREATER = 0;
-    static constexpr int HASH_ALWAYS = 1;
+    static constexpr int HASH_ALWAYS1 = 1;
     Hash();
     typedef union _ThashData {
         u64 dataU;
@@ -122,20 +122,20 @@ public:
             nRecordHashE++;
         }
 #endif
-
-        _Thash *rootHashA = &(hashArray[HASH_ALWAYS][kMod]);
-
-#ifdef DEBUG_MODE
-        if (rootHashA->u.dataU) {
-            INC(collisions);
-        }
-#endif
-        if (rootHashA->u.dataS.depth >= tmp.dataS.depth && rootHashA->u.dataS.entryAge) {
-            return;
-        }
-        tmp.dataS.entryAge = 1;
-        rootHashA->key = (zobristKey ^ tmp.dataU);
-        rootHashA->u.dataU = tmp.dataU;
+//
+//        _Thash *rootHashA = &(hashArray[HASH_ALWAYS][kMod]);
+//
+//#ifdef DEBUG_MODE
+//        if (rootHashA->u.dataU) {
+//            INC(collisions);
+//        }
+//#endif
+//        if (rootHashA->u.dataS.depth >= tmp.dataS.depth && rootHashA->u.dataS.entryAge) {
+//            return;
+//        }
+//        tmp.dataS.entryAge = 1;
+//        rootHashA->key = (zobristKey ^ tmp.dataU);
+//        rootHashA->u.dataU = tmp.dataU;
 
     }
 
