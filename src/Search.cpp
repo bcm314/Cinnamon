@@ -708,7 +708,7 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 //                    alpha = hashGreaterItem.first;
                 break;
             case Hash::hashfBETA:
-                if (hashGreaterItem.first > beta) {
+                if (hashGreaterItem.first > beta) {//TODO < va in illegal move
                     incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
                                         hashGreaterItem.second.phasheType->dataS.to,
                                         1);
@@ -716,12 +716,12 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
                 }
                 break;
             case Hash::hashfALPHA:
-                if (hashGreaterItem.first < alpha)
+                if (hashGreaterItem.first < alpha) //TODO > va in illegal move
                     alpha = hashGreaterItem.first;
                 break;
         }
-//        if (alpha >= beta)
-//            return alpha;
+        if (alpha >= beta)
+            return alpha;
     }
 
 //    flag = Hash::hashfEXACT;
