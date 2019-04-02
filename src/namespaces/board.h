@@ -26,7 +26,7 @@
 using namespace _def;
 namespace _board {
 
-    static const string NAME = "Cinnamon 2.2-56_percx";
+    static const string NAME = "Cinnamon no_hash";
     static const string STARTPOS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     static constexpr int MAX_PLY = 96;
