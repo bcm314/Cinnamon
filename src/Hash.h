@@ -30,7 +30,7 @@
 using namespace _board;
 using namespace _logger;
 
-class Hash{
+class Hash {
 
 public:
 
@@ -109,7 +109,9 @@ public:
         ASSERT(zobristKey);
         const int kMod = zobristKey % HASH_SIZE;
         _Thash *rootHashG = &(hashArray[HASH_GREATER][kMod]);
-
+        if (rootHashG->u.dataS.depth > tmp.dataS.depth) {
+            return;
+        }
         rootHashG->key = (zobristKey ^ tmp.dataU);
         rootHashG->u.dataU = tmp.dataU;
 
