@@ -43,35 +43,35 @@ void Search::aspirationWindow(const int depth, const int valWin) {
     valWindow = valWin;
     init();
 
-    if (depth == 1) {
+//    if (depth == 1) {
         valWindow = search<searchMoves>(depth, -_INFINITE - 1, _INFINITE + 1);
-    } else {
-//        ASSERT(INT_MAX != valWindow);
-        int tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW, valWindow + VAL_WINDOW);
-
-        if (tmp <= valWindow - VAL_WINDOW || tmp >= valWindow + VAL_WINDOW) {
-            if (tmp <= valWindow - VAL_WINDOW) {
-                tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW * 2, valWindow + VAL_WINDOW);
-            } else {
-                tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW, valWindow + VAL_WINDOW * 2);
-            }
-
-            if (tmp <= valWindow - VAL_WINDOW || tmp >= valWindow + VAL_WINDOW) {
-                if (tmp <= valWindow - VAL_WINDOW) {
-                    tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW * 4, valWindow + VAL_WINDOW);
-                } else {
-                    tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW, valWindow + VAL_WINDOW * 4);
-                }
-
-                if (tmp <= valWindow - VAL_WINDOW || tmp >= valWindow + VAL_WINDOW) {
-                    tmp = search<searchMoves>(mainDepth, -_INFINITE - 1, _INFINITE + 1);
-                }
-            }
-        }
-        if (getRunning()) {
-            valWindow = tmp;
-        }
-    }
+//    } else {
+////        ASSERT(INT_MAX != valWindow);
+//        int tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW, valWindow + VAL_WINDOW);
+//
+//        if (tmp <= valWindow - VAL_WINDOW || tmp >= valWindow + VAL_WINDOW) {
+//            if (tmp <= valWindow - VAL_WINDOW) {
+//                tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW * 2, valWindow + VAL_WINDOW);
+//            } else {
+//                tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW, valWindow + VAL_WINDOW * 2);
+//            }
+//
+//            if (tmp <= valWindow - VAL_WINDOW || tmp >= valWindow + VAL_WINDOW) {
+//                if (tmp <= valWindow - VAL_WINDOW) {
+//                    tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW * 4, valWindow + VAL_WINDOW);
+//                } else {
+//                    tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW, valWindow + VAL_WINDOW * 4);
+//                }
+//
+//                if (tmp <= valWindow - VAL_WINDOW || tmp >= valWindow + VAL_WINDOW) {
+//                    tmp = search<searchMoves>(mainDepth, -_INFINITE - 1, _INFINITE + 1);
+//                }
+//            }
+//        }
+//        if (getRunning()) {
+//            valWindow = tmp;
+//        }
+//    }
 }
 
 Search::Search() : ponder(false), nullSearch(false) {
@@ -751,28 +751,28 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     line.cmove = 0;
 
     // ********* null move ***********
-    if (!nullSearch && /*!pv_node &&*/  !is_incheck_side) {
-        int n_depth = (n_root_moves > 17 || depth > 3) ? 1 : 3;
-        if (n_depth == 3) {
-            const u64 pieces = getPiecesNoKing<side>();
-            if (pieces != chessboard[PAWN_BLACK + side] || bitCount(pieces) > 9)
-                n_depth = 1;
-        }
-        if (depth > n_depth) {
-            nullSearch = true;
-            const int R = NULL_DEPTH + depth / NULL_DIVISOR;
-            const int nullScore =
-                (depth - R - 1 > 0) ?
-                -search<side ^ 1, checkMoves>(depth - R - 1, -beta, -beta + 1, &line, N_PIECE, mateIn, n_root_moves)
-                                    :
-                -quiescence<side ^ 1>(-beta, -beta + 1, -1, N_PIECE, 0);
-            nullSearch = false;
-            if (nullScore >= beta) {
-                INC(nNullMoveCut);
-                return nullScore;
-            }
-        }
-    }
+//    if (!nullSearch && /*!pv_node &&*/  !is_incheck_side) {
+//        int n_depth = (n_root_moves > 17 || depth > 3) ? 1 : 3;
+//        if (n_depth == 3) {
+//            const u64 pieces = getPiecesNoKing<side>();
+//            if (pieces != chessboard[PAWN_BLACK + side] || bitCount(pieces) > 9)
+//                n_depth = 1;
+//        }
+//        if (depth > n_depth) {
+//            nullSearch = true;
+//            const int R = NULL_DEPTH + depth / NULL_DIVISOR;
+//            const int nullScore =
+//                (depth - R - 1 > 0) ?
+//                -search<side ^ 1, checkMoves>(depth - R - 1, -beta, -beta + 1, &line, N_PIECE, mateIn, n_root_moves)
+//                                    :
+//                -quiescence<side ^ 1>(-beta, -beta + 1, -1, N_PIECE, 0);
+//            nullSearch = false;
+//            if (nullScore >= beta) {
+//                INC(nNullMoveCut);
+//                return nullScore;
+//            }
+//        }
+//    }
 
     ///******* null move end ********
 
@@ -780,25 +780,25 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     /**************Futility Pruning razor at pre-pre-frontier*****/
     bool futilPrune = false;
     int futilScore = 0;
-    if (depth <= 3 && !is_incheck_side) {
-        int matBalance = lazyEval<side>();
-        if ((futilScore = matBalance + FUTIL_MARGIN) <= alpha) {
-            if (depth == 3 && (matBalance + RAZOR_MARGIN) <= alpha && getNpiecesNoPawnNoKing<side ^ 1>() > 3) {
-                INC(nCutRazor);
-                depth--;
-            } else
-                ///**************Futility Pruning at pre-frontier*****
-            if (depth == 2 && (futilScore = matBalance + EXT_FUTILY_MARGIN) <= alpha) {
-                futilPrune = true;
-                score = futilScore;
-            } else
-                ///**************Futility Pruning at frontier*****
-            if (depth == 1) {
-                futilPrune = true;
-                score = futilScore;
-            }
-        }
-    }
+//    if (depth <= 3 && !is_incheck_side) {
+//        int matBalance = lazyEval<side>();
+//        if ((futilScore = matBalance + FUTIL_MARGIN) <= alpha) {
+//            if (depth == 3 && (matBalance + RAZOR_MARGIN) <= alpha && getNpiecesNoPawnNoKing<side ^ 1>() > 3) {
+//                INC(nCutRazor);
+//                depth--;
+//            } else
+//                ///**************Futility Pruning at pre-frontier*****
+//            if (depth == 2 && (futilScore = matBalance + EXT_FUTILY_MARGIN) <= alpha) {
+//                futilPrune = true;
+//                score = futilScore;
+//            } else
+//                ///**************Futility Pruning at frontier*****
+//            if (depth == 1) {
+//                futilPrune = true;
+//                score = futilScore;
+//            }
+//        }
+//    }
     /************ end Futility Pruning*************/
     incListId();
     ASSERT_RANGE(KING_BLACK + side, 0, 11);
