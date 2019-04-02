@@ -696,8 +696,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     if (hashGreaterItem.first != INT_MAX) {
         switch (flag) {
             case Hash::hashfEXACT:
-//                if (pline->cmove)
-//                    return hashGreaterItem.first;
+                if (pline->cmove)
+                    return hashGreaterItem.first;
 //                else
 //                if (hashGreaterItem.first > beta) {
 //                    incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
