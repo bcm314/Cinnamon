@@ -163,7 +163,7 @@ private:
 
     int mainMateIn;
     int mainDepth;
-    inline pair<int, _TcheckHash> checkHash(const int type, //TODO return phashe.dataU
+    inline pair<Hash::_ThashData, _TcheckHash> checkHash(const int type, //TODO return phashe.dataU
 //                                            const int alpha,
 //                                            const int beta,
                                             const int depth,
@@ -173,7 +173,7 @@ private:
 //        if (currentPly) {
         Hash::_ThashData phashe = checkHashStruct.phasheType[type];
         if ((phashe.dataU = hash->readHash(type, zobristKeyR))) {
-            if (phashe.dataS.depth >= depth) {
+//            if (phashe.dataS.depth >= depth) {
                 INC(hash->probeHash);
                 switch (phashe.dataS.flags) {
                     case Hash::hashfEXACT:
@@ -192,12 +192,13 @@ private:
                         fatal("error unknow flag");
                         break;
                 }
-                return pair<int, _TcheckHash>(phashe.dataS.score, checkHashStruct);
-            }
+                return pair<Hash::_ThashData, _TcheckHash>(phashe, checkHashStruct);
+//            }
 //            }
         }
         INC(hash->cutFailed);
-        return pair<int, _TcheckHash>(INT_MAX, checkHashStruct);
+        phashe.dataU=0;
+        return pair<Hash::_ThashData, _TcheckHash>(phashe, checkHashStruct);
 
     }
 };

@@ -44,7 +44,7 @@ void Search::aspirationWindow(const int depth, const int valWin) {
     init();
 
 //    if (depth == 1) {
-        valWindow = search<searchMoves>(depth, -_INFINITE - 1, _INFINITE + 1);
+    valWindow = search<searchMoves>(depth, -_INFINITE - 1, _INFINITE + 1);
 //    } else {
 ////        ASSERT(INT_MAX != valWindow);
 //        int tmp = search<searchMoves>(mainDepth, valWindow - VAL_WINDOW, valWindow + VAL_WINDOW);
@@ -690,14 +690,19 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     }
 
     //************* hash ****************
-  u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
-      char flag = '-';
-    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, depth, zobristKeyR, &flag);
-    if (hashGreaterItem.first != INT_MAX) {
-        switch (flag) {
-            case Hash::hashfEXACT:
-                if (pline->cmove)
-                    return hashGreaterItem.first;
+    u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
+    char flag = '-';
+    pair<Hash::_ThashData, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, depth, zobristKeyR, &flag);
+    if (hashGreaterItem.first.dataU != 0) {
+
+            incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
+                                hashGreaterItem.second.phasheType->dataS.to,
+                                1);
+        if (hashGreaterItem.first.dataS.depth >= depth) {
+            switch (flag) {
+                case Hash::hashfEXACT:
+                    if (pline->cmove)
+                        return hashGreaterItem.first.dataS.score;
 //                else
 //                if (hashGreaterItem.first > beta) {
 //                    incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
@@ -706,20 +711,20 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 //                    beta = hashGreaterItem.first;
 //                } else if (hashGreaterItem.first < alpha)
 //                    alpha = hashGreaterItem.first;
-                break;
-            case Hash::hashfBETA:
-                if (hashGreaterItem.first >= beta) {//TODO < va in illegal move
-                    incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
-                                        hashGreaterItem.second.phasheType->dataS.to,
-                                        1);
-                    return hashGreaterItem.first;
-                }
-                break;
-            case Hash::hashfALPHA:
-                if (hashGreaterItem.first <= alpha) //TODO > va in illegal move
-                    return hashGreaterItem.first;
-                break;
+                    break;
+                case Hash::hashfBETA:
+                    if (hashGreaterItem.first.dataS.score >= beta) {//TODO < va in illegal move
+
+                        return hashGreaterItem.first.dataS.score;
+                    }
+                    break;
+                case Hash::hashfALPHA:
+                    if (hashGreaterItem.first.dataS.score <= alpha) //TODO > va in illegal move
+                        return hashGreaterItem.first.dataS.score;
+                    break;
+            }
         }
+
 //        if (alpha >= beta)
 //            return alpha;
     }
