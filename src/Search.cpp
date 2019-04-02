@@ -692,7 +692,7 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     //************* hash ****************
     u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
     char flag;
-    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, alpha, beta, depth, zobristKeyR, &flag);
+    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, depth, zobristKeyR, &flag);
     if (hashGreaterItem.first != INT_MAX) {
         switch (flag) {
             case Hash::hashfEXACT:
@@ -700,8 +700,12 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
                     return hashGreaterItem.first;
                 break;
             case Hash::hashfBETA:
-                if (hashGreaterItem.first < beta)
+                if (hashGreaterItem.first < beta) {
+                    incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
+                                        hashGreaterItem.second.phasheType->dataS.to,
+                                        1);
                     beta = hashGreaterItem.first;
+                }
                 break;
             case Hash::hashfALPHA:
                 if (hashGreaterItem.first > alpha)
