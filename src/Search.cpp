@@ -693,11 +693,18 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
     char flag = '-';
     pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, depth, zobristKeyR, &flag);
-    if (pline->cmove && hashGreaterItem.first != INT_MAX) {
+    if (hashGreaterItem.first != INT_MAX) {
         switch (flag) {
             case Hash::hashfEXACT:
-//                if (pline->cmove)
+                if (pline->cmove)
                     return hashGreaterItem.first;
+                else if (hashGreaterItem.first > beta) {
+                    incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
+                                        hashGreaterItem.second.phasheType->dataS.to,
+                                        1);
+                    beta = hashGreaterItem.first;
+                } else if (hashGreaterItem.first < alpha)
+                    alpha = hashGreaterItem.first;
                 break;
             case Hash::hashfBETA:
                 if (hashGreaterItem.first > beta) {
@@ -712,8 +719,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
                     alpha = hashGreaterItem.first;
                 break;
         }
-        if (alpha >= beta)
-            return alpha;
+//        if (alpha >= beta)
+//            return alpha;
     }
 
 //    flag = Hash::hashfEXACT;
