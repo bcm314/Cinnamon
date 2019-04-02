@@ -704,7 +704,7 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 //                                        hashGreaterItem.second.phasheType->dataS.to,
 //                                        1);
 //                    beta = hashGreaterItem.first;
-//                } else if (hashGreaterItem.first < alpha)
+//                } else if (hashGreaterItem.first < alpha) 
 //                    alpha = hashGreaterItem.first;
                 break;
             case Hash::hashfBETA:
