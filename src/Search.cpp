@@ -716,8 +716,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 //                }
                 break;
             case Hash::hashfALPHA:
-//                if (hashGreaterItem.first <= alpha) //TODO > va in illegal move
-//                    return hashGreaterItem.first;
+                if (hashGreaterItem.first <= alpha) //TODO > va in illegal move
+                    return hashGreaterItem.first;
                 break;
         }
 //        if (alpha >= beta)
