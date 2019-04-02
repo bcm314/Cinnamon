@@ -708,15 +708,15 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 //                    alpha = hashGreaterItem.first;
                 break;
             case Hash::hashfBETA:
-//                if (hashGreaterItem.first < beta) {
-//                    incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
-//                                        hashGreaterItem.second.phasheType->dataS.to,
-//                                        1);
-//                    beta = hashGreaterItem.first;
-//                }
+                if (hashGreaterItem.first > beta) {
+                    incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
+                                        hashGreaterItem.second.phasheType->dataS.to,
+                                        1);
+                    beta = hashGreaterItem.first;
+                }
                 break;
             case Hash::hashfALPHA:
-                if (hashGreaterItem.first > alpha)
+                if (hashGreaterItem.first < alpha)
                     alpha = hashGreaterItem.first;
                 break;
         }
