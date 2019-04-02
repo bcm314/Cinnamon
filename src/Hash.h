@@ -145,7 +145,7 @@ private:
 #ifdef JS_MODE
     static constexpr int HASH_SIZE_DEFAULT = 1;
 #else
-    static constexpr int HASH_SIZE_DEFAULT = 64;
+    static constexpr int HASH_SIZE_DEFAULT = 128;//TODO
 #endif
 
     void dispose();

@@ -289,8 +289,8 @@ int Search::getMaxTimeMillsec() {
 void Search::sortFromHash(const int listId, const Hash::_ThashData &phashe) {
     for (int r = 0; r < gen_list[listId].size; r++) {
         _Tmove *mos = &gen_list[listId].moveList[r];
-        if(phashe.dataS.from< 0 ||  phashe.dataS.from>63)return;//TODO dif develop
-        if(phashe.dataS.to< 0 ||  phashe.dataS.to>63)return;
+        if (phashe.dataS.from < 0 || phashe.dataS.from > 63)return;//TODO dif develop
+        if (phashe.dataS.to < 0 || phashe.dataS.to > 63)return;
 
         if (phashe.dataS.from == mos->from && phashe.dataS.to == mos->to) {
             mos->score = _INFINITE / 2;
@@ -691,16 +691,44 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 
     //************* hash ****************
     u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
-    char flag = Hash::hashfEXACT;
+    char flag;
     pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, alpha, beta, depth, zobristKeyR, &flag);
-    if (hashGreaterItem.first != INT_MAX && (flag != Hash::hashfEXACT || pline->cmove)) {
-        return hashGreaterItem.first;
-    };
-    flag = Hash::hashfEXACT;
-    pair<int, _TcheckHash> hashAlwaysItem = checkHash(Hash::HASH_ALWAYS, alpha, beta, depth, zobristKeyR, &flag);
-    if (hashAlwaysItem.first != INT_MAX && (flag != Hash::hashfEXACT || pline->cmove)) {
-        return hashAlwaysItem.first;
-    };
+    if (hashGreaterItem.first != INT_MAX) {
+        switch (flag) {
+            case Hash::hashfEXACT:
+                if (pline->cmove)
+                    return hashGreaterItem.first;
+                break;
+            case Hash::hashfBETA:
+                if (hashGreaterItem.first < beta)
+                    beta = hashGreaterItem.first;
+                break;
+            case Hash::hashfALPHA:
+                if (hashGreaterItem.first > alpha)
+                    alpha = hashGreaterItem.first;
+                break;
+        }
+        if (alpha >= beta)
+            return alpha;
+    }
+
+//    flag = Hash::hashfEXACT;
+//    pair<int, _TcheckHash> hashAlwaysItem = checkHash(Hash::HASH_ALWAYS, alpha, beta, depth, zobristKeyR, &flag);
+//    if (hashAlwaysItem.first != INT_MAX) {
+//        switch (flag) {
+//            case Hash::hashfEXACT:
+//                if (pline->cmove)return hashGreaterItem.first;
+//                break;
+//            case Hash::hashfBETA:
+//                return hashGreaterItem.first;
+//            case Hash::hashfALPHA:
+//                alpha = hashGreaterItem.first;
+//                break;
+//        }
+////        if (flag != Hash::hashfEXACT || pline->cmove) {
+////            return hashGreaterItem.first;
+////        };
+//    }
     ///********** end hash ***************
 
     if (!(numMoves % 8192)) {
@@ -782,12 +810,14 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     }
     ASSERT(gen_list[listId].size > 0);
     _Tmove *best = &gen_list[listId].moveList[0];
-    if ((hashGreaterItem.first != INT_MAX) && (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags & 0x3)) {
+    if ((hashGreaterItem.first != INT_MAX)
+        && (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags & 0x3)) {
         sortFromHash(listId, hashGreaterItem.second.phasheType[Hash::HASH_GREATER]);
-    } else if ((hashAlwaysItem.first != INT_MAX)
-        && (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags & 0x3)) {
-        sortFromHash(listId, hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS]);
     }
+//    else if ((hashAlwaysItem.first != INT_MAX)
+//        && (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags & 0x3)) {
+//        sortFromHash(listId, hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS]);
+//    }
     INC(totGen);
     _Tmove *move;
     bool checkInCheck = false;
