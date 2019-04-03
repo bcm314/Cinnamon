@@ -5061,12 +5061,7 @@ public:
                     chessboard[KING_WHITE] = POW2[kw];
                     chessboard[KING_BLACK] = POW2[kb];
                     chessboard[PAWN_BLACK + pawncolor] = POW2[p];
-//if(kw==B4 && kb ==G4 && p ==E4 && pawncolor == WHITE && side ==BLACK)
-//    cout<<"TODO";
-
                     const auto res = gtb.getDtm(side, false, chessboard, 100);
-
-//cout <<"\n";
                     if (res == GTB_DRAW) {
                         if (pawncolor == WHITE) kpkBitbaseWhite[side][kw][kb] |= POW2[p]; else
                             kpkBitbaseBlack[side][kw][kb] |= POW2[p];

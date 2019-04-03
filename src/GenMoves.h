@@ -278,6 +278,8 @@ public:
     bool generatePuzzle(const string type);
 
     void incHistoryHeuristic(const int from, const int to, const int value) {
+        if(from < 0 || from >63)        return;//TODO
+        if(to < 0 || to >63)        return;
         ASSERT_RANGE(from, 0, 63);
         ASSERT_RANGE(to, 0, 63);
         ASSERT(historyHeuristic[from][to] <= historyHeuristic[from][to] + value);

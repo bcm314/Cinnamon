@@ -32,10 +32,6 @@ class Search: public Eval, public Thread<Search> {
 
 public:
 
-    typedef struct {
-        Hash::_ThashData phasheType[2];
-    } _TcheckHash;
-
     Search();
 
     Search(const Search *s) { clone(s); }
@@ -163,42 +159,17 @@ private:
 
     int mainMateIn;
     int mainDepth;
-    inline pair<Hash::_ThashData, _TcheckHash> checkHash(const int type, //TODO return phashe.dataU
-//                                            const int alpha,
-//                                            const int beta,
-                                            const int depth,
-                                            const u64 zobristKeyR, char *flag) {
+    inline Hash::_ThashData checkHash(const u64 zobristKeyR) {
         ASSERT(hash);
-        _TcheckHash checkHashStruct;
+        Hash::_ThashData phashe;
 //        if (currentPly) {
-        Hash::_ThashData phashe = checkHashStruct.phasheType[type];
-        if ((phashe.dataU = hash->readHash(type, zobristKeyR))) {
-//            if (phashe.dataS.depth >= depth) {
-                INC(hash->probeHash);
-                switch (phashe.dataS.flags) {
-                    case Hash::hashfEXACT:
-                        INC(hash->n_cut_hashB);
-                        *flag = Hash::hashfEXACT;
-                        break;
-                    case Hash::hashfBETA:
-                        INC(hash->n_cut_hashB);
-                        *flag = Hash::hashfBETA;
-                        break;
-                    case Hash::hashfALPHA:
-                        INC(hash->n_cut_hashA);
-                        *flag = Hash::hashfALPHA;
-                        break;
-                    default:
-                        fatal("error unknow flag");
-                        break;
-                }
-                return pair<Hash::_ThashData, _TcheckHash>(phashe, checkHashStruct);
-//            }
-//            }
+
+        if ((phashe.dataU = hash->readHash(zobristKeyR))) {
+            return phashe;
         }
         INC(hash->cutFailed);
-        phashe.dataU=0;
-        return pair<Hash::_ThashData, _TcheckHash>(phashe, checkHashStruct);
+        phashe.dataU = 0;
+        return phashe;
 
     }
 };

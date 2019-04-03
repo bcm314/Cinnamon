@@ -691,18 +691,18 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 
     //************* hash ****************
     u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
-    char flag = '-';
-    pair<Hash::_ThashData, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, depth, zobristKeyR, &flag);
-    if (hashGreaterItem.first.dataU != 0) {
 
-            incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
-                                hashGreaterItem.second.phasheType->dataS.to,
+    Hash::_ThashData hashGreaterItem = checkHash(zobristKeyR);
+    if (hashGreaterItem.dataU != 0) {
+
+            incHistoryHeuristic(hashGreaterItem.dataS.from,
+                                hashGreaterItem.dataS.to,
                                 1);
-        if (hashGreaterItem.first.dataS.depth >= depth) {
-            switch (flag) {
+        if (hashGreaterItem.dataS.depth >= depth) {
+            switch (hashGreaterItem.dataS.flags) {
                 case Hash::hashfEXACT:
                     if (pline->cmove)
-                        return hashGreaterItem.first.dataS.score;
+                        return hashGreaterItem.dataS.score;
 //                else
 //                if (hashGreaterItem.first > beta) {
 //                    incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
@@ -713,14 +713,14 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 //                    alpha = hashGreaterItem.first;
                     break;
                 case Hash::hashfBETA:
-                    if (hashGreaterItem.first.dataS.score >= beta) {//TODO < va in illegal move
+                    if (hashGreaterItem.dataS.score >= beta) {//TODO < va in illegal move
 
-                        return hashGreaterItem.first.dataS.score;
+                        return hashGreaterItem.dataS.score;
                     }
                     break;
                 case Hash::hashfALPHA:
-                    if (hashGreaterItem.first.dataS.score <= alpha) //TODO > va in illegal move
-                        return hashGreaterItem.first.dataS.score;
+                    if (hashGreaterItem.dataS.score <= alpha) //TODO > va in illegal move
+                        return hashGreaterItem.dataS.score;
                     break;
             }
         }

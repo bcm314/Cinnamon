@@ -34,8 +34,6 @@ class Hash {
 
 public:
 
-    static constexpr int HASH_GREATER = 0;
-    static constexpr int HASH_ALWAYS1 = 1;
     Hash();
     typedef union _ThashData {
         u64 dataU;
@@ -87,12 +85,12 @@ public:
 
     void clearAge();
 
-    u64 readHash(const int type, const u64 zobristKeyR)
+    u64 readHash(const u64 zobristKeyR)
 #ifndef DEBUG_MODE
     const
 #endif
     {
-        const _Thash *hash = &(hashArray[type][zobristKeyR % HASH_SIZE]);
+        const _Thash *hash = &(hashArray[zobristKeyR % HASH_SIZE]);
         const u64 data = hash->u.dataU;
         const u64 k = hash->key;
         if (zobristKeyR == (k ^ data)) {
@@ -109,7 +107,11 @@ public:
 
         ASSERT(zobristKey);
         const int kMod = zobristKey % HASH_SIZE;
-        _Thash *rootHashG = &(hashArray[HASH_GREATER][kMod]);
+        _Thash *rootHashG = &(hashArray[kMod]);
+        if(rootHashG->u.dataS.from<0||rootHashG->u.dataS.from>63)//TODO
+            return;
+        if(rootHashG->u.dataS.to<0||rootHashG->u.dataS.to>63)
+            return;
         if (rootHashG->u.dataS.depth > tmp.dataS.depth) {
             return;
         }
@@ -152,6 +154,6 @@ private:
 #endif
 
     void dispose();
-    _Thash *hashArray[2];
+    _Thash *hashArray;
 };
 
