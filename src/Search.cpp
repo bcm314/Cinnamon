@@ -692,18 +692,21 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     //************* hash ****************
     u64 zobristKeyR = chessboard[ZOBRISTKEY_IDX] ^_random::RANDSIDE[side];
 
-    Hash::_ThashData hashGreaterItem = checkHash(zobristKeyR);
-    if (hashGreaterItem.dataU != 0) {
+    ASSERT(hash);
+    Hash::_ThashData phashe;
+    phashe.dataU = hash->readHash(zobristKeyR);
 
-            incHistoryHeuristic(hashGreaterItem.dataS.from,
-                                hashGreaterItem.dataS.to,
-                                1);
-        if (hashGreaterItem.dataS.depth >= depth) {
-            switch (hashGreaterItem.dataS.flags) {
+    if (phashe.dataU == 0) {
+        INC(hash->cutFailed);
+    }
+    else {
+        incHistoryHeuristic(phashe.dataS.from, phashe.dataS.to, 1);
+        if (phashe.dataS.depth >= depth) {
+            switch (phashe.dataS.flags) {
                 case Hash::hashfEXACT:
                     if (pline->cmove) {
                         INC(hash->n_cut_hashE);
-                        return hashGreaterItem.dataS.score;
+                        return phashe.dataS.score;
                     }
 //                else
 //                if (hashGreaterItem.first > beta) {
@@ -715,15 +718,15 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 //                    alpha = hashGreaterItem.first;
                     break;
                 case Hash::hashfBETA:
-                    if (hashGreaterItem.dataS.score >= beta) {//TODO < va in illegal move
+                    if (phashe.dataS.score >= beta) {//TODO < va in illegal move
                         INC(hash->n_cut_hashB);
-                        return hashGreaterItem.dataS.score;
+                        return phashe.dataS.score;
                     }
                     break;
                 case Hash::hashfALPHA:
-                    if (hashGreaterItem.dataS.score <= alpha) {//TODO > va in illegal move
+                    if (phashe.dataS.score <= alpha) {//TODO > va in illegal move
                         INC(hash->n_cut_hashA);
-                        return hashGreaterItem.dataS.score;
+                        return phashe.dataS.score;
                     }
                     break;
             }
@@ -887,8 +890,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 //            }
 //        }
         int val = -search<side ^ 1, checkMoves>(depth - 1, -beta, -alpha,
-                                            &line, move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
-                                            mateIn, n_root_moves);
+                                                &line, move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
+                                                mateIn, n_root_moves);
         score = max(score, val);
         takeback(move, oldKey, true);
         move->score = score;

@@ -159,19 +159,7 @@ private:
 
     int mainMateIn;
     int mainDepth;
-    inline Hash::_ThashData checkHash(const u64 zobristKeyR) {
-        ASSERT(hash);
-        Hash::_ThashData phashe;
-//        if (currentPly) {
 
-        if ((phashe.dataU = hash->readHash(zobristKeyR))) {
-            return phashe;
-        }
-        INC(hash->cutFailed);
-        phashe.dataU = 0;
-        return phashe;
-
-    }
 };
 
 
