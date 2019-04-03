@@ -783,8 +783,8 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 
     /**************Futility Pruning****************/
     /**************Futility Pruning razor at pre-pre-frontier*****/
-    bool futilPrune = false;
-    int futilScore = 0;
+//    bool futilPrune = false;
+//    int futilScore = 0;
 //    if (depth <= 3 && !is_incheck_side) {
 //        int matBalance = lazyEval<side>();
 //        if ((futilScore = matBalance + FUTIL_MARGIN) <= alpha) {
@@ -849,39 +849,42 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
             continue;
         }
         checkInCheck = true;
-        if (futilPrune && ((move->type & 0x3) != PROMOTION_MOVE_MASK) &&
-            futilScore + PIECES_VALUE[move->capturedPiece] <= alpha && !inCheck<side>()) {
-            INC(nCutFp);
-            takeback(move, oldKey, true);
-            continue;
-        }
+//        if (futilPrune && ((move->type & 0x3) != PROMOTION_MOVE_MASK) &&
+//            futilScore + PIECES_VALUE[move->capturedPiece] <= alpha && !inCheck<side>()) {
+//            INC(nCutFp);
+//            takeback(move, oldKey, true);
+//            continue;
+//        }
         //Late Move Reduction
-        int val = INT_MAX;
-        if (countMove > 4 && !is_incheck_side && depth >= 3 && move->capturedPiece == SQUARE_FREE &&
-            move->promotionPiece == NO_PROMOTION) {
-            currentPly++;
-            val = -search<side ^ 1, checkMoves>(depth - 2, -(alpha + 1), -alpha, &line, N_PIECE, mateIn, n_root_moves);
-            ASSERT(val != INT_MAX);
-            currentPly--;
-        }
-        if (val > alpha) {
-            const int doMws = (score > -_INFINITE + MAX_PLY);
-            const int lwb = max(alpha, score);
-            const int upb = (doMws ? (lwb + 1) : beta);
-            currentPly++;
-            val = -search<side ^ 1, checkMoves>(depth - 1, -upb, -lwb, &line,
-                                                move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
-                                                mateIn, n_root_moves);
-            ASSERT(val != INT_MAX);
-            currentPly--;
-            if (doMws && (lwb < val) && (val < beta)) {
-                currentPly++;
-                val = -search<side ^ 1, checkMoves>(depth - 1, -beta, -val + 1,
-                                                    &line, move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
-                                                    mateIn, n_root_moves);
-                currentPly--;
-            }
-        }
+//        int val = INT_MAX;
+//        if (countMove > 4 && !is_incheck_side && depth >= 3 && move->capturedPiece == SQUARE_FREE &&
+//            move->promotionPiece == NO_PROMOTION) {
+//            currentPly++;
+//            val = -search<side ^ 1, checkMoves>(depth - 2, -(alpha + 1), -alpha, &line, N_PIECE, mateIn, n_root_moves);
+//            ASSERT(val != INT_MAX);
+//            currentPly--;
+//        }
+//        if (val > alpha) {
+//            const int doMws = (score > -_INFINITE + MAX_PLY);
+//            const int lwb = max(alpha, score);
+//            const int upb = (doMws ? (lwb + 1) : beta);
+//            currentPly++;
+//            val = -search<side ^ 1, checkMoves>(depth - 1, -upb, -lwb, &line,
+//                                                move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
+//                                                mateIn, n_root_moves);
+//            ASSERT(val != INT_MAX);
+//            currentPly--;
+//            if (doMws && (lwb < val) && (val < beta)) {
+//                currentPly++;
+//                val = -search<side ^ 1, checkMoves>(depth - 1, -beta, -val + 1,
+//                                                    &line, move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
+//                                                    mateIn, n_root_moves);
+//                currentPly--;
+//            }
+//        }
+        int val = -search<side ^ 1, checkMoves>(depth - 1, -beta, -alpha,
+                                            &line, move->capturedPiece == SQUARE_FREE ? N_PIECE : N_PIECE - 1,
+                                            mateIn, n_root_moves);
         score = max(score, val);
         takeback(move, oldKey, true);
         move->score = score;
