@@ -704,18 +704,10 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
         if (phashe.dataS.depth >= depth) {
             switch (phashe.dataS.flags) {
                 case Hash::hashfEXACT:
-                    if (pline->cmove) {
-                        INC(hash->n_cut_hashE);
-                        return phashe.dataS.score;
-                    }
-//                else
-//                if (hashGreaterItem.first > beta) {
-//                    incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
-//                                        hashGreaterItem.second.phasheType->dataS.to,
-//                                        1);
-//                    beta = hashGreaterItem.first;
-//                } else if (hashGreaterItem.first < alpha)
-//                    alpha = hashGreaterItem.first;
+//                    if (pline->cmove) {
+                    INC(hash->n_cut_hashE);
+                    return phashe.dataS.score;
+//                    }
                     break;
                 case Hash::hashfBETA:
                     if (phashe.dataS.score >= beta) {//TODO < va in illegal move
@@ -921,7 +913,6 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
 
     Hash::_ThashData data(score, depth - extension, best->from, best->to, 0, hashf);
     hash->recordHash(zobristKeyR, data);
-
     decListId();
     return score;
 }
