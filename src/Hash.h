@@ -34,8 +34,8 @@ class Hash{
 
 public:
 
-    static constexpr int HASH_GREATER = 0;
     static constexpr int HASH_ALWAYS = 1;
+    static constexpr int HASH_GREATER = 0;
     Hash();
     typedef union _ThashData {
         u64 dataU;
@@ -108,7 +108,7 @@ public:
     void recordHash(const u64 zobristKey, _ThashData &tmp) {
         ASSERT(zobristKey);
         const int kMod = zobristKey % HASH_SIZE;
-        _Thash *rootHashG = &(hashArray[HASH_GREATER][kMod]);
+        _Thash *rootHashG = &(hashArray[HASH_ALWAYS][kMod]);
 
         rootHashG->key = (zobristKey ^ tmp.dataU);
         rootHashG->u.dataU = tmp.dataU;
@@ -123,7 +123,7 @@ public:
         }
 #endif
 
-        _Thash *rootHashA = &(hashArray[HASH_ALWAYS][kMod]);
+        _Thash *rootHashA = &(hashArray[HASH_GREATER][kMod]);
 
 #ifdef DEBUG_MODE
         if (rootHashA->u.dataU) {

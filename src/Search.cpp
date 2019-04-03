@@ -207,14 +207,14 @@ int Search::quiescence(int alpha, int beta, const char promotionPiece, int N_PIE
     ///************* hash ****************
     char hashf = Hash::hashfALPHA;
 
-    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, true, alpha, beta, depth, zobristKeyR);
-    if (hashGreaterItem.first != INT_MAX) {
-        return hashGreaterItem.first;
-    };
-
     pair<int, _TcheckHash> hashAlwaysItem = checkHash(Hash::HASH_ALWAYS, true, alpha, beta, depth, zobristKeyR);
     if (hashAlwaysItem.first != INT_MAX) {
         return hashAlwaysItem.first;
+    };
+
+    pair<int, _TcheckHash> hashGreaterItem = checkHash(Hash::HASH_GREATER, true, alpha, beta, depth, zobristKeyR);
+    if (hashGreaterItem.first != INT_MAX) {
+        return hashGreaterItem.first;
     };
 
 ///********** end hash ***************
@@ -245,12 +245,12 @@ int Search::quiescence(int alpha, int beta, const char promotionPiece, int N_PIE
     _Tmove *move;
     _Tmove *best = &gen_list[listId].moveList[0];
     const u64 oldKey = chessboard[ZOBRISTKEY_IDX];
-    if (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags & 0x3) {
+    if (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags & 0x3) {
+        sortFromHash(listId, hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS]);
+    } else if (hashGreaterItem.second.phasheType[Hash::HASH_GREATER].dataS.flags & 0x3) {
         sortFromHash(listId, hashGreaterItem.second.phasheType[Hash::HASH_GREATER]);
     }
-    else if (hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS].dataS.flags & 0x3) {
-        sortFromHash(listId, hashAlwaysItem.second.phasheType[Hash::HASH_ALWAYS]);
-    }
+
     while ((move = getNextMove(&gen_list[listId]))) {
         if (!makemove(move, false, true)) {
             takeback(move, oldKey, false);

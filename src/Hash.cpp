@@ -21,7 +21,7 @@
 
 Hash::Hash() {
     HASH_SIZE = 0;
-    hashArray[HASH_GREATER] = hashArray[HASH_ALWAYS] = nullptr;
+    hashArray[HASH_ALWAYS] = hashArray[HASH_GREATER] = nullptr;
 #ifdef DEBUG_MODE
     n_cut_hashA = n_cut_hashB = cutFailed = probeHash = readCollisions = 0;
     nRecordHashA = nRecordHashB = nRecordHashE = collisions = 0;
@@ -32,7 +32,7 @@ Hash::Hash() {
 
 void Hash::clearAge() {
     for (int i = 0; i < HASH_SIZE; i++) {
-        hashArray[HASH_GREATER][i].u.dataS.entryAge = 0;
+        hashArray[HASH_ALWAYS][i].u.dataS.entryAge = 0;
     }
 }
 
@@ -40,8 +40,8 @@ void Hash::clearHash() {
     if (!HASH_SIZE) {
         return;
     }
-    memset(hashArray[HASH_ALWAYS], 0, sizeof(_Thash) * HASH_SIZE);
     memset(hashArray[HASH_GREATER], 0, sizeof(_Thash) * HASH_SIZE);
+    memset(hashArray[HASH_ALWAYS], 0, sizeof(_Thash) * HASH_SIZE);
 }
 
 int Hash::getHashSize() const {
@@ -52,13 +52,13 @@ void Hash::setHashSize(int mb) {
     dispose();
     if (mb > 0) {
         int tmp = mb * 1024 * 1000 / (sizeof(_Thash) * 2);
-        hashArray[HASH_GREATER] = (_Thash *) calloc(tmp, sizeof(_Thash));
-        if (!hashArray[HASH_GREATER]) {
+        hashArray[HASH_ALWAYS] = (_Thash *) calloc(tmp, sizeof(_Thash));
+        if (!hashArray[HASH_ALWAYS]) {
             fatal("info string error - no memory");
             exit(1);
         }
-        hashArray[HASH_ALWAYS] = (_Thash *) calloc(tmp, sizeof(_Thash));
-        if (!hashArray[HASH_ALWAYS]) {
+        hashArray[HASH_GREATER] = (_Thash *) calloc(tmp, sizeof(_Thash));
+        if (!hashArray[HASH_GREATER]) {
             fatal("info string error - no memory");
             exit(1);
         }
@@ -67,13 +67,13 @@ void Hash::setHashSize(int mb) {
 }
 
 void Hash::dispose() {
-    if (hashArray[HASH_GREATER] != nullptr) {
-        free(hashArray[HASH_GREATER]);
-    }
     if (hashArray[HASH_ALWAYS] != nullptr) {
         free(hashArray[HASH_ALWAYS]);
     }
-    hashArray[HASH_GREATER] = hashArray[HASH_ALWAYS] = nullptr;
+    if (hashArray[HASH_GREATER] != nullptr) {
+        free(hashArray[HASH_GREATER]);
+    }
+    hashArray[HASH_ALWAYS] = hashArray[HASH_GREATER] = nullptr;
     HASH_SIZE = 0;
 }
 

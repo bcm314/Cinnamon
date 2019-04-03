@@ -67,7 +67,7 @@ void IterativeDeeping::run() {
     if (LOCK_TEST_AND_SET(running)) {
         while (running);
     }
-
+    bestmove.clear();
     INC(checkSmp2);
     int timeTaken = 0;
     searchManager.setRunning(2);
@@ -128,7 +128,7 @@ void IterativeDeeping::run() {
         searchManager.setRunningThread(1);
         searchManager.setRunning(1);
         if (!searchManager.getRes(resultMove, ponderMove, pvv, &mateIn)) {
-            debug("IterativeDeeping cmove == 0, exit");
+            debug("IterativeDeeping cmove == 0. Exit");
             break;
         }
 
