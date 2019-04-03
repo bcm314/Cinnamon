@@ -70,9 +70,9 @@ public:
     };
 
 #ifdef DEBUG_MODE
-    unsigned nRecordHashA, nRecordHashB, nRecordHashE, collisions, readCollisions;
+    unsigned nRecordHashA, nRecordHashB, nRecordHashE, collisionsDepth, collisionsAge, readCollisions;
 
-    int n_cut_hashA, n_cut_hashB, cutFailed, probeHash;
+    int n_cut_hashA, n_cut_hashB, n_cut_hashE, cutFailed, probeHash;
 #endif
 
     ~Hash();
@@ -108,17 +108,23 @@ public:
         ASSERT(zobristKey);
         const int kMod = zobristKey % HASH_SIZE;
         _Thash *rootHashG = &(hashArray[kMod]);
-        if(rootHashG->u.dataS.from<0||rootHashG->u.dataS.from>63)//TODO
+        if (rootHashG->u.dataS.from < 0 || rootHashG->u.dataS.from > 63)//TODO
             return;
-        if(rootHashG->u.dataS.to<0||rootHashG->u.dataS.to>63)
+        if (rootHashG->u.dataS.to < 0 || rootHashG->u.dataS.to > 63)
             return;
         if (rootHashG->u.dataS.depth > tmp.dataS.depth) {
+            INC(collisionsDepth);
             return;
         }
-        rootHashG->key = (zobristKey ^ tmp.dataU);
-        rootHashG->u.dataU = tmp.dataU;
+
+        if (rootHashG->u.dataS.entryAge == ageCounter) {
+            INC(collisionsAge);
+            return;
+        }
+
 
 #ifdef DEBUG_MODE
+
         if (tmp.dataS.flags == hashfALPHA) {
             nRecordHashA++;
         } else if (tmp.dataS.flags == hashfBETA) {
@@ -126,7 +132,11 @@ public:
         } else {
             nRecordHashE++;
         }
+
 #endif
+        rootHashG->key = (zobristKey ^ tmp.dataU);
+        rootHashG->u.dataU = tmp.dataU;
+        rootHashG->u.dataS.entryAge = ageCounter;
 //
 //        _Thash *rootHashA = &(hashArray[HASH_ALWAYS][kMod]);
 //
@@ -143,9 +153,9 @@ public:
 //        rootHashA->u.dataU = tmp.dataU;
 
     }
-
+    void incAge() { ageCounter++; }
 private:
-
+    uchar ageCounter = 0;
     int HASH_SIZE;
 #ifdef JS_MODE
     static constexpr int HASH_SIZE_DEFAULT = 1;

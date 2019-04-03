@@ -55,6 +55,7 @@ string SearchManager::probeRootTB() {
 
 void SearchManager::search(const int mply) {
 
+    hash.incAge();
     constexpr int SkipStep[64] =
         {0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1,
          1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3, 0, 1, 1, 2, 1, 1, 2, 3};

@@ -148,17 +148,13 @@ void IterativeDeeping::run() {
         int percStoreHashA = searchManager.getHash()->nRecordHashA * 100 / totStoreHash;
         int percStoreHashB = searchManager.getHash()->nRecordHashB * 100 / totStoreHash;
         int percStoreHashE = searchManager.getHash()->nRecordHashE * 100 / totStoreHash;
-        int totCutHash = searchManager.getHash()->n_cut_hashA + searchManager.getHash()->n_cut_hashB + 1;
+        int totCutHash = searchManager.getHash()->n_cut_hashA + searchManager.getHash()->n_cut_hashB
+            + searchManager.getHash()->n_cut_hashE + 1;
         int percCutHashA = searchManager.getHash()->n_cut_hashA * 100 / totCutHash;
         int percCutHashB = searchManager.getHash()->n_cut_hashB * 100 / totCutHash;
+        int percCutHashE = searchManager.getHash()->n_cut_hashE * 100 / totCutHash;
         cout << "\ninfo string ply: " << mply << endl;
         cout << "info string tot moves: " << totMoves << endl;
-        unsigned cumulativeMovesCount = searchManager.getCumulativeMovesCount();
-        cout << "info string hash stored " << totStoreHash * 100 / (1 + cumulativeMovesCount) << "% (alpha=" <<
-            percStoreHashA << "% beta=" << percStoreHashB << "% exact=" << percStoreHashE << "%)" << endl;
-
-        cout << "info string cut hash " << totCutHash * 100 / (1 + searchManager.getCumulativeMovesCount()) <<
-            "% (alpha=" << percCutHashA << "% beta=" << percCutHashB << "%)" << endl;
 
         u64 nps = 0;
         if (timeTaken) {
@@ -170,9 +166,10 @@ void IterativeDeeping::run() {
         int nCutFp = searchManager.getNCutFp();
         int nCutRazor = searchManager.getNCutRazor();
 
-        int collisions = searchManager.getHash()->collisions;
+        int collisionsDepth = searchManager.getHash()->collisionsDepth;
+        int collisionsAge = searchManager.getHash()->collisionsAge;
         unsigned readCollisions = searchManager.getHash()->readCollisions;
-        int nNullMoveCut = searchManager.getHash()->cutFailed;
+        int cutFailed = searchManager.getHash()->cutFailed;
         unsigned totGen = searchManager.getTotGen();
         if (nCutAB) {
             cout << "info string beta efficiency: " << (int) (betaEfficiency / totGen * 10) << "%" << endl;
@@ -186,10 +183,18 @@ void IterativeDeeping::run() {
         cout << "info string lazy eval cut: " << LazyEvalCuts << endl;
         cout << "info string futility pruning cut: " << nCutFp << endl;
         cout << "info string razor cut: " << nCutRazor << endl;
-        cout << "info string null move cut: " << nNullMoveCut << endl;
-
-        cout << "info string hash write collisions : " << collisions * 100 / totStoreHash << "%" << endl;
+        cout << "info string ---- hash -----" << endl;
+        cout << "info string hash tot stored (" << totStoreHash << ") " << totStoreHash * 100 / (1 + totMoves)
+            << "% (alpha=" <<
+            percStoreHashA << "% beta=" << percStoreHashB << "% exact=" << percStoreHashE << "%)" << endl;
+        cout << "info string hash probe failed: " << cutFailed << " " << cutFailed * 100 / (1 + totStoreHash)
+            << "%" << endl;
+        cout << "info string hash write collisionsDepth : " << collisionsDepth << " collisionAge " << collisionsAge
+            << " " << (collisionsDepth + collisionsAge) * 100 / totStoreHash << "%" << endl;
         cout << "info string hash read collisions : " << readCollisions * 100 / totStoreHash << "%" << endl;
+
+        cout << "info string cut hash (" << totCutHash << ") " << totCutHash * 100 / (1 + totMoves) <<
+            "% (alpha=" << percCutHashA << "% beta=" << percCutHashB << "% exact=" << percCutHashE << "%)" << endl;
 #endif
         ///is a valid move?
         bool trace = true;

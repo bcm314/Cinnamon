@@ -478,7 +478,7 @@ bool GenMoves::makemove(const _Tmove *move, const bool rep, const bool checkInCh
 }
 
 void GenMoves::init() {
-    numMoves = numMovesq = listId = 0;
+    numMoves = listId = 0;
 #ifdef DEBUG_MODE
     nCutFp = nCutRazor = 0;
     betaEfficiency = 0.0;
@@ -488,7 +488,7 @@ void GenMoves::init() {
 }
 
 u64 GenMoves::getTotMoves() const {
-    return numMoves + numMovesq;
+    return numMoves;
 }
 
 void GenMoves::setRepetitionMapCount(const int i) {

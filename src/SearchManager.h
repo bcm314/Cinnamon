@@ -152,14 +152,6 @@ public:
 
 #ifdef DEBUG_MODE
 
-    unsigned getCumulativeMovesCount() {
-        unsigned i = 0;
-        for (Search *s:threadPool->getPool()) {
-            i += s->cumulativeMovesCount;
-        }
-        return i;
-    }
-
     unsigned getNCutAB() {
         unsigned i = 0;
         for (Search *s:threadPool->getPool()) {

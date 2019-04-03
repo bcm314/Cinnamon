@@ -76,7 +76,7 @@ void Search::aspirationWindow(const int depth, const int valWin) {
 
 Search::Search() : ponder(false), nullSearch(false) {
 #ifdef DEBUG_MODE
-    lazyEvalCuts = cumulativeMovesCount = totGen = 0;
+    lazyEvalCuts = totGen = 0;
 #endif
 
 }
@@ -649,12 +649,12 @@ int Search::probeGtb(const int side, const int N_PIECE, const int depth) const {
 template<int side, bool checkMoves>
 int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn, int n_root_moves) {
     ASSERT_RANGE(depth, 0, MAX_PLY);
-    INC(cumulativeMovesCount);
 
     ASSERT_RANGE(side, 0, 1);
     if (!getRunning()) {
         return 0;
     }
+    ++numMoves;
 //if(depth == 0 && pline->cmove==0)depth++;
 //    const int v = probeTB(side, N_PIECE, depth);
 //    if (v != INT_MAX) {
@@ -701,8 +701,10 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
         if (hashGreaterItem.dataS.depth >= depth) {
             switch (hashGreaterItem.dataS.flags) {
                 case Hash::hashfEXACT:
-                    if (pline->cmove)
+                    if (pline->cmove) {
+                        INC(hash->n_cut_hashE);
                         return hashGreaterItem.dataS.score;
+                    }
 //                else
 //                if (hashGreaterItem.first > beta) {
 //                    incHistoryHeuristic(hashGreaterItem.second.phasheType->dataS.from,
@@ -714,13 +716,15 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
                     break;
                 case Hash::hashfBETA:
                     if (hashGreaterItem.dataS.score >= beta) {//TODO < va in illegal move
-
+                        INC(hash->n_cut_hashB);
                         return hashGreaterItem.dataS.score;
                     }
                     break;
                 case Hash::hashfALPHA:
-                    if (hashGreaterItem.dataS.score <= alpha) //TODO > va in illegal move
+                    if (hashGreaterItem.dataS.score <= alpha) {//TODO > va in illegal move
+                        INC(hash->n_cut_hashA);
                         return hashGreaterItem.dataS.score;
+                    }
                     break;
             }
         }
@@ -751,7 +755,7 @@ int Search::search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE,
     if (!(numMoves % 8192)) {
         setRunning(checkTime());
     }
-    ++numMoves;
+
     _TpvLine line;
     line.cmove = 0;
 

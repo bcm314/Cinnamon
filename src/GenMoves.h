@@ -335,7 +335,6 @@ protected:
     int currentPly; //TODO eliminare
 
     u64 numMoves = 0;
-    u64 numMovesq = 0;
 
     _Tmove *getNextMove(decltype(gen_list));
 

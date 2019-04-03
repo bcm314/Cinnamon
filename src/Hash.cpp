@@ -21,10 +21,10 @@
 
 Hash::Hash() {
     HASH_SIZE = 0;
-    hashArray  = nullptr;
+    hashArray = nullptr;
 #ifdef DEBUG_MODE
-    n_cut_hashA = n_cut_hashB = cutFailed = probeHash = readCollisions = 0;
-    nRecordHashA = nRecordHashB = nRecordHashE = collisions = 0;
+    n_cut_hashA = n_cut_hashB = n_cut_hashE = cutFailed = probeHash = readCollisions = 0;
+    nRecordHashA = nRecordHashB = nRecordHashE = collisionsAge = collisionsDepth = 0;
 #endif
     setHashSize(HASH_SIZE_DEFAULT);
 
@@ -51,8 +51,8 @@ int Hash::getHashSize() const {
 void Hash::setHashSize(int mb) {
     dispose();
     if (mb > 0) {
-        int tmp = mb * 1024 * 1000 / (sizeof(_Thash) );
-        
+        int tmp = mb * 1024 * 1000 / (sizeof(_Thash));
+
         hashArray = (_Thash *) calloc(tmp, sizeof(_Thash));
         if (!hashArray) {
             fatal("info string error - no memory");
@@ -74,7 +74,7 @@ void Hash::dispose() {
 //    if (hashArray[HASH_ALWAYS] != nullptr) {
 //        free(hashArray[HASH_ALWAYS]);
 //    }
-    hashArray  = nullptr;
+    hashArray = nullptr;
     HASH_SIZE = 0;
 }
 

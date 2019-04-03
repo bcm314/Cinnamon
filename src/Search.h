@@ -104,7 +104,7 @@ public:
     int getMateIn();
 
 #ifdef DEBUG_MODE
-    unsigned cumulativeMovesCount;
+
     unsigned totGen;
 
 #endif
