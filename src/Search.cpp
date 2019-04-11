@@ -392,7 +392,7 @@ int Search::search(const int depth, const int alpha, const int beta) {
     const u64 enemies = (side == WHITE) ? getBitmap<BLACK>() : getBitmap<WHITE>();
     generateCaptures(side, enemies, friends);
     generateMoves(side, friends | enemies);
-    int n_root_movesTODOcrafty = getListSize();
+    int n_root_moves = getListSize();
     decListId();
     return getSide() ? search<WHITE, searchMoves>(depth,
                                                   alpha,
@@ -400,10 +400,10 @@ int Search::search(const int depth, const int alpha, const int beta) {
                                                   &pvLine,
                                                   bitCount(getBitmap<WHITE>() | getBitmap<BLACK>()),
                                                   &mainMateIn,
-                                                  n_root_movesTODOcrafty)
+                                                  n_root_moves)
                      : search<BLACK, searchMoves>(depth, alpha, beta, &pvLine,
                                                   bitCount(getBitmap<WHITE>() | getBitmap<BLACK>()), &mainMateIn,
-                                                  n_root_movesTODOcrafty);
+                                                  n_root_moves);
 }
 
 string Search::probeRootTB() {
@@ -584,46 +584,6 @@ string Search::probeRootTB() {
     return "";
 }
 
-int Search::probeTB(const int side, const int N_PIECE, const int depth) const {//TODO eliminare
-    // kpk
-
-//    if (N_PIECE == 3 && depth != mainDepth) {
-//
-//        if (chessboard[PAWN_BLACK]) {
-//            //    display();
-//            const auto res = _INFINITE - (mainDepth - depth + 1);
-//            const int kw = BITScanForward(chessboard[KING_WHITE]);
-//            const int kb = BITScanForward(chessboard[KING_BLACK]);
-//            const int p = BITScanForward(chessboard[PAWN_BLACK]);
-//            auto win = isWin<BLACK>(side, kw, kb, p);
-//            if (win)
-//                return res;
-//            else
-//                return -depth;
-//        }
-//        if (chessboard[PAWN_WHITE]) {
-//            //    display();
-//            const auto res = _INFINITE - (mainDepth - depth + 1);
-//            const int kw = BITScanForward(chessboard[KING_WHITE]);
-//            const int kb = BITScanForward(chessboard[KING_BLACK]);
-//            const int p = BITScanForward(chessboard[PAWN_WHITE]);
-//            auto win = isWin<WHITE>(side, kw, kb, p);
-//
-//            if (win)
-//                return res;
-//            else
-//                return -depth;
-//        }
-//
-//    }
-    int v = probeGtb(side, N_PIECE, depth);
-    if (abs(v) != INT_MAX) return v;
-//    v = probeSyzygy(side);
-//    if (abs(v) != INT_MAX) return v;
-
-    return INT_MAX;
-}
-
 //int Search::probeSyzygy(const int side) {
 //    if (syzygy  /* && TODO syzygy->isInstalledPieces(N_PIECE) e no castle*/) {
 //        auto v = syzygy->getDtm(chessboard, side);
@@ -647,31 +607,6 @@ bool Search::checkSearchMoves(_Tmove *move) {
         return true;
     }
     return false;
-}
-
-int Search::probeGtb(const int side, const int N_PIECE, const int depth) const {//TODO eliminare
-    if (SearchManager::getGtb() && depth != mainDepth && SearchManager::getGtb()->isInstalledPieces(N_PIECE)) {
-        int v = SearchManager::getGtb()->getDtm(side, false, chessboard, 100);
-
-        if (abs(v) != INT_MAX) {
-            // display();
-            int res = 0;
-            if (v == GTB_DRAW) {
-                res = depth;
-            } else {
-                res = _INFINITE - (abs(v + GTB_OFFSET));
-            }
-            if (v < 0) {
-                res = -res;
-            }
-            ASSERT_RANGE(res, -_INFINITE, _INFINITE);
-            ASSERT(mainDepth >= depth);
-            return res;
-        }
-        return INT_MAX;
-
-    }
-    return INT_MAX;
 }
 
 template<int side, bool checkMoves>

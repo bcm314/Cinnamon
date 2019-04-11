@@ -143,12 +143,9 @@ private:
 
     template<int side, bool checkMoves>
     int search(int depth, int alpha, int beta, _TpvLine *pline, int N_PIECE, int *mateIn, int n_root_moves);
-    int probeTB(const int side, const int N_PIECE, const int depth) const;
 
     template<bool checkMoves>
     bool checkSearchMoves(_Tmove *move);
-
-    int probeGtb(const int side, const int N_PIECE, const int depth) const;
 
     bool checkInsufficientMaterial(int);
 
@@ -158,9 +155,7 @@ private:
     int quiescence(int alpha, int beta, const char promotionPiece, int, int depth);
 
     void updatePv(_TpvLine *pline, const _TpvLine *line, const _Tmove *move);
-
-//    int getDtm1(const int side, _TpvLine *pline, const int depth, const int nPieces) const;
-
+    
     int mainMateIn;
     int mainDepth;
     inline pair<int, _TcheckHash> checkHash(const int type,

@@ -111,15 +111,6 @@ int Eval::evaluatePawn() {
         result += PAWN_IN_8TH * bitCount(pawnsIn8); //try to decrease PAWN_IN_8TH
         ADD(SCORE_DEBUG.PAWN_IN_8TH[side], PAWN_IN_8TH * (bitCount(pawnsIn8)));
 
-        // pawns in 8th not attacked TODO ripristinare
-//        for (u64 p = pawnsIn8; p; RESET_LSB(p)) {
-//            const int o = BITScanForward(p);
-//            if (!isAttacked<side>(o, structureEval.allPieces)) {
-//                result += PAWN_IN_8TH_SAVE;
-//                display();
-//                ADD(SCORE_DEBUG.PAWN_IN_8TH[side], PAWN_IN_8TH_SAVE);
-//            }
-//        }
     }
 
     for (u64 p = ped_friends; p; RESET_LSB(p)) {
