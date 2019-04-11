@@ -17,9 +17,7 @@ TODO
 
 News
 ----------
-- Bugs fixed in Uci protocol
-- Improved eval function
-- Improved null moves
+TODO
 
 Features  
 ----------  
